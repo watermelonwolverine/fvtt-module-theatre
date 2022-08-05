@@ -5648,7 +5648,7 @@ class Theatre {
 
 		if (Theatre.instance.isSuppressed) {
 
-			opacity = game.settings.get("theatre", "suppressOpacity")
+			opacity = game.settings.get(_TheatreSettings.THEATRE, _TheatreSettings.SUPPRESS_OPACITY)
 
 			primeBar.style["pointer-events"] = "none";
 			secondBar.style["pointer-events"] = "none";

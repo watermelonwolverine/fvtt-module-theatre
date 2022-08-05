@@ -197,50 +197,6 @@ Hooks.on("sidebarCollapse", function (a, collapsed) {
 });
 
 /**
- * Handle combat start
- */
-Hooks.on("createCombat", function () {
-	// If theatre isn't even ready, then just no
-	if (!Theatre.instance) return;
-
-	if (!game.settings.get(_TheatreSettings.THEATRE, _TheatreSettings.SUPPRESS_AT_START_OF_COMBAT))
-		return;
-
-	if (
-		game.combats.active &&
-		game.combats.active.round == 0 &&
-		Theatre.instance.isSuppressed
-	) {
-		if (Theatre.DEBUG) console.log("COMBAT CREATED");
-		// if suppressed, change opacity to 0.05
-		//Theatre.instance.theatreGroup.style.opacity = "0.05";
-		Theatre.instance.theatreDock.style.opacity = "1";
-		Theatre.instance.theatreBar.style.opacity = "1";
-		Theatre.instance.theatreNarrator.style.opacity = "1";
-	}
-});
-
-/**
- * Handle combat end
- */
-Hooks.on("deleteCombat", function () {
-	// If theatre isn't even ready, then just no
-	if (!Theatre.instance) return;
-
-	if (!game.settings.get(_TheatreSettings.THEATRE, _TheatreSettings.UNSUPPRESS_AT_END_OF_COMBAT))
-		return;
-
-	if (!game.combats.active && Theatre.instance.isSuppressed) {
-		if (Theatre.DEBUG) console.log("COMBAT DELETED");
-		// if suppressed, change opacity to 0.25
-		//Theatre.instance.theatreGroup.style.opacity = "0.25";
-		Theatre.instance.theatreDock.style.opacity = "0.20";
-		Theatre.instance.theatreBar.style.opacity = "0.20";
-		Theatre.instance.theatreNarrator.style.opacity = "0.20";
-	}
-});
-
-/**
  * Pre-process chat message to set 'speaking as' to correspond
  * to our 'speaking as'
  */

@@ -8,9 +8,8 @@ class _TheatreSettings {
 
 
 	static THEATRE = "theatre";
+	static SUPPRESS_OPACITY = "suppressOpacity"
 	static SHIFT_PAUSE_ICON = "shiftPauseIcon";
-	static SUPPRESS_AT_START_OF_COMBAT = "suppressAtStartOfCombat";
-	static UNSUPPRESS_AT_END_OF_COMBAT = "unsuppressAtEndOfCombat";
 
 	/**
 	 * Init Module Settings
@@ -191,7 +190,7 @@ class _TheatreSettings {
 			onChange: debouncedReload
 		});
 
-		game.settings.register(this.THEATRE, "suppressOpacity", {
+		game.settings.register(this.THEATRE, this.SUPPRESS_OPACITY, {
 			name: "Theatre.UI.Settings.suppressOpacity",
 			hint: "Theatre.UI.Settings.suppressOpacityHint",
 			scope: "world",
@@ -209,26 +208,6 @@ class _TheatreSettings {
 		game.settings.register(this.THEATRE, this.SHIFT_PAUSE_ICON, {
 			name: "Theatre.UI.Settings.shiftPauseIcon",
 			hint: "Theatre.UI.Settings.shiftPauseIconHint",
-			scope: "world",
-			config: true,
-			type: Boolean,
-			default: true,
-			onChange: debouncedReload
-		});
-
-		game.settings.register(this.THEATRE, this.SUPPRESS_AT_START_OF_COMBAT, {
-			name: "Theatre.UI.Settings.suppressAtStartOfCombat",
-			hint: "Theatre.UI.Settings.suppressAtStartOfCombatHint",
-			scope: "world",
-			config: true,
-			type: Boolean,
-			default: true,
-			onChange: debouncedReload
-		});
-
-		game.settings.register(this.THEATRE, this.UNSUPPRESS_AT_END_OF_COMBAT, {
-			name: "Theatre.UI.Settings.unsuppressAtEndOfCombat",
-			hint: "Theatre.UI.Settings.unsuppressAtEndOfCombatHint",
 			scope: "world",
 			config: true,
 			type: Boolean,
