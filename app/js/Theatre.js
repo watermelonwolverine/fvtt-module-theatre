@@ -94,7 +94,12 @@ class Theatre {
 			// FaceAPI
 			//this._initFaceAPI(); 
 			// module settings
-			this._initModuleSettings(); 
+			_theatre_initModuleSettings(); 
+
+			// Load in default settings (theatreStyle is loaded on HTML Injection)
+			this.settings.decayMin = (game.settings.get("theatre", "textDecayMin") || 30) * 1000;
+			this.settings.decayRate = (game.settings.get("theatre", "textDecayRate") || 1) * 1000;
+			this.settings.motdNewInfo = game.settings.get("theatre", "motdNewInfo") || 1;
 		}
 		return Theatre.instance; 
 	}
@@ -281,14 +286,14 @@ class Theatre {
 
 		if (game.user.isGM || !game.settings.get(Theatre.SETTINGS, "gmOnly")) {
 			if (controlButtons) {
-				controlButtons.style["flex-basis"] = "150px";
+				controlButtons.style["flex-basis"] = "100%";
 				KHelpers.insertBefore(btnResync,controlButtons.children[0]);
 				KHelpers.insertBefore(btnQuote,btnResync);
 				KHelpers.insertBefore(btnDelayEmote,btnQuote);
 			} else {
 				controlButtons = document.createElement("div");
 				KHelpers.addClass(controlButtons,"control-buttons");
-				controlButtons.style["flex-basis"] = "66px";
+				controlButtons.style["flex-basis"] = "100%";
 				controlButtons.appendChild(btnDelayEmote);
 				controlButtons.appendChild(btnQuote);
 				controlButtons.appendChild(btnResync);
@@ -316,184 +321,6 @@ class Theatre {
 		 * Tooltip
 		 */
 		this.theatreEmoteMenu.addEventListener("mousemove",this.handleEmoteMenuMouseMove); 
-	}
-
-	/**
-	 * Init Module Settings
-	 *
-	 * @private
-	 */
-	_initModuleSettings() {
-		// module settings
-
-		game.settings.register(Theatre.SETTINGS, "gmOnly", {
-			name: "Theatre.UI.Settings.gmOnly",
-			hint: "Theatre.UI.Settings.gmOnlyHint",
-			scope: "world",
-			config: true,
-			defualt: false,
-			type: Boolean,
-			onChange: () => {if (!game.user.isGM) location.reload();},
-		});
-
-		game.settings.register(Theatre.SETTINGS, "theatreStyle", {
-			name: "Theatre.UI.Settings.displayMode",
-			hint: "Theatre.UI.Settings.displayModeHint",
-			scope: "world",
-			config: true,
-			default: "textbox",
-			type: String,
-			choices: {
-				"textbox": "Theatre.UI.Settings.displayModeTextBox",
-				"lightbox": "Theatre.UI.Settings.displayModeLightBox",
-				"clearbox": "Theatre.UI.Settings.displayModeClearBox"
-			},
-			onChange: theatreStyle => Theatre.instance.configTheatreStyle(theatreStyle)
-		});
-
-		game.settings.register(Theatre.SETTINGS, "theatreImageSize", {
-			name: "Maximum image height",
-			scope: "client",
-			config: true,
-			default: 400,
-			type: Number,
-		  });
-
-		game.settings.register(Theatre.SETTINGS, "theatreNarratorHeight", {
-			name: "Theatre.UI.Settings.narrHeight",
-			hint: "Theatre.UI.Settings.narrHeightHint",
-			scope: "world",
-			config: true,
-			default: "50%",
-			type: String,
-			choices: {
-				"15%": "15%",
-				"25%": "25%",
-				"30%": "30%",
-				"50%": "50%",
-				"70%": "75%"
-			},
-			onChange: narrHeight => {
-				this.settings.narrHeight = narrHeight; 
-				if (this.theatreNarrator)
-					this.theatreNarrator.style.top = `calc(${narrHeight} - 50px)`; 
-			}
-		});
-
-		game.settings.register(Theatre.SETTINGS, "nameFont", {
-			name: "Theatre.UI.Settings.nameFont",
-			hint: "Theatre.UI.Settings.nameFontHint",
-			scope: "world",
-			config: true,
-			default: Theatre.instance.titleFont,
-			type: String,
-		choices: Theatre.FONTS.reduce((a, font) => { a[font]=font;
-			return a;
-		}, {}),
-		});
-
-		game.settings.register(Theatre.SETTINGS, "nameFontSize", {
-			name: "Theatre.UI.Settings.nameFontSize",
-			hint: "Theatre.UI.Settings.nameFontSizeHint",
-			scope: "world",
-			config: true,
-			default: 44,
-			type: Number,
-		});
-		
-		game.settings.register(Theatre.SETTINGS, "textDecayMin", {
-			name: "Theatre.UI.Settings.textDecayMin",
-			hint: "Theatre.UI.Settings.textDecayMinHint",
-			scope: "world",
-			config: true,
-			default: 30,
-			type: Number,
-			onChange: textDecayMin => {
-				if (Theatre.DEBUG) console.log("Text decay minimum set to %s",textDecayMin); 
-				textDecayMin = Number(textDecayMin); 
-				if(isNaN(textDecayMin) || textDecayMin <= 0) {
-					ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.InvalidDecayMin")); 
-					game.settings.set(Theatre.SETTINGS,"textDecayMin",30); 
-					return; 
-				}
-				if(textDecayMin > 600) {
-					ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.TooLongDecayMin")); 
-					game.settings.set(Theatre.SETTINGS,"textDecayMin",600); 
-					return; 
-				}
-
-				this.settings.decayMin = textDecayMin*1000; 
-			}
-		});
-
-		game.settings.register(Theatre.SETTINGS, "textDecayRate", {
-			name: "Theatre.UI.Settings.textDecayRate",
-			hint: "Theatre.UI.Settings.textDecayRateHint",
-			scope: "world",
-			config: true,
-			default: 1,
-			type: Number,
-			onChange: textDecayRate => {
-				if (Theatre.DEBUG) console.log("Text decay rate set to %s",textDecayRate); 
-				textDecayRate = Number(textDecayRate); 
-				if(isNaN(textDecayRate) || textDecayRate <= 0) {
-					textDecayRate = 1; 
-					ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.InvalidDecayRate")); 
-					game.settings.set(Theatre.SETTINGS,"textDecayRate",1); 
-					return; 
-				}
-				if (textDecayRate > 10) {
-					textDecayRate = 10; 
-					ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.TooLongDecayRate")); 
-					game.settings.set(Theatre.SETTINGS,"textDecayRate",10); 
-					return; 
-				}
-				this.settings.decayRate = textDecayRate*1000; 
-			}
-		});
-
-		game.settings.register(Theatre.SETTINGS, "motdNewInfo", {
-			name: "MOTD New Info",
-			scope: "client",
-			default: 0,
-			type: Number,
-			onChange: newInfo => {
-				// NOOP
-			}
-		});
-		
-		game.settings.register(Theatre.SETTINGS, "autoHideBottom", {
-			name: "Theatre.UI.Settings.autoHideBottom",
-		  	hint: "Theatre.UI.Settings.autoHideBottomHint",
-		  	scope: "world",
-		  	config: true,
-		  	type: Boolean,
-		  	default: true
-		});
-
-		game.settings.register(Theatre.SETTINGS, "suppressMacroHotbar", {
-			name: "Theatre.UI.Settings.suppressMacroHotbar",
-		  	hint: "",
-		  	scope: "world",
-		  	config: true,
-		  	type: Boolean,
-		  	default: true
-		});
-
-		game.settings.register(Theatre.SETTINGS, "removeLabelSheetHeader", {
-			name: "Theatre.UI.Settings.removeLabelSheetHeader",
-		  	hint: "Theatre.UI.Settings.removeLabelSheetHeaderHint",
-		  	scope: "world",
-		  	config: true,
-		  	type: Boolean,
-		  	default: false
-		});
-
-		// Load in default settings (theatreStyle is loaded on HTML Injection)
-		this.settings.decayMin = (game.settings.get(Theatre.SETTINGS,"textDecayMin")||30)*1000; 
-		this.settings.decayRate = (game.settings.get(Theatre.SETTINGS,"textDecayRate")||1)*1000; 
-		this.settings.motdNewInfo = game.settings.get(Theatre.SETTINGS,"motdNewInfo")||1; 
-
 	}
 
 	/**
@@ -2240,8 +2067,6 @@ class Theatre {
 			insert.dockContainer = null; 
 			let idx = this.portraitDocks.findIndex(e => e.imgId == imgId);
 			this.portraitDocks.splice(idx,1); 
-			// The "MyTab" module inserts another element with id "pause". Use querySelectorAll to make sure we catch both
-			document.querySelectorAll("#pause").forEach(ele => KHelpers.removeClass(ele, "theatre-centered"));
 			$('#players').removeClass("theatre-invisible");
 			$('#hotbar').removeClass("theatre-invisible");
 		}
@@ -5816,26 +5641,25 @@ class Theatre {
 
 		let primeBar = document.getElementById("theatre-prime-bar");
 		let secondBar = document.getElementById("theatre-second-bar");
-		if (Theatre.instance.isSuppressed) {
-			let combatActive = game.combats.active; 
-			Theatre.instance.isSuppressed = true; 
-			//Theatre.instance.theatreGroup.style.opacity = (combatActive ? "0.05" : "0.20");
-			Theatre.instance.theatreDock.style.opacity = (combatActive ? "0.05" : "0.20");
-			Theatre.instance.theatreBar.style.opacity = (combatActive ? "0.05" : "0.20");
-			Theatre.instance.theatreNarrator.style.opacity = (combatActive ? "0.05" : "0.20");
+		let opacity = null
 
+		if (Theatre.instance.isSuppressed) {
+
+			opacity = game.settings.get("theatre", "suppressOpacity")
 
 			primeBar.style["pointer-events"] = "none"; 
 			secondBar.style["pointer-events"] = "none"; 
 		} else {
-			//Theatre.instance.theatreGroup.style.opacity = "1";
-			Theatre.instance.theatreDock.style.opacity = "1";
-			Theatre.instance.theatreBar.style.opacity = "1";
-			Theatre.instance.theatreNarrator.style.opacity = "1";
+
+			opacity = "1"
 
 			primeBar.style["pointer-events"] = "all";
 			secondBar.style["pointer-events"] = "all"; 
 		}
+
+		Theatre.instance.theatreDock.style.opacity = opacity;
+		Theatre.instance.theatreBar.style.opacity = opacity;
+		Theatre.instance.theatreNarrator.style.opacity = opacity;
 
 		// call hooks
 		Hooks.call("theatreSuppression", Theatre.instance.isSuppressed);

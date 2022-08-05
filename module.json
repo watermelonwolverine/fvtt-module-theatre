@@ -2,7 +2,7 @@
     "name": "theatre",
     "title": "Theatre Inserts",
     "description": "Theater Inserts with a visual novel style made for heavy roleplay scenes",
-    "version": "1.16.2",
+    "version": "2.2.1",
     "author": "Ken L, Noah Zorbaugh, U~man, KaKaRoTo, elizeuangelo",
     "socket": true,
     "languages": [
@@ -57,9 +57,10 @@
         "greensock/dist/PixiPlugin.min.js",
         "greensock/dist/ScrollToPlugin.min.js",
         "greensock/dist/SplitText.min.js",
+        "app/js/theatre_init_module_settings.js",
         "app/js/TheatreActorConfig.js",
         "app/js/TheatreActor.js",
-        "app/js/Theatre.js",
+        "app/js/Theatre.js",        
         "app/js/theatre_main.js"
     ],
     "styles": [
@@ -74,7 +75,7 @@
         }
     ],
     "url": "https://github.com/League-of-Foundry-Developers/fvtt-module-theatre",
-    "download": "https://github.com/League-of-Foundry-Developers/fvtt-module-theatre/releases/download/v1.16.2/theatre.zip",
+    "download": "https://github.com/League-of-Foundry-Developers/fvtt-module-theatre/releases/download/v2.2.1/theatre.zip",
     "manifest": "https://github.com/League-of-Foundry-Developers/fvtt-module-theatre/releases/download/latest/module.json",
     "minimumCoreVersion": "9",
     "compatibleCoreVersion": "9"
