@@ -84,6 +84,10 @@
 	"Theatre.UI.Config.CustomEmotePlaceholder" : "Benutzerdefinierter Name",
 	"Theatre.UI.Config.DisableDefaultAnim" : "Standard Animationen deaktivieren",
 	"Theatre.UI.Config.DisableDefaultAnimHint" : "Deaktiviere alle standard Animationen für Emotes, das schließt die Blasen und alle anderen Animationen ein, die mitgeliefert werden.",
+	"Theatre.UI.Settings.suppressOpacity": "Deckkraft der Bühne bei Unterdrückung",
+	"Theatre.UI.Settings.suppressOpacityHint": "Deckkraft der Bühne, wenn sie unterdrückt ist.",
+	"Theatre.UI.Settings.shiftPauseIcon": "Pause-Symbol Verschieben",
+	"Theatre.UI.Settings.shiftPauseIconHint": "Verschiebe das Pausensymbol bei der Aktivierung der Bühne.",
 
 	"Theatre.Text.OpenBracket" : "\"",
 	"Theatre.Text.CloseBracket" : "\"",

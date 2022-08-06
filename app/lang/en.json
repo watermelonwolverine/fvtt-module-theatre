@@ -68,6 +68,10 @@
 	"Theatre.UI.Settings.suppressMacroHotbar": "Show Player List and Macro Hotbar When Stage is Suppressed",
 	"Theatre.UI.Settings.removeLabelSheetHeader": "Remove label from the header character sheet",
 	"Theatre.UI.Settings.removeLabelSheetHeaderHint": "Remove label from the header character sheet, Useful for little screen and mobile",
+	"Theatre.UI.Settings.suppressOpacity": "Stage Opacity While Suppressed",
+	"Theatre.UI.Settings.suppressOpacityHint": "Opacity of the stage while it is suppressed.",
+	"Theatre.UI.Settings.shiftPauseIcon": "Shift Pause Icon",
+	"Theatre.UI.Settings.shiftPauseIconHint": "Shift the pause icon when the stage is activated.",
 
 	"Theatre.UI.Keybinds.unfocusTextArea": "Unfocus Text Area",
 	"Theatre.UI.Keybinds.addOwnedToStage": "Add Owned Actors to Stage",
