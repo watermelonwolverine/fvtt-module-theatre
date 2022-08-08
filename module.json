@@ -1,9 +1,9 @@
 {
-    "name": "theatre",
-    "title": "Theatre Inserts",
-    "description": "Theater Inserts with a visual novel style made for heavy roleplay scenes",
-    "version": "2.2.1",
-    "author": "Ken L, Noah Zorbaugh, U~man, KaKaRoTo, elizeuangelo",
+    "name": "{{name}}",
+    "title": "{{title}}",
+    "description": "{{description}}",
+    "version": "{{version}}",
+    "author": "Ken L, Noah Zorbaugh, U~man, KaKaRoTo, elizeuangelo, WatermelonWolverine",
     "socket": true,
     "languages": [
         {

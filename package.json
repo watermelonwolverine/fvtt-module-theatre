@@ -1,8 +1,8 @@
 {
-	"name": "module-package-name",
-	"title": "Module Name",
-	"version": "1.0.0",
-	"description": "Module description displayed in FoundryVTT Program",
+	"name": "theatre",
+	"title": "Theatre Insert",
+	"version": "3.0.0",
+	"description": "Theater Inserts with a visual novel style made for heavy roleplay scenes",
 	"main": "src/theatre_main.js",
 	"scripts": {
 		"build": "npx gulp",
