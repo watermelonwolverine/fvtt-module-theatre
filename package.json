@@ -3,7 +3,6 @@
 	"title": "Module Name",
 	"version": "1.0.0",
 	"description": "Module description displayed in FoundryVTT Program",
-	"devDir": "/path/to/FoundryVTT/Data/modules/",
 	"main": "app/js/theatre_main.js",
 	"scripts": {
 		"build": "npx gulp",
