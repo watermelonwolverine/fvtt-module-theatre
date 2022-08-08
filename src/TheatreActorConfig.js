@@ -18,17 +18,7 @@
  *
  */
 
-/**
- * ============================================================
- * Application to configure Actor Theatre-Inserts
- *
- *
- *
- *
- *
- * ============================================================
- */
-class TheatreActorConfig extends FormApplication {
+export default class TheatreActorConfig extends FormApplication {
 	constructor(object={}, options={}) {
 		if (object._theatre_mod_configTab) {
 			options.tabs = [        

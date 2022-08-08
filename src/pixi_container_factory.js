@@ -1,5 +1,7 @@
+import Theatre from "./Theatre.js";
+import _TheatreWorkers from "./workers.js";
 
-class _TheatrePixiContainerFactory {
+export default class _TheatrePixiContainerFactory {
 
     /**
      * @param {Theatre} context

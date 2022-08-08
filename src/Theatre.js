@@ -1,3 +1,6 @@
+/* eslint-disable no-useless-escape */
+/* eslint-disable no-case-declarations */
+/* eslint-disable no-unused-vars */
 /**
  * Theatre.js
  *
@@ -18,9 +21,13 @@
  *
  */
 
+import _TheatreSettings from './settings.js';
+import _TheatreWorkers from './workers.js';
+import KHelpers from "./KHelpers.js";
+import TheatreActor from './TheatreActor.js';
+import TheatreActorConfig from './TheatreActorConfig.js';
 
-
-class Theatre {
+export default class Theatre {
 
 	static SOCKET = "module.theatre";
 	static SETTINGS = "theatre";
@@ -1556,11 +1563,10 @@ class Theatre {
 	 *
 	 * @return (Object) : An object containing the parameters of the insert given the actor Id
 	 *					 or null.
-	 * @private
 	 */
 	_getInsertParamsFromActorId(actorId) {
 		let actor = game.actors.get(actorId);
-		if (!!!actor) {
+		if (!actor) {
 			console.log("ERROR, ACTOR %s DOES NOT EXIST!", actorId);
 			return null;
 		}
@@ -1612,7 +1618,7 @@ class Theatre {
 		let actorId = theatreId.replace("theatre-", "");
 		let actor = game.actors.get(actorId);
 
-		if (!!!actor) {
+		if (!actor) {
 			console.log("ERROR, ACTOR %s DOES NOT EXIST!", actorId);
 			return null;
 		}
@@ -1639,7 +1645,7 @@ class Theatre {
 		let actorId = theatreId.replace("theatre-", "");
 		let actor = game.actors.get(actorId);
 
-		if (!!!actor) {
+		if (!actor) {
 			console.log("ERROR, ACTOR %s DOES NOT EXIST!", actorId);
 			return false;
 		}
@@ -1663,7 +1669,7 @@ class Theatre {
 		let actor = game.actors.get(actorId);
 		let user;
 
-		if (!!!actor) {
+		if (!actor) {
 			console.log("ERROR, ACTOR %s DOES NOT EXIST!", actorId);
 			return;
 		}
@@ -1885,7 +1891,6 @@ class Theatre {
 	 *
 	 * @params time (Number) : The high resolution time, typically from performace.now() to
 	 *						 update all current animation sequences within the PIXI context.
-	 * @private
 	 */
 	_renderTheatre(time) {
 		// let the ticker update all its objects
@@ -1997,7 +2002,6 @@ class Theatre {
 	 *
 	 * @params imgId (String) : The theatreId of the insert whose dockContainer will be destroyed.
 	 *
-	 * @private
 	 */
 	_destroyPortraitDock(imgId) {
 		let app = this.pixiCTX;
@@ -2039,7 +2043,6 @@ class Theatre {
 	 *
 	 * @params insert (Objet) : An Object represeting the insert
 	 *
-	 * @private
 	 */
 	_updateTheatreDebugInfo(insert) {
 		if (!insert || !insert.dockContainer)
@@ -2400,7 +2403,6 @@ class Theatre {
 	 *								   representing the assets to be loaded into PIXI's loader.
 	 * @params cb (Function) : The function to invoke once the assets are loaded. 
 	 *
-	 * @private
 	 */
 	_addSpritesToPixi(imgSrcs, cb) {
 		if (Theatre.DEBUG) console.log("adding sprite to dockContainer");
@@ -2442,7 +2444,7 @@ class Theatre {
 	 */
 	_getLoaderChainWait(ctx, imgSrcs, cb) {
 		let loader = PIXI.Loader.shared;
-		let func = function () {
+		let func = () => {
 			if (!loader.loading) {
 				if (Theatre.DEBUG) console.log("delayed loading resources", loader);
 				for (let imgTuple of imgSrcs) {
@@ -2709,7 +2711,6 @@ class Theatre {
 	 *
 	 * @return (Array[HTMLElement]) : An array of HTMLElements which are the textboxes
 	 *
-	 * @private
 	 */
 	_getTextBoxes() {
 		let textBoxes = [];
@@ -2727,7 +2728,6 @@ class Theatre {
 	 * @return (HTMLELement) : The HTMLElement which is the textbox, or undefined if it
 	 *						  does not exist. 
 	 *
-	 * @private
 	 */
 	_getTextBoxById(id) {
 		return this._getTextBoxes().find(e => { return e.getAttribute("imgId") == id });
@@ -2741,7 +2741,6 @@ class Theatre {
 	 * @return (HTMLELement) : The HTMLElement which is the textbox, or undefined if it
 	 *						  does not exist. 
 	 *
-	 * @private
 	 */
 	_getTextBoxByName(name) {
 		return this._getTextBoxes().find(e => { return e.getAttribute("name") == name });
@@ -2754,7 +2753,6 @@ class Theatre {
 	 *								 MUST correspond to an insert. 
 	 * @params isLeft (Boolean) : Wither this textBox should be injected Left or Right. 
 	 *
-	 * @private
 	 */
 	_addTextBoxToTheatreBar(textBox, isLeft) {
 		let textBoxes = this._getTextBoxes();
@@ -2914,7 +2912,7 @@ class Theatre {
 	 * @params remote (Boolean) : Boolean indicating if this is being invoked remotely, or locally. 
 	 */
 	injectLeftPortrait(imgPath, portName, imgId, optAlign, emotions, remote) {
-		if (!!this.getInsertById(imgId)) {
+		if (this.getInsertById(imgId)) {
 			console.log('ID "%s" already exists! Refusing to inject %s', imgId, portName);
 			return;
 		}
@@ -2952,7 +2950,7 @@ class Theatre {
 	 * @params remote (Boolean) : Boolean indicating if this is being invoked remotely, or locally. 
 	 */
 	injectRightPortrait(imgPath, portName, imgId, optAlign, emotions, remote) {
-		if (!!this.getInsertById(imgId)) {
+		if (this.getInsertById(imgId)) {
 			console.log('ID "%s" already exists! Refusing to inject %s', imgId, portName);
 			return;
 		}
@@ -2987,7 +2985,6 @@ class Theatre {
 	 *					 or null if there was nothing to remove. 
 	 */
 	removeInsertById(id, remote) {
-		name = name.toLowerCase();
 		let toRemoveInsert,
 			toRemoveTextBox;
 		for (let insert of this.portraitDocks) {
@@ -2998,13 +2995,13 @@ class Theatre {
 			}
 		}
 		for (let textBox of this._getTextBoxes()) {
-			if (textBox.getAttribute("imgId") == id && !!!textBox.getAttribute("deleting")) {
-				textBox.setAttribute("deleting", true);
+			if (textBox.getAttribute("imgId") == id && !textBox.getAttribute("deleting")) {
+				textBox.setAttribute("deleting", "true");
 				toRemoveTextBox = textBox
 				break;
 			}
 		}
-		if (!!!toRemoveInsert || !!!toRemoveTextBox)
+		if (!toRemoveInsert || !toRemoveTextBox)
 			return null;
 
 		return this._removeInsert(toRemoveInsert, toRemoveTextBox, remote);
@@ -3037,14 +3034,14 @@ class Theatre {
 		}
 		if (!id) return;
 		for (let textBox of this._getTextBoxes()) {
-			if (textBox.getAttribute("imgId") == id && !!!textBox.getAttribute("deleting")) {
+			if (textBox.getAttribute("imgId") == id && !textBox.getAttribute("deleting")) {
 				//textBox.parentNode.removeChild(textBox); 
 				textBox.setAttribute("deleting", true);
 				toRemoveTextBox = textBox
 				break;
 			}
 		}
-		if (!!!toRemoveInsert || !!!toRemoveTextBox)
+		if (!toRemoveInsert || !toRemoveTextBox)
 			return null;
 
 		return this._removeInsert(toRemoveInsert, toRemoveTextBox, remote);
@@ -3405,22 +3402,22 @@ class Theatre {
 			textBox1,
 			textBox2;
 		for (let insert of this.portraitDocks) {
-			if (insert.imgId == id1 && !!!insert1)
+			if (insert.imgId == id1 && !insert1)
 				insert1 = insert;
-			else if (insert.imgId == id2 && !!!insert2)
+			else if (insert.imgId == id2 && !insert2)
 				insert2 = insert;
 			if (!!insert1 && !!insert2) break;
 		}
 		for (let textBox of this._getTextBoxes()) {
-			if (textBox.getAttribute("imgId") == id1 && !!!textBox1)
+			if (textBox.getAttribute("imgId") == id1 && !textBox1)
 				textBox1 = textBox;
-			else if (textBox.getAttribute("imgId") == id2 && !!!textBox2)
+			else if (textBox.getAttribute("imgId") == id2 && !textBox2)
 				textBox2 = textBox;
 			if (!!textBox1 && !!textBox2) break;
 		}
 
-		if (!!!insert1 || !!!insert2) return;
-		if (!!!textBox1 || !!!textBox2) return;
+		if (!insert1 || !insert2) return;
+		if (!textBox1 || !textBox2) return;
 		this._swapInserts(insert1, insert2, textBox1, textBox2, remote);
 	}
 
@@ -3441,22 +3438,22 @@ class Theatre {
 		name1 = name1.toLowerCase();
 		name2 = name2.toLowerCase();
 		for (let insert of this.portraitDocks) {
-			if (insert.name == name1 && !!!insert1)
+			if (insert.name == name1 && !insert1)
 				insert1 = insert;
-			else if (insert.name == name2 && !!!insert2)
+			else if (insert.name == name2 && !insert2)
 				insert2 = insert;
 			if (!!insert1 && !!insert2) break;
 		}
 		for (let textBox of this._getTextBoxes()) {
-			if (textBox.getAttribute("name") == name1 && !!!textBox1)
+			if (textBox.getAttribute("name") == name1 && !textBox1)
 				textBox1 = textBox;
-			else if (textBox.getAttribute("name") == name2 && !!!textBox2)
+			else if (textBox.getAttribute("name") == name2 && !textBox2)
 				textBox2 = textBox;
 			if (!!textBox1 && !!textBox2) break;
 		}
 
-		if (!!!insert1 || !!!insert2) return;
-		if (!!!textBox1 || !!!textBox2) return;
+		if (!insert1 || !insert2) return;
+		if (!textBox1 || !textBox2) return;
 		this._swapInserts(insert1, insert2, textBox1, textBox2, remote);
 	}
 
@@ -3562,22 +3559,22 @@ class Theatre {
 			textBox1,
 			textBox2;
 		for (let insert of this.portraitDocks) {
-			if (insert.imgId == id1 && !!!insert1)
+			if (insert.imgId == id1 && !insert1)
 				insert1 = insert;
-			else if (insert.imgId == id2 && !!!insert2)
+			else if (insert.imgId == id2 && !insert2)
 				insert2 = insert;
 			if (!!insert1 && !!insert2) break;
 		}
 		for (let textBox of this._getTextBoxes()) {
-			if (textBox.getAttribute("imgId") == id1 && !!!textBox1)
+			if (textBox.getAttribute("imgId") == id1 && !textBox1)
 				textBox1 = textBox;
-			else if (textBox.getAttribute("imgId") == id2 && !!!textBox2)
+			else if (textBox.getAttribute("imgId") == id2 && !textBox2)
 				textBox2 = textBox;
 			if (!!textBox1 && !!textBox2) break;
 		}
 
-		if (!!!insert1 || !!!insert2) return;
-		if (!!!textBox1 || !!!textBox2) return;
+		if (!insert1 || !insert2) return;
+		if (!textBox1 || !textBox2) return;
 		this._moveInsert(insert1, insert2, textBox1, textBox2, remote);
 	}
 
@@ -3720,7 +3717,7 @@ class Theatre {
 				break;
 			}
 		}
-		if (!!!targInsert || !!!targTextBox) return;
+		if (!targInsert || !targTextBox) return;
 
 		this._pushInsert(targInsert, targTextBox, isLeft, remote);
 	}
@@ -3749,7 +3746,7 @@ class Theatre {
 				break;
 			}
 		}
-		if (!!!targInsert || !!!targTextBox) return;
+		if (!targInsert || !targTextBox) return;
 
 		this._pushInsert(targInsert, targTextBox, isLeft, remote);
 	}
@@ -3771,7 +3768,7 @@ class Theatre {
 		let firstTextBox = textBoxes[0];
 		let lastTextBox = textBoxes[textBoxes.length - 1];
 
-		if (!!!firstInsert || !!!lastInsert || !!!firstTextBox || !!!lastTextBox) return;
+		if (!firstInsert || !lastInsert || !firstTextBox || !lastTextBox) return;
 
 		// permission check
 		if (!remote && !this.isActorOwner(game.user.id, insert.imgId)) {
@@ -3997,7 +3994,7 @@ class Theatre {
 		if (Theatre.DEBUG) console.log("Adding tweens for animation '%s' from syntax: %s with params: ", animName, animSyntax, tweenParams);
 		//console.log("Resource path is %s, resource: ", resTarget.path, resource); 
 		if (!resource) {
-			console.log('ERROR: resource name : "%s" with path "%s" does not exist!', tweenParams[idx].resName, resTarget.path);
+			console.log('ERROR: resource name : "%s" with path "%s" does not exist!', tweenParams[0].resName, resTarget.path);
 			return;
 		}
 
@@ -4187,7 +4184,7 @@ class Theatre {
 		if (!!insert && textBox.getAttribute("deleting"))
 			return;
 
-		if (!!insert) {
+		if (insert) {
 			// already in theatre
 			// if not same id toggle it
 			let cimg = this.getTheatreCoverPortrait();
@@ -5270,7 +5267,7 @@ class Theatre {
 		// push focus to chat-message
 		let chatMessage = document.getElementById("chat-message");
 		chatMessage.focus();
-	}	
+	}
 
 	/**
 	 * Handle a nav item dragstart

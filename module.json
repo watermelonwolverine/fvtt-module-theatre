@@ -56,9 +56,9 @@
         "greensock/dist/gsap.min.js",
         "greensock/dist/PixiPlugin.min.js",
         "greensock/dist/ScrollToPlugin.min.js",
-        "greensock/dist/SplitText.min.js",
-        "{{sources}}"
+        "greensock/dist/SplitText.min.js"
     ],
+    "esmodules": "{{sources}}",
     "styles": [
         "app/css/theatre.css"
     ],

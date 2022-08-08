@@ -1,10 +1,6 @@
+import Theatre from "./Theatre.js";
 
-/**
- * Module Settings
- *
- * @private
- */
-class _TheatreSettings {
+export default class _TheatreSettings {
 
 
 	static THEATRE = "theatre";
@@ -26,7 +22,7 @@ class _TheatreSettings {
 			hint: "Theatre.UI.Settings.gmOnlyHint",
 			scope: "world",
 			config: true,
-			defualt: false,
+			default: false,
 			type: Boolean,
 			onChange: () => { if (!game.user.isGM) debouncedReload(); },
 		});
@@ -141,7 +137,7 @@ class _TheatreSettings {
 			scope: "client",
 			default: 0,
 			type: Number,
-			onChange: newInfo => {
+			onChange: () => {
 				// NOOP
 			}
 		});
@@ -200,5 +196,5 @@ class _TheatreSettings {
 			default: true,
 			onChange: debouncedReload
 		});
-	};
+	}
 }

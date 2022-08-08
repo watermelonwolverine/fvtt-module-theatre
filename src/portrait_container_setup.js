@@ -1,4 +1,7 @@
-class _TheatrePortraitContainerSetupWorker {
+import Theatre from "./Theatre.js";
+import _TheatreWorkers from "./workers.js";
+
+export default class _TheatrePortraitContainerSetupWorker {
 
     /**
      * @param {Theatre} context
@@ -41,7 +44,6 @@ class _TheatrePortraitContainerSetupWorker {
             return;
         }
 
-        let app = this.context.pixiCTX;
         let dockContainer = insert.dockContainer;
         let portraitContainer = insert.portraitContainer;
 
