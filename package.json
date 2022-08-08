@@ -3,7 +3,7 @@
 	"title": "Module Name",
 	"version": "1.0.0",
 	"description": "Module description displayed in FoundryVTT Program",
-	"main": "app/js/theatre_main.js",
+	"main": "src/theatre_main.js",
 	"scripts": {
 		"build": "npx gulp",
 		"watch": "npx gulp watch",
@@ -20,7 +20,6 @@
 		"@typescript-eslint/parser": "^5.32.0",
 		"del": "^6.0.0",
 		"eslint": "^8.21.0",
-		"eslint-config-standard": "^17.0.0",
 		"gulp": "^4.0.2",
 		"gulp-cli": "^2.3.0",
 		"gulp-minify": "^3.1.0",

@@ -69,9 +69,9 @@ class _TheatreSettings {
 				"70%": "75%"
 			},
 			onChange: narrHeight => {
-				this.settings.narrHeight = narrHeight;
-				if (this.theatreNarrator)
-					this.theatreNarrator.style.top = `calc(${narrHeight} - 50px)`;
+				Theatre.instance.settings.narrHeight = narrHeight;
+				if (Theatre.instance.theatreNarrator)
+					Theatre.instance.theatreNarrator.style.top = `calc(${narrHeight} - 50px)`;
 			}
 		});
 
@@ -120,7 +120,7 @@ class _TheatreSettings {
 					return;
 				}
 
-				this.settings.decayMin = textDecayMin * 1000;
+				Theatre.instance.settings.decayMin = textDecayMin * 1000;
 			}
 		});
 
@@ -146,7 +146,7 @@ class _TheatreSettings {
 					game.settings.set(this.THEATRE, "textDecayRate", 10);
 					return;
 				}
-				this.settings.decayRate = textDecayRate * 1000;
+				Theatre.instance.settings.decayRate = textDecayRate * 1000;
 			}
 		});
 
