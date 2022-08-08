@@ -61,8 +61,7 @@ exports.step_buildSourceMin = buildSource(false, true);
  */
 function buildManifest(output = null) {
 	const files = []; // Collector for all the file paths
-	return (cb) => gulp.src(PACKAGE.main) // collect the source files
-		.pipe(rename({ extname: '.js' })) // rename their extensions to `.js`
+	return (cb) => gulp.src(SOURCE + GLOB) // collect the source files
 		.pipe(gulp.src(CSS + GLOB)) // grab all the CSS files
 		.on('data', file => files.push(path.relative(file.cwd, file.path))) // Collect all the file paths
 		.on('end', () => { // output the filepaths to the module.json
@@ -70,13 +69,18 @@ function buildManifest(output = null) {
 				throw Error('No files found in ' + SOURCE + GLOB + " or " + CSS + GLOB);
 			const js = files.filter(e => e.endsWith('js')); // split the CSS and JS files
 			const css = files.filter(e => e.endsWith('css'));
+
+			let sources = stringify(js, {indent: 0});
+			sources = sources.substring(1, sources.length - 1);
+			sources = sources.replaceAll(', ', ',\n\t\t').replaceAll('\\\\', '/');
+
 			fs.readFile('module.json', (err, data) => {
 				const module = data.toString() // Inject the data into the module.json
 					.replaceAll('{{name}}', PACKAGE.name)
 					.replaceAll('{{title}}', PACKAGE.title)
 					.replaceAll('{{version}}', PACKAGE.version)
 					.replaceAll('{{description}}', PACKAGE.description)
-					.replace('"{{sources}}"', stringify(js, null, '\t').replaceAll('\n', '\n\t'))
+					.replace('"{{sources}}"', sources)
 					.replace('"{{css}}"', stringify(css, null, '\t').replaceAll('\n', '\n\t'));
 				fs.writeFile((output || DIST) + 'module.json', module, cb); // save the module to the distribution directory
 			});

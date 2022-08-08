@@ -57,11 +57,7 @@
         "greensock/dist/PixiPlugin.min.js",
         "greensock/dist/ScrollToPlugin.min.js",
         "greensock/dist/SplitText.min.js",
-        "src/settings.js",
-        "src/TheatreActorConfig.js",
-        "src/TheatreActor.js",
-        "src/Theatre.js",        
-        "src/theatre_main.js"
+        "{{sources}}"
     ],
     "styles": [
         "app/css/theatre.css"

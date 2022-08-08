@@ -1,8 +1,10 @@
 
-class PixiContainerFactory {
+class _TheatrePixiContainerFactory {
 
-    constructor(context){
+    constructor(context,
+        workers){
         this.context = context;
+        this.workers = workers;
     }
 
     /**
@@ -116,16 +118,16 @@ class PixiContainerFactory {
             if (!ename) {
                 // load in default portrait
                 dockContainer.x = initX;
-                this.context._setupPortraitContainer(imgId, optAlign, imgPath, resources, true);
+                this.workers.portrait_container_setup_worker.setupPortraitContainer(imgId, optAlign, imgPath, resources, true);
             } else {
                 // load in the ename emote portrait instead if possible, else load the default
                 if (params.emotes[ename] && params.emotes[ename].insert) {
                     dockContainer.x = isLeft ?
                         (-1 * portWidth) : (this.context.theatreDock.offsetWidth + portWidth);
-                    this.context._setupPortraitContainer(imgId, optAlign, params.emotes[ename].insert, resources, true);
+                    this.portrait_container_setup_worker.setupPortraitContainer(imgId, optAlign, params.emotes[ename].insert, resources, true);
                 } else {
                     dockContainer.x = initX;
-                    this.context._setupPortraitContainer(imgId, optAlign, imgPath, resources, true);
+                    this.portrait_container_setup_worker.setupPortraitContainer(imgId, optAlign, imgPath, resources, true);
                 }
             }
 
