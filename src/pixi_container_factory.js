@@ -114,7 +114,7 @@ class _TheatrePixiContainerFactory {
         this.context._addSpritesToPixi(imgSrcs, (loader, resources) => {
             // PIXI Container is ready!
             // Setup the dockContainer to display the base insert
-            if (Theatre.DEBUG) console.log("Sprites added to PIXI _createPortraitPIXIContainer", resources);
+            if (Theatre.DEBUG) console.log("Sprites added to PIXI createPortraitPIXIContainer", resources);
             let portWidth = (ename && params.emotes[ename] && params.emotes[ename].insert) ?
                 resources[params.emotes[ename].insert].texture.width : resources[imgPath].texture.width;
             let initX = isLeft ? (-1 * portWidth) : (this.context.theatreDock.offsetWidth + portWidth);

@@ -366,7 +366,7 @@ class TheatreActorConfig extends FormApplication {
 						insert.label.text = newName; 
 
 						Theatre.instance._clearPortraitContainer(theatreId); 
-						Theatre.instance._setupPortraitContainer(theatreId,newAlign,newSrcImg,resources); 
+						Theatre.instance.workers.setupPortraitContainer(theatreId,newAlign,newSrcImg,resources); 
 						// re-attach label + typingBubble
 						insert.dockContainer.addChild(insert.label); 
 						insert.dockContainer.addChild(insert.typingBubble); 
@@ -404,7 +404,7 @@ class TheatreActorConfig extends FormApplication {
 				insert.label.text = newName; 
 
 				Theatre.instance._clearPortraitContainer(theatreId); 
-				Theatre.instance._setupPortraitContainer(theatreId,newAlign,resName,PIXI.Loader.shared.resources); 
+				Theatre.instance.workers.setupPortraitContainer(theatreId,newAlign,resName,PIXI.Loader.shared.resources); 
 				// re-attach label + typingBubble
 				insert.dockContainer.addChild(insert.label); 
 				insert.dockContainer.addChild(insert.typingBubble); 

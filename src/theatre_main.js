@@ -480,7 +480,7 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 		}
 		if (Theatre.DEBUG)
 			console.log("font size is (%s): ", insertFontSize, fontSize);
-		Theatre.instance._applyFontFamily(
+		Theatre.instance.applyFontFamily(
 			textBox,
 			insertFontType || Theatre.instance.textFont
 		);
