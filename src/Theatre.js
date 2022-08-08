@@ -6846,7 +6846,7 @@ export default class Theatre {
 			actorSheet.actor.data.flags.theatre = { baseinsert: "", name: "" };
 		}
 
-		new TheatreActorConfig(this.workers, actorSheet.actor, {
+		new TheatreActorConfig(actorSheet.actor, {
 			top: actorSheet.position.top + 40,
 			left: actorSheet.position.left + ((actorSheet.position.width - 500) / 2),
 			configureDefault: true
