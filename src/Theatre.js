@@ -2929,7 +2929,7 @@ class Theatre {
 		if (navItem)
 			KHelpers.addClass(navItem, "theatre-control-nav-bar-item-active");
 
-		let dock = this.workers.pixi_container_factory._createPortraitPIXIContainer(imgPath, portName, imgId, optAlign, emotions, true);
+		let dock = this.workers.pixi_container_factory.createPortraitPIXIContainer(imgPath, portName, imgId, optAlign, emotions, true);
 		let textBox = document.createElement("div");
 		// textBox class + style depends on our display mode
 		switch (this.settings.theatreStyle) {
@@ -7787,3 +7787,4 @@ class Theatre {
 	}
 
 }
+

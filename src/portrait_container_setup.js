@@ -1,5 +1,9 @@
 class _TheatrePortraitContainerSetupWorker {
 
+    /**
+     * @param {Theatre} context
+     * @param {_TheatreWorkers} workers
+     */
     constructor(context,
         workers) {
         this.context = context;

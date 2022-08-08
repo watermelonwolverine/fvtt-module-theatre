@@ -1,8 +1,12 @@
 
 class _TheatrePixiContainerFactory {
 
+    /**
+     * @param {Theatre} context
+     * @param {_TheatreWorkers} workers
+     */
     constructor(context,
-        workers){
+        workers) {
         this.context = context;
         this.workers = workers;
     }
