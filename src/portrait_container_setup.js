@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import Theatre from "./Theatre.js";
 import _TheatreWorkers from "./workers.js";
 

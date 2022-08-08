@@ -34,5 +34,16 @@
         "Sine": true,
         "Expo": true,
         "Circ": true,
+        "Bounce": true,
+        "Elastic": true,
+        "FormApplication": true,
+        "mergeObject" : true,
+        "duplicate" : true,
+        "FilePicker": true,
+        "Back": true,
+        "gsap": true,
+        "libWrapper": true,
+        "CONST": true,
+        "canvas": true
     }
 }

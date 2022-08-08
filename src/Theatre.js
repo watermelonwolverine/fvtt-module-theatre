@@ -5596,116 +5596,85 @@ export default class Theatre {
 			case "power1":
 			case "power1Out":
 				return Power1.easeOut;
-				break;
 			case "power1In":
 				return Power1.easeIn;
-				break;
 			case "power1InOut":
 				return Power1.easeInOut;
-				break;
 			case "power2":
 			case "power2Out":
 				return Power2.easeOut;
-				break;
 			case "power2In":
 				return Power2.easeIn;
-				break;
 			case "power2InOut":
 				return Power2.easeInOut;
-				break;
 
 			case "power3":
 			case "power3Out":
 				return Power3.easeOut;
-				break;
 			case "power3In":
 				return Power3.easeIn;
-				break;
 			case "power3InOut":
 				return Power3.easeInOut;
-				break;
 
 			case "power4":
 			case "power4Out":
 				return Power4.easeOut;
-				break;
 			case "power4In":
 				return Power4.easeIn;
-				break;
 			case "power4InOut":
 				return Power4.easeInOut;
-				break;
 
 			case "back":
 			case "backOut":
 				return Back.easeOut;
-				break;
 			case "backIn":
 				return Back.easeIn;
-				break;
 			case "backInOut":
 				return Back.easeInOut;
-				break;
 
 			case "elastic":
 			case "elasticOut":
 				return Elastic.easeOut;
-				break;
 			case "elasticIn":
 				return Elastic.easeIn;
-				break;
 			case "elasticInOut":
 				return Elastic.easeInOut;
-				break;
 
 			case "bounce":
 			case "bounceOut":
 				return Bounce.easeOut;
-				break;
 			case "bounceIn":
 				return Bounce.easeIn;
-				break;
 			case "bounceInOut":
 				return Bounce.easeInOut;
-				break;
 
 			case "circ":
 			case "circOut":
 				return Circ.easeOut;
-				break;
 			case "circIn":
 				return Circ.easeIn;
-				break;
 			case "circInOut":
 				return Circ.easeInOut;
-				break;
 
 			case "expo":
 			case "expoOut":
 				return Expo.easeOut;
-				break;
 			case "expoIn":
 				return Expo.easeIn;
-				break;
 			case "expoInOut":
 				return Expo.easeInOut;
-				break;
 
 			case "sine":
 			case "sineOut":
 				return Sine.easeOut;
-				break;
 			case "sineIn":
 				return Sine.easeIn;
-				break;
 			case "sineInOut":
 				return Sine.easeInOut;
-				break;
 
 			case "power0":
 			default:
 				return Power0.easeNone;
-				break;
 		}
 	}
 
@@ -6962,7 +6931,7 @@ export default class Theatre {
 		navItem.setAttribute("optalign", optAlign);
 
 		// if the theatreId is present, then set our navItem as active!
-		if (!!Theatre.instance.getInsertById(theatreId))
+		if (Theatre.instance.getInsertById(theatreId))
 			KHelpers.addClass(navItem, "theatre-control-nav-bar-item-active");
 
 		navItem.addEventListener("mouseup", Theatre.instance.handleNavItemMouseUp);
