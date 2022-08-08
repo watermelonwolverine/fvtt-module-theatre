@@ -89,10 +89,6 @@ class Theatre {
 				barStyle: "textbox",
 				narrHeight: "50%"
 			}
-			// Font library
-			Theatre.getFonts();
-			// FaceAPI
-			//this._initFaceAPI(); 
 			// module settings
 			_TheatreSettings.initModuleSettings();
 
@@ -1835,52 +1831,7 @@ class Theatre {
 		// render and show the tooltip
 		app.render();
 		this.theatreToolTip.style.opacity = 1;
-		// face detect
-		/*
-		faceapi.detectSingleFace(app.view,new faceapi.TinyFaceDetectorOptions()).then((detection)=>{
-			console.log("face detected: ", detection); 
-			if (detection) {
-				let box = detection.box; 
-				console.log("successful preview face detection: ", box); 
-				let graphics = new PIXI.Graphics(); 
-				graphics.lineStyle (2,0xFFFFFF,1); 
-
-				if (maxSide == portWidth) {
-					graphics.moveTo(box.x/(ratio*2)+70,box.y/(ratio*2));
-					graphics.lineTo(box.x/(ratio*2) + box.width/(ratio*2)+70,box.y/(ratio*2));
-					graphics.lineTo(box.x/(ratio*2) + box.width/(ratio*2)+70,box.y/(ratio*2)+box.height/(ratio*2)); 
-					graphics.lineTo(box.x/(ratio*2)+70,box.y/(ratio*2)+box.height/(ratio*2)); 
-					graphics.lineTo(box.x/(ratio*2)+70,box.y/(ratio*2)); 
-				} else {
-					graphics.moveTo(box.x/(ratio*2),box.y/(ratio*2)+70);
-					graphics.lineTo(box.x/(ratio*2) + box.width/(ratio*2),box.y/(ratio*2)+70);
-					graphics.lineTo(box.x/(ratio*2) + box.width/(ratio*2),box.y/(ratio*2)+box.height/(ratio*2)+70); 
-					graphics.lineTo(box.x/(ratio*2),box.y/(ratio*2)+box.height/(ratio*2)+70); 
-					graphics.lineTo(box.x/(ratio*2),box.y/(ratio*2)+70); 
-				}
-				app.stage.addChild(graphics); 
-				app.render(); 
-			} else {
-				console.log("FAILED TO FIND PREVIEW FACE"); 
-			}
-			this.theatreToolTip.style.opacity = 1; 
-		}); 
-		*/
-	}
-
-	/**
-	 * Inititalize Face API
-	 *
-	 *
-	 * @private
-	 */
-	_initFaceAPI() {
-		const MODEL_URL = "modules/theatre/app/weights";
-
-		faceapi.loadSsdMobilenetv1Model(MODEL_URL);
-		faceapi.loadTinyFaceDetectorModel(MODEL_URL);
-		faceapi.loadFaceLandmarkModel(MODEL_URL);
-		faceapi.loadFaceRecognitionModel(MODEL_URL);
+	
 	}
 
 	/**
@@ -2285,7 +2236,7 @@ class Theatre {
 		if (!insert.label) {
 			let textStyle = new PIXI.TextStyle({
 				align: "center",
-				fontFamily: game.settings.get(Theatre.SETTINGS, "nameFont"),
+				fontFamily: Theatre.instance.titleFont,
 				fontSize: 44,
 				lineHeight: 64,
 				//fontStyle: 'italic',
@@ -5072,7 +5023,7 @@ class Theatre {
 				fontSelect.value = Theatre.instance.userEmotes[game.user.id].textFont;
 				if (insert) insert.textFont = fontSelect.value;
 			} else {
-				fontSelect.value = fonts[0];
+				fontSelect.value = Theatre.instance.textFont;
 			}
 			// assign color from insert
 			if (insert && insert.textColor) {
@@ -6394,270 +6345,6 @@ class Theatre {
 		return tweenParams;
 	}
 
-	/**
-	 * Prepare fonts and return the list of fonts available
-	 *
-	 * @return (Array[(String)]) : The array of font familys to use. 
-	 */
-	static getFonts() {
-		if (!Theatre.FONTS) {
-			// language specific fonts 
-			switch (game.i18n.lang) {
-				case "cn":
-					Theatre.instance.titleFont = "SourceHanSerifSC-Medium";
-					Theatre.instance.textFont = "BianHeiti";
-					Theatre.instance.fontWeight = "normal";
-					Theatre.FONTS = [
-						"SourceHanSerifSC-Medium",
-						"BianHeiti"
-					];
-					break;
-				case "ja":
-					Theatre.instance.titleFont = "Togalite";
-					Theatre.instance.textFont = "NotoSansJPBold";
-					Theatre.instance.fontWeight = "normal";
-					Theatre.FONTS = [
-						"NotoSansJPBold",
-						"Togalite",
-						"GenEiLateMin_v2",
-						"HannariMincho",
-						"TogoshiMincho",
-						"AppliMincho",
-						"GenkaiMincho",
-						"CorporateLogoBold",
-						"CineCaption",
-						"RiiPopkk",
-						"MikaChan",
-						"PopRumCute",
-						"MaleCharacters",
-						"AsobiMemogaki",
-						"ArmedLemon",
-						"ChikaraYowaku",
-						"Otsutome",
-						"ZinHenaBokuryu",
-						"KohichiFeltPen",
-						"KaisoNextB",
-						"TegakiKakutto",
-						"NicoMojiPlus",
-						"Pigmo01",
-						"NagurigakiCrayon",
-						"TanukiPermanentMarker",
-						"MinaMoji",
-						"Zomzi",
-						"ReallyScaryMinchotai"
-					];
-					break;
-				case "ko":
-					Theatre.instance.titleFont = "BMDohyeon";
-					Theatre.instance.textFont = "NotoSansKRBold";
-					Theatre.instance.fontWeight = "normal";
-					Theatre.FONTS = [
-						"NotoSansKRBold",
-						"BMDohyeon",
-						"BMHannaPro",
-						"BMYeonSung",
-						"Sunflower",
-						"BlackHanSans",
-						"JejuHallasan",
-						"KirangHaerang",
-						"Daraehand",
-						"GabiaSolmee",
-						"NanumBrush",
-						"HiMelody",
-						"UhBeeSeHyun",
-						"UhBeeJisyuk",
-						"SSShinRegular",
-						"SSShinB7Regular",
-						"TvNEnjoyStories"
-					];
-					break;
-				case "th":
-					Theatre.instance.titleFont = "Prompt";
-					Theatre.instance.textFont = "NotoSansThaiBold";
-					Theatre.instance.fontWeight = "normal";
-					Theatre.FONTS = [
-						"NotoSansThaiBold",
-						"Prompt",
-						"K2DBold",
-						"Kanit",
-						"Chonburi",
-						"Charm",
-						"Charmonman",
-						"Srisakdi",
-						"Sriracha",
-						"Pattaya",
-						"Athiti",
-						"ChakraPetch",
-						"Kodchasan",
-						"Fahkwang",
-						"Itim",
-						"KoHo",
-						"Krub",
-						"Maitree",
-						"Mali",
-						"Niramit",
-						"Pridi",
-						"Sarabun",
-						"Taviraj",
-						"Thasadith",
-						"BaiJamjuree"
-					];
-					break;
-				case "en":
-					Theatre.instance.titleFont = "Riffic";
-					Theatre.instance.textFont = "SignikaBold";
-					Theatre.instance.fontWeight = "normal";
-					Theatre.FONTS = [
-						"Caslon",
-						"CaslonAntique",
-						"SignikaBold",
-						"Riffic",
-						"IronSans",
-						"LinLibertine",
-						"TimesNewRomance",
-						"TimesNewYorker",
-						"LPEducational",
-						"Cardinal",
-						"OldLondon",
-						"StoneHenge",
-						"SunnyDay",
-						"PaulSignature",
-						"LemonTuesday",
-						"FairProsper",
-						"BalletHarmony",
-						"MagieraScript",
-						"Cathallina",
-						"Hamish",
-						"DreamersBrush",
-						"FastInMyCar",
-						"ChildWriting",
-						"Kindergarten",
-						"FuturaHandwritten",
-						"Fewriter",
-						"TrashHand",
-						"GoodBrush",
-						"BaksoSapi",
-						"SuplexmentaryComic",
-						"ComicInk",
-						"DreamyLand",
-						"Yikes",
-						"GangOfThree",
-						"JianGkrik",
-						"Yozakura",
-						"Hiroshio",
-						"ArabDances",
-						"Rooters",
-						"Subway",
-						"Himagsikan",
-						"MilTown",
-						"Galactico",
-						"Oko",
-						"Ethnocentric",
-						"VenusRising",
-						"StampAct",
-						"Kirsty",
-						"Western",
-						"BreakAway",
-						"YoungerThanMe",
-						"Underground",
-						"VarsityTeam",
-						"Valentino",
-						"GlassHouses",
-						"Makayla",
-						"DancingVampyrish",
-						"Codex",
-						"DSNetStamped",
-						"HappyFrushZero",
-						"Shoplifter",
-						"Stereofidelic",
-						"Headache",
-						"HorrorHouse",
-						"GhostTheory2",
-						"Syemox",
-						"GhostChase"
-					];
-					break;
-				default:
-					Theatre.instance.titleFont = "Riffic";
-					Theatre.instance.textFont = "SignikaBold";
-					Theatre.instance.fontWeight = "normal";
-					Theatre.FONTS = [
-						"Caslon",
-						"CaslonAntique",
-						"SignikaBold",
-						"Riffic",
-						"LinLibertine",
-						"TimesNewRomance",
-						"LPEducational",
-						"Cardinal",
-						"OldLondon",
-						"StoneHenge",
-						"Alamain",
-						"LemonTuesday",
-						"FairProsper",
-						"Exmouth",
-						"Hamish",
-						"DreamersBrush",
-						"FuturaHandwritten",
-						"Fewriter",
-						"TrashHand",
-						"GoodBrush",
-						"BaksoSapi",
-						"SuplexmentaryComic",
-						"DreamyLand",
-						"GangOfThree",
-						"JianGkrik",
-						"Yozakura",
-						"Hiroshio",
-						"Rooters",
-						"Himagsikan",
-						"Galactico",
-						"Oko",
-						"Ethnocentric",
-						"VenusRising",
-						"StampAct",
-						"Kirsty",
-						"YoungerThanMe",
-						"Underground",
-						"VarsityTeam",
-						"Valentino",
-						"Makayla",
-						"HappyFrushZero",
-						"Stereofidelic",
-						"Headache",
-						"HorrorHouse",
-						"Syemox"
-					];
-					break;
-			}
-			// Load some essential fonts we use in PIXI
-			WebFont.load({
-				custom: {
-					families: [Theatre.instance.titleFont, Theatre.instance.textFont]
-				}
-			});
-			// async load everything else
-			let oFonts = [];
-			for (let idx = Theatre.FONTS.length - 1; idx >= 0; --idx) {
-				if (Theatre.FONTS[idx] == Theatre.instance.titleFont
-					|| Theatre.FONTS[idx] == Theatre.instance.textFont)
-					continue;
-				oFonts.push(Theatre.FONTS[idx]);
-			}
-			var aLoader = async function (fonts) {
-				WebFont.load({
-					custom: {
-						families: fonts
-					}
-				});
-			}
-
-			aLoader(oFonts);
-
-		}
-
-		return Theatre.FONTS;
-	}
 
 	static getActorDisplayName(actorId) {
 		const actor = game.actors.get(actorId);

@@ -75,20 +75,6 @@ class _TheatreSettings {
 			}
 		});
 
-		game.settings.register(this.THEATRE, "nameFont", {
-			name: "Theatre.UI.Settings.nameFont",
-			hint: "Theatre.UI.Settings.nameFontHint",
-			scope: "world",
-			config: true,
-			default: Theatre.instance.titleFont,
-			type: String,
-			choices: Theatre.FONTS.reduce((a, font) => {
-				a[font] = font;
-				return a;
-			}, {}),
-			onChange: debouncedReload
-		});
-
 		game.settings.register(this.THEATRE, "nameFontSize", {
 			name: "Theatre.UI.Settings.nameFontSize",
 			hint: "Theatre.UI.Settings.nameFontSizeHint",
