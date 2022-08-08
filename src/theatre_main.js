@@ -557,8 +557,7 @@ Hooks.on("getActorDirectoryEntryContext", async (html, options) => {
 	});
 });
 
-// Fixed global singleton/global object
-var theatre = null;
+var theatre;
 Hooks.once("setup", () => {
 	theatre = new Theatre();
 });

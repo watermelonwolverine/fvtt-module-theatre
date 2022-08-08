@@ -13,12 +13,16 @@ class _TheatrePortraitContainerSetupWorker {
     /**
      * Sets up a portrait's PIXI dockContainer to size to
      * the given resource
-     *
      * @params imgId (String) : The theatreId of the insert whose portrait we're setting up.
      * @params resName (String) : The resource name of the sprite to configure.
      * @params resources (Object) : The resource object from PIXI.Loader.shared.
      * @params reorder (Boolean) : Boolean to indicate if a reorder should be performed after
-     *							 an update. 
+    an update.
+     * @param {any} imgId
+     * @param {string} optAlign
+     * @param {string} resName
+     * @param {PIXI.IResourceDictionary} resources
+     * @param {boolean} [reorder]
      */
     setupPortraitContainer(imgId, optAlign, resName, resources, reorder) {
         let insert = this.context.getInsertById(imgId);

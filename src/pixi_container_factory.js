@@ -128,10 +128,10 @@ class _TheatrePixiContainerFactory {
                 if (params.emotes[ename] && params.emotes[ename].insert) {
                     dockContainer.x = isLeft ?
                         (-1 * portWidth) : (this.context.theatreDock.offsetWidth + portWidth);
-                    this.portrait_container_setup_worker.setupPortraitContainer(imgId, optAlign, params.emotes[ename].insert, resources, true);
+                    this.workers.portrait_container_setup_worker.setupPortraitContainer(imgId, optAlign, params.emotes[ename].insert, resources, true);
                 } else {
                     dockContainer.x = initX;
-                    this.portrait_container_setup_worker.setupPortraitContainer(imgId, optAlign, imgPath, resources, true);
+                    this.workers.portrait_container_setup_worker.setupPortraitContainer(imgId, optAlign, imgPath, resources, true);
                 }
             }
 

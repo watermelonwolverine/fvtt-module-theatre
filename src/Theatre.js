@@ -40,6 +40,10 @@ class Theatre {
 		if (!Theatre.instance) {
 			// build theater-wide statics
 
+			Theatre.instance = this;
+
+			this.workers = new _TheatreWorkers(this);
+
 			Theatre.textStandingAnimation(null);
 			Theatre.textFlyinAnimation(null);
 			// build theater variables
@@ -92,7 +96,7 @@ class Theatre {
 			this.settings.decayRate = (game.settings.get("theatre", "textDecayRate") || 1) * 1000;
 			this.settings.motdNewInfo = game.settings.get("theatre", "motdNewInfo") || 1;
 
-			this.workers = new _TheatreWorkers(this);
+
 		}
 		return Theatre.instance;
 	}
@@ -1888,7 +1892,7 @@ class Theatre {
 		// this.pixiCTX.renderer.clear(); // PIXI.v6 does not respect transparency for clear
 		for (let insert of this.portraitDocks) {
 			if (insert.dockContainer) {
-				if (Theatre.DEBUG) this._updateTheatreDebugInfo(insert);
+				if (Theatre.DEBUG) this.updateTheatreDebugInfo(insert);
 				// PIXI.v6 The renderer should not clear the canvas on rendering
 				this.pixiCTX.renderer.render(insert.dockContainer, { clear: false });
 			}
@@ -2988,7 +2992,7 @@ class Theatre {
 		if (navItem)
 			KHelpers.addClass(navItem, "theatre-control-nav-bar-item-active");
 
-		let dock = this.workers.pixi_container_factory._createPortraitPIXIContainer(imgPath, portName, imgId, optAlign, emotions, false);
+		let dock = this.workers.pixi_container_factory.createPortraitPIXIContainer(imgPath, portName, imgId, optAlign, emotions, false);
 		let textBox = document.createElement("div");
 		// textBox class + style depends on our display mode
 		switch (this.settings.theatreStyle) {
