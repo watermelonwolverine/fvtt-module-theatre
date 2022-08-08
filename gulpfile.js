@@ -17,8 +17,8 @@ const SOURCE = 'src/';
 const LANG = 'app/lang/';
 const TEMPLATES = 'app/templates/';
 const CSS = 'app/css/';
-const PACKS = 'app/packs';
-const GRAPHICS = 'app/graphics';
+const PACKS = 'app/packs/';
+const GRAPHICS = 'app/graphics/';
 
 const METAFILES = ['LICENSE.txt', 'README.md', 'CHANGELOG.md'];
 
