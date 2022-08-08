@@ -23,7 +23,8 @@ import Theatre from "./Theatre.js";
 import KHelpers from "./workers/KHelpers.js";
 
 export default class TheatreActorConfig extends FormApplication {
-	constructor(object = {}, options = {}) {
+	constructor(workers, object = {}, options = {}) {
+
 		if (object._theatre_mod_configTab) {
 			options.tabs = [
 				{ navSelector: ".tabs", contentSelector: ".theatre-config-contents", initial: object._theatre_mod_configTab }
@@ -33,6 +34,9 @@ export default class TheatreActorConfig extends FormApplication {
 			}
 		}
 		super(object, options);
+
+		this.workers = workers;
+
 	}
 
 	/**
@@ -360,7 +364,7 @@ export default class TheatreActorConfig extends FormApplication {
 						insert.label.text = newName;
 
 						Theatre.instance._clearPortraitContainer(theatreId);
-						Theatre.instance.workers.setupPortraitContainer(theatreId, newAlign, newSrcImg, resources);
+						this.workers.portrait_container_setup_worker.setupPortraitContainer(theatreId, newAlign, newSrcImg, resources);
 						// re-attach label + typingBubble
 						insert.dockContainer.addChild(insert.label);
 						insert.dockContainer.addChild(insert.typingBubble);
@@ -398,7 +402,7 @@ export default class TheatreActorConfig extends FormApplication {
 				insert.label.text = newName;
 
 				Theatre.instance._clearPortraitContainer(theatreId);
-				Theatre.instance.workers.setupPortraitContainer(theatreId, newAlign, resName, PIXI.Loader.shared.resources);
+				this.workers.portrait_container_setup_worker.setupPortraitContainer(theatreId, newAlign, resName, PIXI.Loader.shared.resources);
 				// re-attach label + typingBubble
 				insert.dockContainer.addChild(insert.label);
 				insert.dockContainer.addChild(insert.typingBubble);
