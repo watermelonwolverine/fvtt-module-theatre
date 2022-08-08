@@ -20,17 +20,17 @@
 
 
 
-/**
- * ============================================================
- * Singleton Theatre
- *
- *
- *
- *
- *
- * ============================================================
- */
 class Theatre {
+
+	static SOCKET = "module.theatre";
+	static SETTINGS = "theatre";
+	static NARRATOR = "Narrator";
+	static ICONLIB = "modules/theatre/app/graphics/emotes";
+	static DEBUG = false;
+	/**
+	 * @type {Theatre}
+	 */
+	static instance = undefined;
 
 	/**
 	 * Make singleton and initalize the inner instance object. 
@@ -39,12 +39,7 @@ class Theatre {
 	constructor() {
 		if (!Theatre.instance) {
 			// build theater-wide statics
-			Theatre.SOCKET = "module.theatre";
-			Theatre.SETTINGS = "theatre";
-			Theatre.NARRATOR = "Narrator";
-			Theatre.ICONLIB = "modules/theatre/app/graphics/emotes";
-			Theatre.DEBUG = false;
-			Theatre.instance = this;
+
 			Theatre.textStandingAnimation(null);
 			Theatre.textFlyinAnimation(null);
 			// build theater variables
