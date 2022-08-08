@@ -22,8 +22,8 @@
  */
 
 import _TheatreSettings from './settings.js';
-import _TheatreWorkers from './workers.js';
-import KHelpers from "./KHelpers.js";
+import _TheatreWorkers from './workers/workers.js';
+import KHelpers from "./workers/KHelpers.js";
 import TheatreActor from './TheatreActor.js';
 import TheatreActorConfig from './TheatreActorConfig.js';
 
@@ -6858,7 +6858,10 @@ export default class Theatre {
 	 *
 	 * @params ev (Event) : The event that triggered adding to the NavBar staging area.
 	 */
-	static onAddToNavBar(ev, actorSheet, removeLabelSheetHeader) {
+	static onAddToNavBar(ev, actorSheet) {
+
+		const removeLabelSheetHeader = game.settings.get(_TheatreSettings.THEATRE, _TheatreSettings.REMOVE_LABEL_SHEET_HEADER);
+
 		if (Theatre.DEBUG) console.log("Click Event on Add to NavBar!!", actorSheet, actorSheet.actor, actorSheet.position);
 		const actor = actorSheet.object.data;
 		const addLabel = removeLabelSheetHeader ? "" : game.i18n.localize("Theatre.UI.Config.AddToStage");

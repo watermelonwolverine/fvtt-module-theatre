@@ -2,7 +2,7 @@
 import _TheatrePixiContainerFactory from "./pixi_container_factory.js";
 import _TheatrePortraitContainerSetupWorker from "./portrait_container_setup.js";
 import _TextBoxFactory from "./textbox_factory.js";
-import Theatre from "./Theatre.js";
+import Theatre from "../Theatre.js";
 
 export default class _TheatreWorkers {
 

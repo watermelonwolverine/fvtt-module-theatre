@@ -2,10 +2,16 @@ import Theatre from "./Theatre.js";
 
 export default class _TheatreSettings {
 
+	static REMOVE_LABEL_SHEET_HEADER = "removeLabelSheetHeader";
 
 	static THEATRE = "theatre";
 	static SUPPRESS_OPACITY = "suppressOpacity"
 	static SHIFT_PAUSE_ICON = "shiftPauseIcon";
+
+	static UI_SETTINGS_KEY = "Theatre.UI.Settings";
+	static HINT = "Hint";
+
+	static WORLD_SCOPE = "world";
 
 	/**
 	 * Init Module Settings
@@ -162,10 +168,10 @@ export default class _TheatreSettings {
 			onChange: debouncedReload
 		});
 
-		game.settings.register(this.THEATRE, "removeLabelSheetHeader", {
-			name: "Theatre.UI.Settings.removeLabelSheetHeader",
-			hint: "Theatre.UI.Settings.removeLabelSheetHeaderHint",
-			scope: "world",
+		game.settings.register(this.THEATRE, this.REMOVE_LABEL_SHEET_HEADER, {
+			name: this.UI_SETTINGS_KEY + "." + this.REMOVE_LABEL_SHEET_HEADER,
+			hint: this.UI_SETTINGS_KEY + "." + this.REMOVE_LABEL_SHEET_HEADER + this.HINT,
+			scope: this.WORLD_SCOPE,
 			config: true,
 			type: Boolean,
 			default: false,

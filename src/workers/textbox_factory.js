@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import Theatre from "./Theatre.js";
+import Theatre from "../Theatre.js";
 import KHelpers from "./KHelpers.js"
 import _TheatreWorkers from "./workers.js";
 

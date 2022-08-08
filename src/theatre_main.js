@@ -21,7 +21,7 @@
  */
 
 import Theatre from "./Theatre.js";
-import KHelpers from "./KHelpers.js";
+import KHelpers from "./workers/KHelpers.js";
 import _TheatreSettings from "./settings.js"
 
 /**
@@ -61,8 +61,13 @@ Hooks.on("getActorSheetHeaderButtons", (app, buttons) => {
 			})
 
 		}
+
+		const removeLabelSheetHeader = game.settings.get(_TheatreSettings.THEATRE, _TheatreSettings.REMOVE_LABEL_SHEET_HEADER);
+		let label = Theatre.isActorStaged(app.object.data) ? "Theatre.UI.Config.RemoveFromStage" : "Theatre.UI.Config.AddToStage";
+		label = removeLabelSheetHeader ? "" : label;
+
 		theatreButtons.push({
-			label: Theatre.isActorStaged(app.object.data) ? "Theatre.UI.Config.RemoveFromStage" : "Theatre.UI.Config.AddToStage",
+			label: label,
 			class: "add-to-theatre-navbar",
 			icon: "fas fa-theater-masks",
 			onclick: ev => {
