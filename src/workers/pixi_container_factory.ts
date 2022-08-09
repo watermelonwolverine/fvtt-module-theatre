@@ -1,15 +1,18 @@
 /* eslint-disable no-unused-vars */
+import Emotes from "../Emotes.js";
+import Resources from "../foundry_extensions.js";
+import Params from "../Params.js";
 import Theatre from "../Theatre.js";
 import _TheatreWorkers from "./workers.js";
 
+
 export default class _TheatrePixiContainerFactory {
 
-    /**
-     * @param {Theatre} context
-     * @param {_TheatreWorkers} workers
-     */
-    constructor(context,
-        workers) {
+    context: Theatre;
+    workers: _TheatreWorkers;
+
+    constructor(context: Theatre,
+        workers: _TheatreWorkers) {
         this.context = context;
         this.workers = workers;
     }
@@ -29,7 +32,13 @@ export default class _TheatrePixiContainerFactory {
      *							left, or right in the dock after creation. 
      *
      */
-    createPortraitPIXIContainer(imgPath, portName, imgId, optAlign, emotions, isLeft) {
+    createPortraitPIXIContainer(
+        imgPath: string,
+        portName: string,
+        imgId: string,
+        optAlign: string,
+        emotions: Emotes,
+        isLeft: boolean): void {
         // given an image, we will generate a PIXI container to add to the theatreDock and size
         // it to the image loaded
         let dockContainer = new PIXI.Container();
@@ -51,7 +60,7 @@ export default class _TheatrePixiContainerFactory {
 
         //console.log("Creating PortraintPIXIContainer with emotions: ",emotions); 
 
-        let ename, textFlyin, textStanding, textFont, textSize, textColor
+        let ename: string, textFlyin, textStanding, textFont, textSize, textColor
         if (emotions) {
             ename = emotions.emote;
             textFlyin = emotions.textFlyin;
@@ -92,7 +101,7 @@ export default class _TheatrePixiContainerFactory {
         if (Theatre.DEBUG) console.log("Adding %s with src %s", portName, imgPath);
         // get actor, load all emote images
         let actorId = imgId.replace("theatre-", "");
-        let params = this.context._getInsertParamsFromActorId(actorId);
+        let params: Params = this.context._getInsertParamsFromActorId(actorId);
 
         if (!params) {
             console.log("ERROR: Actor does not exist for %s", actorId);
@@ -114,7 +123,7 @@ export default class _TheatrePixiContainerFactory {
                     imgSrcs.push({ imgpath: params.emotes[emName].insert, resname: params.emotes[emName].insert });
 
         // handles the waiting game of grabbing loader for us
-        this.context._addSpritesToPixi(imgSrcs, (loader, resources) => {
+        this.context._addSpritesToPixi(imgSrcs, (loader?: any, resources?: Resources) => {
             // PIXI Container is ready!
             // Setup the dockContainer to display the base insert
             if (Theatre.DEBUG) console.log("Sprites added to PIXI createPortraitPIXIContainer", resources);

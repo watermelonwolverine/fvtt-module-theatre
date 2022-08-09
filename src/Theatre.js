@@ -3907,10 +3907,10 @@ export default class Theatre {
 	/**
 	 * Reset an insert's postion/mirror state by Id
 	 *
-	 * @param id (String) : The theatreId of the insert to reset.
-	 * @params remote (Boolean) : Wither this is being invoked remotely, or locally. 
+	 * @param {string} id : The theatreId of the insert to reset.
+	 * @optional @param {boolean} : Wither this is being invoked remotely, or locally. 
 	 */
-	resetInsertById(id, remote) {
+	resetInsertById(id, remote=undefined) {
 		let insert = this.getInsertById(id);
 
 		this._resetPortraitPosition(insert, remote);

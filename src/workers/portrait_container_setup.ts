@@ -1,15 +1,18 @@
 /* eslint-disable no-unused-vars */
+import Resources, { PIXISprite, PIXIText } from "../foundry_extensions.js";
 import Theatre from "../Theatre.js";
 import _TheatreWorkers from "./workers.js";
 
+
+
+
 export default class _TheatrePortraitContainerSetupWorker {
 
-    /**
-     * @param {Theatre} context
-     * @param {_TheatreWorkers} workers
-     */
-    constructor(context,
-        workers) {
+    context: Theatre;
+    workers: _TheatreWorkers;
+
+    constructor(context: Theatre,
+        workers: _TheatreWorkers) {
         this.context = context;
         this.workers = workers;
     }
@@ -28,8 +31,15 @@ export default class _TheatrePortraitContainerSetupWorker {
      * @param {PIXI.IResourceDictionary} resources
      * @param {boolean} [reorder]
      */
-    setupPortraitContainer(imgId, optAlign, resName, resources, reorder) {
+    setupPortraitContainer(
+        imgId: string,
+        optAlign: string,
+        resName: string,
+        resources: Resources,
+        reorder: boolean) {
         let insert = this.context.getInsertById(imgId);
+
+
 
         if (!insert || !insert.dockContainer) {
             console.error("ERROR PIXI Container was destroyed before setup could execute for %s", imgId);
@@ -51,7 +61,7 @@ export default class _TheatrePortraitContainerSetupWorker {
         let sprite = new PIXI.Sprite(resources[resName].texture);
         let portWidth = resources[resName].texture.width;
         let portHeight = resources[resName].texture.height;
-        let maxHeight = game.settings.get(Theatre.SETTINGS, "theatreImageSize");
+        let maxHeight = <number>game.settings.get(Theatre.SETTINGS, "theatreImageSize");
         if (portHeight > maxHeight) {
             portWidth *= maxHeight / portHeight;
             portHeight = maxHeight;
@@ -108,7 +118,7 @@ export default class _TheatrePortraitContainerSetupWorker {
                 wordWrap: true,
                 wordWrapWidth: portWidth
             });
-            let label = new PIXI.Text(insert.name, textStyle);
+            let label = new PIXIText(insert.name, textStyle);
             // save and stage our label
             label.theatreComponentName = "label";
             insert.label = label;
@@ -121,7 +131,7 @@ export default class _TheatrePortraitContainerSetupWorker {
 
         // setup typing bubble
         if (!insert.typingBubble) {
-            let typingBubble = new PIXI.Sprite();
+            let typingBubble = new PIXISprite();
             typingBubble.texture = resources["modules/theatre/app/graphics/typing.png"].texture;
             typingBubble.width = 55;
             typingBubble.height = 55;
@@ -214,7 +224,7 @@ export default class _TheatrePortraitContainerSetupWorker {
             });
             let dims = new PIXI.Text(`${portWidth} px x ${portHeight} px`, dimStyle);
             let path = new PIXI.Text(resources[resName].url, pathStyle);
-            let info = new PIXI.Text("X", infoStyle);
+            let info = new PIXIText("X", infoStyle);
             info.theatreComponentName = "debugInfo";
             dims.x = 20;
             path.x = 20;
@@ -242,8 +252,8 @@ export default class _TheatrePortraitContainerSetupWorker {
             dockContainer.alpha = 0;
 
             window.setTimeout(() => {
-                let tb = this.context._getTextBoxById(imgId);
-                if (tb) tb.style.opacity = 1;
+                let tb = <HTMLElement>this.context._getTextBoxById(imgId);
+                if (tb) tb.style.opacity = "1";
 
                 window.clearTimeout(this.context.reorderTOId)
                 this.context.reorderTOId = window.setTimeout(() => {

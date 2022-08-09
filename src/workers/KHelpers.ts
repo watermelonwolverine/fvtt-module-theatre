@@ -1,17 +1,17 @@
 
 export default class KHelpers {
-	static hasClass(el, className) {
+	static hasClass(el: HTMLElement, className: string) {
 		return el.classList
 			? el.classList.contains(className)
 			: new RegExp("\\b" + className + "\\b").test(el.className);
 	}
 
-	static addClass(el, className) {
+	static addClass(el: HTMLElement, className: string) {
 		if (el.classList) el.classList.add(className);
 		else if (!KHelpers.hasClass(el, className)) el.className += " " + className;
 	}
 
-	static removeClass(el, className) {
+	static removeClass(el: HTMLElement, className: string) {
 		if (el.classList) el.classList.remove(className);
 		else
 			el.className = el.className.replace(
@@ -20,20 +20,20 @@ export default class KHelpers {
 			);
 	}
 
-	static offset(el) {
+	static offset(el: HTMLElement) {
 		var rect = el.getBoundingClientRect(),
 			scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
 			scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 		return { top: rect.top + scrollTop, left: rect.left + scrollLeft };
 	}
 
-	static style(el) {
+	static style(el: HTMLElement) {
 		return el.currentStyle || window.getComputedStyle(el);
 	}
-	static insertAfter(el, referenceNode) {
+	static insertAfter(el: HTMLElement, referenceNode: Node) {
 		referenceNode.parentNode.insertBefore(el, referenceNode.nextSibling);
 	}
-	static insertBefore(el, referenceNode) {
+	static insertBefore(el: HTMLElement, referenceNode: Node) {
 		referenceNode.parentNode.insertBefore(el, referenceNode);
 	}
 
@@ -48,7 +48,7 @@ export default class KHelpers {
 	 *                          depth.
 	 */
 
-	static seekParentClass(elem, cls, depth) {
+	static seekParentClass(elem: HTMLElement, cls: string, depth: number): HTMLElement {
 		depth = depth || 5;
 		let el = elem;
 		let targ = null;
@@ -57,7 +57,10 @@ export default class KHelpers {
 			if (KHelpers.hasClass(el, cls)) {
 				targ = el;
 				break;
-			} else el = el.parentNode;
+			}
+			else {
+				el = el.parentNode as HTMLElement;
+			}
 		}
 		return targ;
 	}

@@ -5,25 +5,19 @@ import _TheatreWorkers from "./workers.js";
 
 export default class _TextBoxFactory {
 
-   
+    workers: _TheatreWorkers;
+    context: Theatre;
 
-    /**
-     * @param {Theatre} context
-     * @param {_TheatreWorkers} workers
-     */
-    constructor(context,
-        workers) {
+    constructor(context: Theatre,
+        workers: _TheatreWorkers) {
         this.context = context;
         this.workers = workers;
     }
 
-    /**
-     * @param {string} portName
-     * @param {string} imgId
-     */
+
     create_textbox(
-        portName,
-        imgId) {
+        portName: string,
+        imgId: string) {
 
         const textBox = document.createElement("div");
         // textBox class + style depends on our display mode
@@ -63,9 +57,9 @@ export default class _TextBoxFactory {
      *
      * @param ev (Event) : The Event that triggered this handler
      */
-    handleTextBoxMouseDown(ev) {
+    handleTextBoxMouseDown(ev: MouseEvent) {
         if (Theatre.DEBUG) console.log("MOUSE DOWN ", ev.buttons, ev.button);
-        let id = ev.currentTarget.getAttribute("imgId");
+        let id = (ev.currentTarget as HTMLElement).getAttribute("imgId");
 
         if (ev.button == 0) {
             if (!ev.ctrlKey
@@ -77,7 +71,7 @@ export default class _TextBoxFactory {
                     //Theatre.instance.dragPoint.port.style.transition = "top 0.5s ease, left 0.5s ease, transform 0.5s ease"; 
                 }
                 // calculate bouding box
-                let boundingBox = {};
+                let boundingBox: { [key: string]: number } = {};
                 let insert = Theatre.instance.getInsertById(id);
 
                 // permission check
@@ -100,7 +94,7 @@ export default class _TextBoxFactory {
                 let origX = insert.portraitContainer.x;
                 let origY = insert.portraitContainer.y;
 
-                if (Theatre.DEBUG) console.log("STORING DRAG POINT", ev.clientX || ev.pageX, ev.clientY || ev.PageY, boundingBox, origX, origY);
+                if (Theatre.DEBUG) console.log("STORING DRAG POINT", ev.clientX || ev.pageX, ev.clientY || ev.pageY, boundingBox, origX, origY);
 
                 // change the transition style while we're dragging
                 //port.style.transition = "top 0.5s ease, left 0.5s ease, transform 0.5s ease"; 
@@ -131,9 +125,9 @@ export default class _TextBoxFactory {
      *
      * @param ev (Event) : The Event that triggered this handler
      */
-    handleTextBoxMouseDoubleClick(ev) {
+    handleTextBoxMouseDoubleClick(ev: MouseEvent) {
         if (Theatre.DEBUG) console.log("MOUSE DOUBLE CLICK");
-        let id = ev.currentTarget.getAttribute("imgId");
+        let id = (ev.currentTarget as HTMLElement).getAttribute("imgId");
         Theatre.instance.resetInsertById(id);
     }
 
@@ -142,9 +136,9 @@ export default class _TextBoxFactory {
      *
      * @param ev (Event) : The Event that triggered this handler
      */
-    handleTextBoxMouseUp(ev) {
+    handleTextBoxMouseUp(ev: MouseEvent) {
         if (Theatre.DEBUG) console.log("MOUSE UP ", ev.buttons, ev.button);
-        let id = ev.currentTarget.getAttribute("imgId");
+        let id = (ev.currentTarget as HTMLElement).getAttribute("imgId");
         let chatMessage = document.getElementById("chat-message");
         if (ev.button == 0) {
             if (ev.ctrlKey) {
