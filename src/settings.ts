@@ -1,5 +1,6 @@
 import Theatre from "./Theatre.js";
 
+
 export default class _TheatreSettings {
 
 	static REMOVE_LABEL_SHEET_HEADER = "removeLabelSheetHeader";
@@ -11,8 +12,6 @@ export default class _TheatreSettings {
 	static UI_SETTINGS_KEY = "Theatre.UI.Settings";
 	static HINT = "Hint";
 
-	static WORLD_SCOPE = "world";
-
 	/**
 	 * Init Module Settings
 	 */
@@ -23,7 +22,7 @@ export default class _TheatreSettings {
 			window.location.reload()
 		}, 100)
 
-		game.settings.register(this.THEATRE, "gmOnly", {
+		game.settings.register<string, string, boolean>(this.THEATRE, "gmOnly", {
 			name: "Theatre.UI.Settings.gmOnly",
 			hint: "Theatre.UI.Settings.gmOnlyHint",
 			scope: "world",
@@ -33,7 +32,7 @@ export default class _TheatreSettings {
 			onChange: () => { if (!game.user.isGM) debouncedReload(); },
 		});
 
-		game.settings.register(this.THEATRE, "theatreStyle", {
+		game.settings.register<string, string, string>(this.THEATRE, "theatreStyle", {
 			name: "Theatre.UI.Settings.displayMode",
 			hint: "Theatre.UI.Settings.displayModeHint",
 			scope: "world",
@@ -48,7 +47,7 @@ export default class _TheatreSettings {
 			onChange: theatreStyle => Theatre.instance.configTheatreStyle(theatreStyle)
 		});
 
-		game.settings.register(this.THEATRE, "theatreImageSize", {
+		game.settings.register<string, string, number>(this.THEATRE, "theatreImageSize", {
 			name: "Maximum image height",
 			scope: "client",
 			config: true,
@@ -56,7 +55,7 @@ export default class _TheatreSettings {
 			type: Number,
 		});
 
-		game.settings.register(this.THEATRE, "theatreNarratorHeight", {
+		game.settings.register<string, string, string>(this.THEATRE, "theatreNarratorHeight", {
 			name: "Theatre.UI.Settings.narrHeight",
 			hint: "Theatre.UI.Settings.narrHeightHint",
 			scope: "world",
@@ -77,7 +76,7 @@ export default class _TheatreSettings {
 			}
 		});
 
-		game.settings.register(this.THEATRE, "nameFontSize", {
+		game.settings.register<string, string, number>(this.THEATRE, "nameFontSize", {
 			name: "Theatre.UI.Settings.nameFontSize",
 			hint: "Theatre.UI.Settings.nameFontSizeHint",
 			scope: "world",
@@ -87,7 +86,7 @@ export default class _TheatreSettings {
 			onChange: debouncedReload
 		});
 
-		game.settings.register(this.THEATRE, "textDecayMin", {
+		game.settings.register<string, string, number>(this.THEATRE, "textDecayMin", {
 			name: "Theatre.UI.Settings.textDecayMin",
 			hint: "Theatre.UI.Settings.textDecayMinHint",
 			scope: "world",
@@ -96,23 +95,23 @@ export default class _TheatreSettings {
 			type: Number,
 			onChange: textDecayMin => {
 				if (Theatre.DEBUG) console.log("Text decay minimum set to %s", textDecayMin);
-				textDecayMin = Number(textDecayMin);
-				if (isNaN(textDecayMin) || textDecayMin <= 0) {
+				const textDecayMinValue = textDecayMin.toNearest();
+				if (isNaN(textDecayMinValue) || textDecayMinValue <= 0) {
 					ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.InvalidDecayMin"));
 					game.settings.set(this.THEATRE, "textDecayMin", 30);
 					return;
 				}
-				if (textDecayMin > 600) {
+				if (textDecayMinValue > 600) {
 					ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.TooLongDecayMin"));
 					game.settings.set(this.THEATRE, "textDecayMin", 600);
 					return;
 				}
 
-				Theatre.instance.settings.decayMin = textDecayMin * 1000;
+				Theatre.instance.settings.decayMin = textDecayMinValue * 1000;
 			}
 		});
 
-		game.settings.register(this.THEATRE, "textDecayRate", {
+		game.settings.register<string, string, number>(this.THEATRE, "textDecayRate", {
 			name: "Theatre.UI.Settings.textDecayRate",
 			hint: "Theatre.UI.Settings.textDecayRateHint",
 			scope: "world",
@@ -121,34 +120,32 @@ export default class _TheatreSettings {
 			type: Number,
 			onChange: textDecayRate => {
 				if (Theatre.DEBUG) console.log("Text decay rate set to %s", textDecayRate);
-				textDecayRate = Number(textDecayRate);
-				if (isNaN(textDecayRate) || textDecayRate <= 0) {
-					textDecayRate = 1;
+				let textDecayRateValue = textDecayRate.toNearest();
+				if (isNaN(textDecayRateValue) || textDecayRateValue <= 0) {
+					textDecayRateValue = 1;
 					ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.InvalidDecayRate"));
 					game.settings.set(this.THEATRE, "textDecayRate", 1);
 					return;
 				}
-				if (textDecayRate > 10) {
-					textDecayRate = 10;
+				if (textDecayRateValue > 10) {
+					textDecayRateValue = 10;
 					ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.TooLongDecayRate"));
 					game.settings.set(this.THEATRE, "textDecayRate", 10);
 					return;
 				}
-				Theatre.instance.settings.decayRate = textDecayRate * 1000;
+				Theatre.instance.settings.decayRate = textDecayRateValue * 1000;
 			}
 		});
 
-		game.settings.register(this.THEATRE, "motdNewInfo", {
+		game.settings.register<string, string, number>(this.THEATRE, "motdNewInfo", {
 			name: "MOTD New Info",
 			scope: "client",
 			default: 0,
 			type: Number,
-			onChange: () => {
-				// NOOP
-			}
+			onChange: () => { }
 		});
 
-		game.settings.register(this.THEATRE, "autoHideBottom", {
+		game.settings.register<string, string, boolean>(this.THEATRE, "autoHideBottom", {
 			name: "Theatre.UI.Settings.autoHideBottom",
 			hint: "Theatre.UI.Settings.autoHideBottomHint",
 			scope: "world",
@@ -158,10 +155,10 @@ export default class _TheatreSettings {
 			onChange: debouncedReload
 		});
 
-		game.settings.register(this.THEATRE, "suppressMacroHotbar", {
+		game.settings.register<string, string, boolean>(this.THEATRE, "suppressMacroHotbar", {
 			name: "Theatre.UI.Settings.suppressMacroHotbar",
 			hint: "",
-			scope: "world",
+			scope: 'world',
 			config: true,
 			type: Boolean,
 			default: true,
@@ -171,14 +168,14 @@ export default class _TheatreSettings {
 		game.settings.register(this.THEATRE, this.REMOVE_LABEL_SHEET_HEADER, {
 			name: this.UI_SETTINGS_KEY + "." + this.REMOVE_LABEL_SHEET_HEADER,
 			hint: this.UI_SETTINGS_KEY + "." + this.REMOVE_LABEL_SHEET_HEADER + this.HINT,
-			scope: this.WORLD_SCOPE,
+			scope: 'world',
 			config: true,
 			type: Boolean,
 			default: false,
 			onChange: debouncedReload
 		});
 
-		game.settings.register(this.THEATRE, this.SUPPRESS_OPACITY, {
+		game.settings.register<string, string, number>(this.THEATRE, this.SUPPRESS_OPACITY, {
 			name: "Theatre.UI.Settings.suppressOpacity",
 			hint: "Theatre.UI.Settings.suppressOpacityHint",
 			scope: "world",
@@ -193,7 +190,7 @@ export default class _TheatreSettings {
 			onChange: debouncedReload
 		});
 
-		game.settings.register(this.THEATRE, this.SHIFT_PAUSE_ICON, {
+		game.settings.register<string, string, boolean>(this.THEATRE, this.SHIFT_PAUSE_ICON, {
 			name: "Theatre.UI.Settings.shiftPauseIcon",
 			hint: "Theatre.UI.Settings.shiftPauseIconHint",
 			scope: "world",
