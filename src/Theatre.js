@@ -26,6 +26,7 @@ import _TheatreWorkers from './workers/workers.js';
 import KHelpers from "./workers/KHelpers.js";
 import TheatreActor from './TheatreActor.js';
 import TheatreActorConfig from './TheatreActorConfig.js';
+import FlyinAnimationsFactory from './flyin_animations_factory.js';
 
 export default class Theatre {
 
@@ -52,7 +53,6 @@ export default class Theatre {
 			this.workers = new _TheatreWorkers(this);
 
 			Theatre.textStandingAnimation(null);
-			Theatre.textFlyinAnimation(null);
 			// build theater variables
 			// font related
 			this.titleFont = "Riffic";
@@ -3910,7 +3910,7 @@ export default class Theatre {
 	 * @param {string} id : The theatreId of the insert to reset.
 	 * @optional @param {boolean} : Wither this is being invoked remotely, or locally. 
 	 */
-	resetInsertById(id, remote=undefined) {
+	resetInsertById(id, remote = undefined) {
 		let insert = this.getInsertById(id);
 
 		this._resetPortraitPosition(insert, remote);
@@ -4550,13 +4550,12 @@ export default class Theatre {
 		let actor;
 		if (actorId)
 			actor = game.actors.get(actorId);
-
+		const flyinAnimations = FlyinAnimationsFactory.get_all_animations(this, this.targets);
 		let emotes = Theatre.getActorEmotes(actorId);
 		let fonts = Theatre.FONTS;
-		let textFlyin = Theatre.FLYIN_ANIMS;
 		let textStanding = Theatre.STANDING_ANIMS;
 		let sideBar = document.getElementById("sidebar");
-		renderTemplate("modules/theatre/app/templates/emote_menu.html", { emotes, textFlyin, textStanding, fonts }).then(template => {
+		renderTemplate("modules/theatre/app/templates/emote_menu.html", { emotes, flyinAnimations, textStanding, fonts }).then(template => {
 			if (Theatre.DEBUG) console.log("emote window template rendered");
 			Theatre.instance.theatreEmoteMenu.style.top = `${Theatre.instance.theatreControls.offsetTop - 410}px`;
 			Theatre.instance.theatreEmoteMenu.innerHTML = template;
@@ -4696,7 +4695,7 @@ export default class Theatre {
 					//console.log("child text: ",text,ev.currentTarget); 
 					ev.currentTarget.textContent = "";
 					let charSpans = Theatre.splitTextBoxToChars(text, ev.currentTarget);
-					textFlyin[anim].func.call(this, charSpans, 0.5, 0.05, null);
+					FlyinAnimationsFactory.get_flyin_animation(anim, this, this.targets).func.call(this, charSpans, 0.5, 0.05, null);
 				});
 				child.addEventListener("mouseout", (ev) => {
 					for (let c of ev.currentTarget.children) {
@@ -4767,7 +4766,7 @@ export default class Theatre {
 					//console.log("child text: ",text,ev.currentTarget); 
 					ev.currentTarget.textContent = "";
 					let charSpans = Theatre.splitTextBoxToChars(text, ev.currentTarget);
-					textFlyin["typewriter"].func.call(this, charSpans, 0.5, 0.05, (textStanding[anim] ? textStanding[anim].func : null));
+					FlyinAnimationsFactory.typewriter(this, this.targets).func.call(this, charSpans, 0.5, 0.05, (textStanding[anim] ? textStanding[anim].func : null));
 				});
 				child.addEventListener("mouseout", (ev) => {
 					for (let c of ev.currentTarget.children) {
@@ -5780,7 +5779,7 @@ export default class Theatre {
 	 *
 	 * @return (Object) : An Object containg the emotes for the requested actorId. 
 	 */
-	static getActorEmotes(actorId, disableDefault) {
+	static getActorEmotes(actorId, disableDefault = undefined) {
 		let actor = game.actors.get(actorId);
 		let data, ae, de, re;
 
@@ -7195,380 +7194,6 @@ export default class Theatre {
 
 		if (Theatre.STANDING_ANIMS[name])
 			return Theatre.STANDING_ANIMS[name].func;
-	}
-
-	/**
-	 * Get text Flyin Animation funciton, still needs to supply
-	 * 1. charSpans
-	 * 2. delay
-	 * 3. speed
-	 * 4. standingAnim (optional standin animation)
-	 *
-	 * @params name (String) : The name of the fly-in animation to use
-	 *
-	 * @return (Object) : An Object tuple of {func: (Function), label: (String)}
-	 *					 representing the animation function and function label. 
-	 *
-	 */
-	static textFlyinAnimation(name) {
-		if (!Theatre.FLYIN_ANIMS)
-			Theatre.FLYIN_ANIMS = {
-				"typewriter": {
-					"func": function (charSpans, animTime, speed, standingAnim) {
-						gsap.from(charSpans, {
-							duration: 0.05,
-							stagger: {
-								each: 0.05,
-								onComplete: function () {
-									if (standingAnim)
-										standingAnim.call(this, this.targets()[0]);
-								}
-							},
-							opacity: 0,
-							scale: 1.5
-						});
-
-					},
-					"label": game.i18n.localize("Theatre.Flyin.Typewriter")
-				},
-
-				"fadein": {
-					"func": function (charSpans, animTime, speed, standingAnim) {
-						gsap.from(charSpans, {
-							duration: animTime,
-							stagger: {
-								each: speed,
-								onComplete: function () {
-									if (standingAnim)
-										standingAnim.call(this, this.targets()[0]);
-								}
-							},
-							opacity: 0,
-						});
-					},
-					"label": game.i18n.localize("Theatre.Flyin.Fadein")
-				},
-
-				"slidein": {
-					"func": function (charSpans, animTime, speed, standingAnim) {
-						gsap.from(charSpans,
-							{
-								duration: animTime,
-								stagger: {
-									each: speed,
-									onComplete: function () {
-										if (standingAnim)
-											standingAnim.call(this, this.targets()[0]);
-									}
-								},
-								opacity: 0,
-								left: 200
-							}
-						);
-					},
-					"label": game.i18n.localize("Theatre.Flyin.Slidein")
-				},
-
-				"scalein": {
-					"func": function (charSpans, animTime, speed, standingAnim) {
-						gsap.from(charSpans,
-							{
-								duration: animTime,
-								stagger: {
-									each: speed,
-									onComplete: function () {
-										if (standingAnim)
-											standingAnim.call(this, this.targets()[0]);
-									}
-								},
-								opacity: 0,
-								scale: 5,
-								//rotation: -180,
-								ease: Power4.easeOut
-							}
-						);
-					},
-					"label": game.i18n.localize("Theatre.Flyin.Scalein")
-				},
-
-				"fallin": {
-					"func": function (charSpans, animTime, speed, standingAnim) {
-						let textBox = null;
-						if (charSpans[0]) {
-							switch (Theatre.instance.settings.theatreStyle) {
-								case "lightbox":
-									textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-light", 5);
-									if (!textBox)
-										textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
-									break;
-								case "clearbox":
-									textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-clear", 5);
-									if (!textBox)
-										textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
-									break;
-								case "mangabubble":
-									break;
-								case "textbox":
-								default:
-									textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
-									break;
-							}
-							if (textBox) {
-								textBox.style["overflow-y"] = "visible";
-								textBox.style["overflow-x"] = "visible";
-							}
-						}
-						gsap.from(charSpans,
-							{
-								duration: animTime,
-								stagger: {
-									each: speed,
-									onComplete: function () {
-										if (standingAnim)
-											standingAnim.call(this, this.targets()[0]);
-									}
-								},
-								opacity: 0,
-								top: -100,
-								ease: Power4.easeOut,
-								onComplete: () => {
-									if (Theatre.DEBUG) console.log("completeAll");
-									if (textBox) {
-										textBox.style["overflow-y"] = "scroll";
-										textBox.style["overflow-x"] = "hidden";
-									}
-								}
-							}
-						);
-					},
-					"label": game.i18n.localize("Theatre.Flyin.Fallin")
-				},
-
-
-				"spin": {
-					"func": function (charSpans, animTime, speed, standingAnim) {
-						gsap.from(charSpans,
-							{
-								duration: animTime,
-								stagger: {
-									each: speed,
-									onComplete: function () {
-										if (standingAnim)
-											standingAnim.call(this, this.targets()[0]);
-									}
-								},
-								opacity: 0,
-								rotation: -360,
-								left: 100,
-								ease: Power4.easeOut
-							}
-						);
-					},
-					"label": game.i18n.localize("Theatre.Flyin.Spin")
-				},
-
-				"spinscale": {
-					"func": function (charSpans, animTime, speed, standingAnim) {
-						let textBox = null;
-						if (charSpans[0]) {
-							switch (Theatre.instance.settings.theatreStyle) {
-								case "lightbox":
-									textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-light", 5);
-									if (!textBox)
-										textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
-									break;
-								case "clearbox":
-									textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-clear", 5);
-									if (!textBox)
-										textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
-									break;
-								case "mangabubble":
-									break;
-								case "textbox":
-								default:
-									textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
-									break;
-							}
-							if (textBox) {
-								textBox.style["overflow-y"] = "visible";
-								textBox.style["overflow-x"] = "visible";
-							}
-						}
-						gsap.from(charSpans, animTime * 1.5,
-							{
-								duration: animTime * 1.5,
-								stagger: {
-									each: speed,
-									onComplete: function () {
-										if (standingAnim)
-											standingAnim.call(this, this.targets()[0]);
-									}
-								},
-								opacity: 0,
-								scale: 5,
-								rotation: -360,
-								left: 150,
-								ease: Power4.easeOut,
-								onComplete: () => {
-									if (Theatre.DEBUG) console.log("completeAll");
-									if (textBox) {
-										textBox.style["overflow-y"] = "scroll";
-										textBox.style["overflow-x"] = "hidden";
-									}
-								}
-							}
-						);
-					},
-					"label": game.i18n.localize("Theatre.Flyin.SpinScale")
-				},
-
-				"outlaw": {
-					"func": function (charSpans, animTime, speed, standingAnim) {
-						//let barTop = 0;
-						//let barLeft = 0;
-						let textBox = null;
-						if (charSpans[0]) {
-							switch (Theatre.instance.settings.theatreStyle) {
-								case "lightbox":
-									textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-light", 5);
-									if (!textBox)
-										textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
-									break;
-								case "clearbox":
-									textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-clear", 5);
-									if (!textBox)
-										textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
-									break;
-								case "mangabubble":
-									break;
-								case "textbox":
-								default:
-									textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
-									break;
-							}
-							if (textBox) {
-								textBox.style["overflow-y"] = "visible";
-								textBox.style["overflow-x"] = "visible";
-							}
-						}
-						gsap.from(charSpans,
-							{
-								duration: animTime * 1.5,
-								stagger: {
-									each: speed,
-									onComplete: function () {
-										if (standingAnim)
-											standingAnim.call(this, this.targets()[0]);
-									}
-								},
-								opacity: 0,
-								scale: 6,
-								rotation: -1080,
-								ease: Power4.easeOut,
-								onComplete: () => {
-									if (Theatre.DEBUG) console.log("completeAll");
-									if (textBox) {
-										textBox.style["overflow-y"] = "scroll";
-										textBox.style["overflow-x"] = "hidden";
-										// shaking box
-										//TweenMax.killTweensOf(charSpans[0].parentNode.parentNode); 
-										//charSpans[0].parentNode.parentNode.style.top = `${barTop}px`; 
-										//charSpans[0].parentNode.parentNode.style.left = `${barLeft}px`; 
-									}
-								}
-							}
-						);
-					},
-					"label": game.i18n.localize("Theatre.Flyin.Outlaw")
-				},
-
-				"vortex": {
-					"func": function (charSpans, animTime, speed, standingAnim) {
-
-						let textBox = null;
-						if (charSpans[0]) {
-							switch (Theatre.instance.settings.theatreStyle) {
-								case "lightbox":
-									textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-light", 5);
-									if (!textBox)
-										textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
-									break;
-								case "clearbox":
-									textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-clear", 5);
-									if (!textBox)
-										textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
-									break;
-								case "mangabubble":
-									break;
-								case "textbox":
-								default:
-									textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
-									break;
-							}
-							if (textBox) {
-								textBox.style["overflow-y"] = "visible";
-								textBox.style["overflow-x"] = "visible";
-							}
-						}
-						for (let idx = 0; idx < charSpans.length; ++idx) {
-							TweenMax.from(charSpans[idx], animTime, {
-								delay: idx * speed,
-								opacity: 0,
-								scale: 5,
-								rotation: -720,
-								left: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * 500}px`,
-								top: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * 500}px`,
-								onComplete: function () {
-									if (standingAnim)
-										standingAnim.call(this, this.targets()[0])
-								}
-							});
-						}
-						if (textBox) {
-							if (Theatre.DEBUG) console.log("vortext all start");
-							TweenMax.from(textBox, 0.1, {
-								delay: (speed * charSpans.length) + animTime,
-								//opacity: 1,
-								onComplete: function () {
-									if (Theatre.DEBUG) console.log("vortex all complete");
-									if (this.targets().length) {
-										this.targets()[0].style["overflow-y"] = "scroll";
-										this.targets()[0].style["overflow-x"] = "visible";
-									}
-								}
-							});
-						}
-
-					},
-					"label": game.i18n.localize("Theatre.Flyin.Vortex")
-				},
-
-				"assemble": {
-					"func": function (charSpans, animTime, speed, standingAnim) {
-						for (let idx = 0; idx < charSpans.length; ++idx) {
-							TweenMax.from(charSpans[idx], animTime, {
-								delay: idx * speed,
-								opacity: 0,
-								scale: 5,
-								rotation: -180,
-								left: `${Math.random() * 500}px`,
-								top: `${Math.random() * 500}px`,
-								onComplete: function () {
-									if (standingAnim)
-										standingAnim.call(this, this.targets()[0])
-								}
-							});
-						}
-					},
-					"label": game.i18n.localize("Theatre.Flyin.Assemble")
-				}
-
-			}
-
-		if (Theatre.FLYIN_ANIMS[name])
-			return Theatre.FLYIN_ANIMS[name].func;
-		else
-			return Theatre.FLYIN_ANIMS["typewriter"].func;
 	}
 
 }
