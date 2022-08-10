@@ -16,7 +16,7 @@ export type TextFlyinAnimationDefinition = {
     label: string;
 }
 
-export class TextFlyinAnimationsFactory {
+export default class TextFlyinAnimationsFactory {
 
     static TYPEWRITER: "typewriter";
     static FADEIN: "fadein";

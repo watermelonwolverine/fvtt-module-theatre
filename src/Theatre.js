@@ -26,7 +26,8 @@ import _TheatreWorkers from './workers/workers.js';
 import KHelpers from "./workers/KHelpers.js";
 import TheatreActor from './TheatreActor.js';
 import TheatreActorConfig from './TheatreActorConfig.js';
-import { TextFlyinAnimationsFactory } from "./workers/flyin_animations_factory.js"
+import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory.js"
+import TextStandingAnimationsFactory from './workers/standing_animations_factory.js';
 
 export default class Theatre {
 
@@ -52,7 +53,6 @@ export default class Theatre {
 
 			this.workers = new _TheatreWorkers(this);
 
-			Theatre.textStandingAnimation(null);
 			// build theater variables
 			// font related
 			this.titleFont = "Riffic";
@@ -4550,12 +4550,12 @@ export default class Theatre {
 		let actor;
 		if (actorId)
 			actor = game.actors.get(actorId);
-		const flyinAnimations = TextFlyinAnimationsFactory.getAllAnimations(this, this.targets);
+		const flyinAnimationsDefinitions = TextFlyinAnimationsFactory.getDefinitions();
 		let emotes = Theatre.getActorEmotes(actorId);
 		let fonts = Theatre.FONTS;
-		let textStanding = Theatre.STANDING_ANIMS;
+		let textStandingAnimationDefinitions = TextStandingAnimationsFactory.getDefinitions();
 		let sideBar = document.getElementById("sidebar");
-		renderTemplate("modules/theatre/app/templates/emote_menu.html", { emotes, flyinAnimations, textStanding, fonts }).then(template => {
+		renderTemplate("modules/theatre/app/templates/emote_menu.html", { emotes, flyinAnimations: flyinAnimationsDefinitions, textStanding: textStandingAnimationDefinitions, fonts }).then(template => {
 			if (Theatre.DEBUG) console.log("emote window template rendered");
 			Theatre.instance.theatreEmoteMenu.style.top = `${Theatre.instance.theatreControls.offsetTop - 410}px`;
 			Theatre.instance.theatreEmoteMenu.innerHTML = template;
@@ -4695,7 +4695,12 @@ export default class Theatre {
 					//console.log("child text: ",text,ev.currentTarget); 
 					ev.currentTarget.textContent = "";
 					let charSpans = Theatre.splitTextBoxToChars(text, ev.currentTarget);
-					TextFlyinAnimationsFactory.getAnimationForName(anim, this, this.targets).func.call(this, charSpans, 0.5, 0.05, null);
+					TextFlyinAnimationsFactory.getForName(anim)(
+						this.targets[0],
+						charSpans,
+						0.5,
+						0.05,
+						null);
 				});
 				child.addEventListener("mouseout", (ev) => {
 					for (let c of ev.currentTarget.children) {
@@ -4766,7 +4771,11 @@ export default class Theatre {
 					//console.log("child text: ",text,ev.currentTarget); 
 					ev.currentTarget.textContent = "";
 					let charSpans = Theatre.splitTextBoxToChars(text, ev.currentTarget);
-					TextFlyinAnimationsFactory.typewriter(this, this.targets).func.call(this, charSpans, 0.5, 0.05, (textStanding[anim] ? textStanding[anim].func : null));
+					TextFlyinAnimationsFactory.do_typewriter(this.targets[0],
+						charSpans,
+						0.5,
+						0.05,
+						(textStandingAnimationDefinitions[anim] ? textStandingAnimationDefinitions[anim].func : null));
 				});
 				child.addEventListener("mouseout", (ev) => {
 					for (let c of ev.currentTarget.children) {
@@ -6990,211 +6999,5 @@ export default class Theatre {
 			Theatre._removeFromStage(theatreId);
 		})
 	}
-
-	/**
-	 * get the text animation given the name
-	 *
-	 * @param name (String) : The name of the standing text animation to get.
-	 *
-	 * @return (Object) : An Object tuple of {func: (Function), label: (String)}
-	 *					 representing the animation function and function label. 
-	 * 
-	 */
-	static textStandingAnimation(name) {
-		if (!Theatre.STANDING_ANIMS)
-			Theatre.STANDING_ANIMS = {
-
-				"impact": {
-					"func": function (target, shakeradius) {
-						if (!target) return;
-						shakeradius = shakeradius || Math.random() * 7 + 7;
-						shakeradius = Math.max(shakeradius - Math.random() * 0.5, 0);
-						// Impact complete!
-						if (shakeradius == 0) {
-							target.style.left = "0px";
-							target.style.top = "0px";
-							return;
-						}
-
-						TweenMax.to(target, 0.025, {
-							left: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * shakeradius}px`,
-							top: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * shakeradius}px`,
-							onComplete: Theatre.textStandingAnimation("impact"),
-							onCompleteParams: [target, shakeradius]
-						});
-					},
-					"label": game.i18n.localize("Theatre.Standing.Impact")
-				},
-
-				"quiver": {
-					"func": function (target, quiverAmt) {
-						if (!target) return;
-						quiverAmt = quiverAmt || 2;
-						quiverAmt = Math.max(quiverAmt - Math.random() * 0.1, 0);
-						// Waver complete
-						if (quiverAmt == 0) {
-							target.style.left = "0px";
-							target.style.top = "0px";
-							return;
-						}
-
-						TweenMax.to(target, 0.1, {
-							left: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * quiverAmt}px`,
-							top: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * quiverAmt}px`,
-							onComplete: Theatre.textStandingAnimation("quiver"),
-							onCompleteParams: [target, quiverAmt]
-						});
-					},
-					"label": game.i18n.localize("Theatre.Standing.Quiver")
-				},
-
-				"wave": {
-					"func": function (target, waveAmp) {
-						if (!target) return;
-						waveAmp = waveAmp || 4;
-						if (waveAmp > 0)
-							waveAmp = waveAmp - 0.5
-						else
-							waveAmp = waveAmp + 0.5
-
-						// Waver complete
-						if (waveAmp == 0) {
-							target.style.top = "0px";
-							return;
-						}
-
-						TweenMax.to(target, 0.5, {
-							top: `${waveAmp}px`,
-							onComplete: Theatre.textStandingAnimation("wave"),
-							onCompleteParams: [target, -waveAmp]
-						});
-					},
-					"label": game.i18n.localize("Theatre.Standing.Wave")
-				},
-
-				"fade": {
-					"func": function (target, fade) {
-						if (!target) return;
-						fade = fade || 1;
-						fade = Math.max(fade - 0.025, 0);
-						// fade complete
-						if (fade <= 0) {
-							target.style.opacity = 0;
-							return;
-						}
-
-						TweenMax.to(target, 0.1, {
-							opacity: fade,
-							onComplete: Theatre.textStandingAnimation("fade"),
-							onCompleteParams: [target, fade]
-						});
-					},
-					"label": game.i18n.localize("Theatre.Standing.Fade")
-				},
-
-				"excited": {
-					"func": function (target) {
-						if (!target) return;
-						TweenMax.to(target, 0.025, {
-							left: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * 1}px`,
-							top: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * 1}px`,
-							onComplete: Theatre.textStandingAnimation("excited"),
-							onCompleteParams: [target]
-						});
-					},
-					"label": game.i18n.localize("Theatre.Standing.Excited")
-				},
-
-				"violent": {
-					"func": function (target, oshakeradius, ox, oy) {
-						if (!target) return;
-						ox = ox || 0;
-						oy = oy || 0;
-						oshakeradius = oshakeradius || 2;
-						let shakeradius = Math.random() * oshakeradius + oshakeradius;
-						if (!target.style.left.match("0px") || !target.style.top.match("0px"))
-							shakeradius = 0;
-
-						TweenMax.to(target, 0.025, {
-							left: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * shakeradius + ox}px`,
-							top: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * shakeradius + oy}px`,
-							scale: `${Math.random() / 3 + 0.9}`,
-							onComplete: Theatre.textStandingAnimation("violent"),
-							onCompleteParams: [target, oshakeradius, ox, oy]
-						});
-					},
-					"label": game.i18n.localize("Theatre.Standing.Violent")
-				},
-
-				"bubbly": {
-					"func": function (target) {
-						if (!target) return;
-						TweenMax.to(target, 0.5, {
-							scale: `${Math.floor((Math.random() * 0.4 + 0.8) * 100) / 100}`,
-							onComplete: Theatre.textStandingAnimation("bubbly"),
-							onCompleteParams: [target]
-						});
-					},
-					"label": game.i18n.localize("Theatre.Standing.Bubbly")
-				},
-
-				"spooky": {
-					"func": function (target) {
-						if (!target) return;
-						TweenMax.to(target, Math.floor((Math.random() * 0.25 + 0.2) * 100) / 100, {
-							left: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * 3}px`,
-							top: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * 3}px`,
-							onComplete: Theatre.textStandingAnimation("spooky"),
-							onCompleteParams: [target]
-						});
-					},
-					"label": game.i18n.localize("Theatre.Standing.Spooky")
-				},
-
-				"insane": {
-					"func": function (target, rotation, scale) {
-						if (!target) return;
-						let spin = (Math.random() * 100);
-						let grow = (Math.random() * 200);
-						let animtime = 0.025;
-						rotation = rotation || 0;
-						scale = scale || 1;
-
-						if (spin >= 99.95) {
-							animtime = Math.random() * 0.5;
-							rotation = 1080;
-						} else if (spin >= 99.8) {
-							animtime = Math.random() * 0.5 + 0.5;
-							rotation = 360;
-						} else if (spin >= 80) {
-							rotation = (rotation != 0 ? 0 : (Math.random() < 0.5 ? -1 : 1) * Math.floor(Math.random() * 30));
-						}
-
-						if (grow >= 199) {
-							if (scale != 1)
-								scale = 1;
-							else
-								scale = Math.random() * 0.5 + 1;
-						}
-
-
-						TweenMax.to(target, animtime, {
-							left: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * 1}px`,
-							top: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * 1}px`,
-							rotation: rotation,
-							scale: scale,
-							onComplete: Theatre.textStandingAnimation("insane"),
-							onCompleteParams: [target, rotation, scale]
-						});
-					},
-					"label": game.i18n.localize("Theatre.Standing.Insane")
-				}
-
-			};
-
-		if (Theatre.STANDING_ANIMS[name])
-			return Theatre.STANDING_ANIMS[name].func;
-	}
-
 }
 

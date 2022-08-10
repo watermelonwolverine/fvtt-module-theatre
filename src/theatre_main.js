@@ -23,6 +23,8 @@
 import Theatre from "./Theatre.js";
 import KHelpers from "./workers/KHelpers.js";
 import _TheatreSettings from "./settings.js"
+import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory.js";
+import TextStandingAnimationsFactory from "./workers/standing_animations_factory.js";
 
 /**
  * Concat helper
@@ -419,12 +421,12 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 
 		if (Theatre.DEBUG) console.log("animating text: " + textContent);
 
-		Theatre.textFlyinAnimation(insertFlyinMode || "typewriter").call(
-			this,
+		TextFlyinAnimationsFactory.getForName(insertFlyinMode || "typewriter")(
+			Theatre.instance.targets[0],
 			charSpans,
 			0.5,
 			0.05,
-			Theatre.textStandingAnimation(insertStandingMode)
+			TextStandingAnimationsFactory.getForName(insertStandingMode)
 		);
 
 		// auto decay?
