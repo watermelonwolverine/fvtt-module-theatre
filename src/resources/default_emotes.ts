@@ -16,9 +16,11 @@ export type EmoteDefinition = {
     rigging: Rigging
 }
 
-export class EmoteFactory {
+export type EmoteDictionary = { [key: string]: EmoteDefinition };
 
-    static getDefaultEmotes(): { [key: string]: EmoteDefinition } {
+export class DefaultEmotes {
+
+    static get(): EmoteDictionary {
         return {
             "smile": {
                 name: "smile",
