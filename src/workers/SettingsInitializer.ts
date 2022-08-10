@@ -73,7 +73,7 @@ export default class TheatreSettingsInitializer {
             type: Number,
         });
 
-        this.register<string>("theatreNarratorHeight", {
+        this.register<string>(TheatreSettings.NARRATOR_HEIGHT, {
             scope: "world",
             config: true,
             default: "50%",

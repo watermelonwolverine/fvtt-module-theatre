@@ -188,7 +188,7 @@ export default class Theatre {
 		this.settings.theatreStyle = TheatreSettings.get("theatreStyle");
 		this.configTheatreStyle(this.settings.theatreStyle);
 		// set narrator height
-		this.settings.narrHeight = TheatreSettings.get("theatreNarratorHeight");
+		this.settings.narrHeight = TheatreSettings.get(TheatreSettings.NARRATOR_HEIGHT);
 		this.theatreNarrator.style.top = `calc(${this.settings.narrHeight} - 50px)`;
 
 		// set dock canvas hard dimensions after CSS has caclulated it

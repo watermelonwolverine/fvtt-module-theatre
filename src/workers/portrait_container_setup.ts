@@ -60,7 +60,7 @@ export default class _TheatrePortraitContainerSetupWorker {
         let sprite = new PIXI.Sprite(resources[resName].texture);
         let portWidth = resources[resName].texture.width;
         let portHeight = resources[resName].texture.height;
-        let maxHeight = <number>game.settings.get(TheatreSettings.NAMESPACE, TheatreSettings.THEATRE_IMAGE_SIZE);
+        let maxHeight = TheatreSettings.get<number>(TheatreSettings.THEATRE_IMAGE_SIZE);
         if (portHeight > maxHeight) {
             portWidth *= maxHeight / portHeight;
             portHeight = maxHeight;

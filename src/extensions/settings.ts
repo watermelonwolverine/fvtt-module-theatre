@@ -7,7 +7,7 @@ export default class TheatreSettings {
 	static SHIFT_PAUSE_ICON = "shiftPauseIcon";
 	static THEATRE_IMAGE_SIZE = "theatreImageSize";
 	static GM_ONLY = "gmOnly";
-
+	static NARRATOR_HEIGHT = "theatreNarratorHeight";
 
 	static get<T>(key: string): T {
 		return <T>game.settings.get(this.NAMESPACE, key);
