@@ -21,7 +21,7 @@
  *
  */
 
-import _TheatreSettings from './settings.js';
+import TheatreSettings from './settings.js';
 import _TheatreWorkers from './workers/workers.js';
 import KHelpers from "./workers/KHelpers.js";
 import ActorExtensions from './ActorExtensions.js';
@@ -98,7 +98,7 @@ export default class Theatre {
 				theatreStyle: undefined,
 			}
 			// module settings
-			_TheatreSettings.initModuleSettings();
+			TheatreSettings.initModuleSettings();
 
 			// Load in default settings (theatreStyle is loaded on HTML Injection)
 			this.settings.decayMin = (game.settings.get("theatre", "textDecayMin") || 30) * 1000;
@@ -2027,7 +2027,7 @@ export default class Theatre {
 			let idx = this.stage.portraitDocks.findIndex(e => e.imgId == imgId);
 			this.stage.portraitDocks.splice(idx, 1);
 			// The "MyTab" module inserts another element with id "pause". Use querySelectorAll to make sure we catch both
-			if (game.settings.get(_TheatreSettings.THEATRE, _TheatreSettings.SHIFT_PAUSE_ICON))
+			if (game.settings.get(TheatreSettings.NAMESPACE, TheatreSettings.SHIFT_PAUSE_ICON))
 				document.querySelectorAll("#pause").forEach(ele => KHelpers.removeClass(ele, "theatre-centered"));
 			$('#players').removeClass("theatre-invisible");
 			$('#hotbar').removeClass("theatre-invisible");
@@ -5187,7 +5187,7 @@ export default class Theatre {
 
 		if (Theatre.instance.isSuppressed) {
 
-			opacity = game.settings.get(_TheatreSettings.THEATRE, _TheatreSettings.SUPPRESS_OPACITY)
+			opacity = game.settings.get(TheatreSettings.NAMESPACE, TheatreSettings.SUPPRESS_OPACITY)
 
 			primeBar.style["pointer-events"] = "none";
 			secondBar.style["pointer-events"] = "none";
@@ -6150,7 +6150,7 @@ export default class Theatre {
 	 */
 	static onAddToNavBar(ev, actorSheet) {
 
-		const removeLabelSheetHeader = game.settings.get(_TheatreSettings.THEATRE, _TheatreSettings.REMOVE_LABEL_SHEET_HEADER);
+		const removeLabelSheetHeader = game.settings.get(TheatreSettings.NAMESPACE, TheatreSettings.REMOVE_LABEL_SHEET_HEADER);
 
 		if (Theatre.DEBUG) console.log("Click Event on Add to NavBar!!", actorSheet, actorSheet.actor, actorSheet.position);
 		const actor = actorSheet.object.data;

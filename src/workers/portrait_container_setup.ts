@@ -3,6 +3,7 @@ import Resources from "../foundry_extensions.js";
 import Theatre from "../Theatre.js";
 import ActorExtensions from "../ActorExtensions.js";
 import _TheatreWorkers from "./workers.js";
+import TheatreSettings from "../settings.js";
 
 export default class _TheatrePortraitContainerSetupWorker {
 
@@ -59,7 +60,7 @@ export default class _TheatrePortraitContainerSetupWorker {
         let sprite = new PIXI.Sprite(resources[resName].texture);
         let portWidth = resources[resName].texture.width;
         let portHeight = resources[resName].texture.height;
-        let maxHeight = <number>game.settings.get(Theatre.SETTINGS, "theatreImageSize");
+        let maxHeight = <number>game.settings.get(TheatreSettings.NAMESPACE, TheatreSettings.THEATRE_IMAGE_SIZE);
         if (portHeight > maxHeight) {
             portWidth *= maxHeight / portHeight;
             portHeight = maxHeight;

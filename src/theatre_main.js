@@ -22,7 +22,7 @@
 
 import Theatre from "./Theatre.js";
 import KHelpers from "./workers/KHelpers.js";
-import _TheatreSettings from "./settings.js"
+import TheatreSettings from "./settings.js"
 import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory.js";
 import TextStandingAnimationsFactory from "./workers/standing_animations_factory.js";
 import ActorExtensions from "./ActorExtensions.js";
@@ -49,7 +49,7 @@ Handlebars.registerHelper("resprop", function (propPath, hash) {
  * Hook in on Actorsheet's Header buttons + context menus
  */
 Hooks.on("getActorSheetHeaderButtons", (app, buttons) => {
-	if (!game.user.isGM && game.settings.get("theatre", "gmOnly")) return;
+	if (!game.user.isGM && game.settings.get(TheatreSettings.NAMESPACE, "gmOnly")) return;
 
 	let theatreButtons = []
 	if (app.object.isOwner) {
@@ -65,7 +65,7 @@ Hooks.on("getActorSheetHeaderButtons", (app, buttons) => {
 
 		}
 
-		const removeLabelSheetHeader = game.settings.get(_TheatreSettings.THEATRE, _TheatreSettings.REMOVE_LABEL_SHEET_HEADER);
+		const removeLabelSheetHeader = game.settings.get(TheatreSettings.NAMESPACE, TheatreSettings.REMOVE_LABEL_SHEET_HEADER);
 		let label = Theatre.isActorStaged(app.object.data) ? "Theatre.UI.Config.RemoveFromStage" : "Theatre.UI.Config.AddToStage";
 		label = removeLabelSheetHeader ? "" : label;
 
@@ -465,7 +465,7 @@ Hooks.on("renderChatLog", function () {
  * Add to stage button on ActorDirectory Sidebar
  */
 Hooks.on("getActorDirectoryEntryContext", async (html, options) => {
-	if (!game.user.isGM && game.settings.get("theatre", "gmOnly")) return;
+	if (!game.user.isGM && TheatreSettings.get(TheatreSettings.GM_ONLY)) return;
 
 	const getActorData = target => {
 		const actor = game.actors.get(target.data("documentId"));
@@ -750,11 +750,11 @@ Hooks.once("init", () => {
 Hooks.on("theatreDockActive", insertCount => {
 	if (!insertCount) return;
 
-	if (game.settings.get(_TheatreSettings.THEATRE, _TheatreSettings.SHIFT_PAUSE_ICON))
+	if (TheatreSettings.get(TheatreSettings.SHIFT_PAUSE_ICON))
 		// The "MyTab" module inserts another element with id "pause". Use querySelectorAll to make sure we catch both
 		document.querySelectorAll("#pause").forEach(ele => KHelpers.addClass(ele, "theatre-centered"));
 
-	if (!game.settings.get(Theatre.SETTINGS, "autoHideBottom")) return;
+	if (!TheatreSettings.get("autoHideBottom")) return;
 
 	if (!theatre.isSuppressed) {
 		$('#players').addClass("theatre-invisible");
@@ -766,7 +766,7 @@ Hooks.on("theatreDockActive", insertCount => {
  * If Argon is active, wrap CombatHudCanvasElement#toggleMacroPlayers to prevent playesr list and macro hotbar from being shown
  */
 Hooks.once("ready", () => {
-	if (!game.settings.get(Theatre.SETTINGS, "autoHideBottom")) return;
+	if (!TheatreSettings.get("autoHideBottom")) return;
 	if (!game.modules.get("enhancedcombathud")?.active) return;
 
 	libWrapper.register(Theatre.SETTINGS, "CombatHudCanvasElement.prototype.toggleMacroPlayers", (wrapped, togg) => {
@@ -779,8 +779,8 @@ Hooks.once("ready", () => {
  * Hide/show macro hotbar when stage is suppressed
  */
 Hooks.on("theatreSuppression", suppressed => {
-	if (!game.settings.get(Theatre.SETTINGS, "autoHideBottom")) return;
-	if (!game.settings.get(Theatre.SETTINGS, "suppressMacroHotbar")) return;
+	if (!TheatreSettings.get("autoHideBottom")) return;
+	if (!TheatreSettings.get("suppressMacroHotbar")) return;
 	if (!theatre.dockActive) return;
 
 	if (suppressed) {
@@ -795,7 +795,7 @@ Hooks.on("theatreSuppression", suppressed => {
 
 Hooks.on("renderPause", () => {
 	if (!theatre?.dockActive) return;
-	if (!game.settings.get(_TheatreSettings.THEATRE, _TheatreSettings.SHIFT_PAUSE_ICON)) return;
+	if (!TheatreSettings.get(TheatreSettings.SHIFT_PAUSE_ICON)) return;
 	// The "MyTab" module inserts another element with id "pause". Use querySelectorAll to make sure we catch both
 	document.querySelectorAll("#pause").forEach(ele => KHelpers.addClass(ele, "theatre-centered"));
 });
