@@ -33,74 +33,53 @@ export default class TextStandingAnimationsFactory {
         TextStandingAnimationsFactory.INSANE
     ]
 
-    static getAllAnimations(targets: HTMLElement[]): { [key: string]: TextStandingAnimationsFactory } {
+    static getDefinitions(): { [key: string]: TextStandingAnimationsFactory } {
 
         const result: { [key: string]: TextStandingAnimationsFactory } = {};
 
         for (const name in this.ALL_ANIMATIONS) {
-            result[name] = this.getAnimationForName(name);
+            result[name] = {
+                func: this.getForName(name),
+                label: game.i18n.localize("Theatre.Standing" + name)
+            }
         }
 
         return result;
     }
 
-    static getAnimationForName(name: string): TextStandingAnimationDefinition {
+    static getForName(name: string): TextStandingAnimationFunction {
 
         switch (name) {
 
             case this.IMPACT:
-                return {
-                    func: this.do_impact,
-                    label: game.i18n.localize("Theatre.Standing.Impact")
-                };
+                return this.do_impact;
 
             case this.QUIVER:
-                return {
-                    func: this.do_quiver,
-                    label: game.i18n.localize("Theatre.Standing.Quiver")
-                };
+                return this.do_quiver;
 
             case this.WAVE:
-
-                return {
-                    func: this.do_wave,
-                    label: game.i18n.localize("Theatre.Standing.Wave")
-                };
+                return this.do_wave;
 
             case this.FADE:
-                return {
-                    func: this.do_fade,
-                    label: game.i18n.localize("Theatre.Standing.Fade")
-                };
+                return this.do_fade;
 
             case this.EXCITED:
-                return {
-                    func: this.do_excited,
-                    label: game.i18n.localize("Theatre.Standing.Excited")
-                };
+                return this.do_excited;
+
             case this.VIOLENT:
-                return {
-                    func: this.do_violent,
-                    label: game.i18n.localize("Theatre.Standing.Violent")
-                };
+                return this.do_violent;
 
             case this.BUBBLY:
-                return {
-                    func: this.do_bubbly,
-                    label: game.i18n.localize("Theatre.Standing.Bubbly")
-                };
+                return this.do_bubbly;
 
             case this.SPOOKY:
-                return {
-                    func: this.do_spooky,
-                    label: game.i18n.localize("Theatre.Standing.Spooky")
-                };
-            case this.INSANE:
+                return this.do_spooky;
 
-                return {
-                    func: this.do_insane,
-                    label: game.i18n.localize("Theatre.Standing.Insane")
-                };
+            case this.INSANE:
+                return this.do_insane;
+
+            default:
+                throw "NotImplemented";
 
         };
     }
