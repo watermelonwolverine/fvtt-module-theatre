@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import Resources from "../foundry_extensions.js";
 import Theatre from "../Theatre.js";
-import TheatreActors from "../TheatreActors.js";
+import ActorExtensions from "../ActorExtensions.js";
 import _TheatreWorkers from "./workers.js";
 
 export default class _TheatrePortraitContainerSetupWorker {
@@ -169,8 +169,8 @@ export default class _TheatrePortraitContainerSetupWorker {
             let actorId = insert.imgId.replace("theatre-", "");
             let defaultDisabled = this.context.isDefaultDisabled(insert.imgId);
             if (Theatre.DEBUG) console.log("is default disabled? : %s", defaultDisabled);
-            let emotes = TheatreActors.getEmotes(actorId, defaultDisabled);
-            let rigResMap = TheatreActors.getRiggingResources(actorId);
+            let emotes = ActorExtensions.getEmotes(actorId, defaultDisabled);
+            let rigResMap = ActorExtensions.getRiggingResources(actorId);
             if (emotes[insert.emote] && emotes[insert.emote].rigging) {
                 for (let anim of emotes[insert.emote].rigging.animations) {
                     this.context.addTweensFromAnimationSyntax(anim.name, anim.syntax, rigResMap, insert);

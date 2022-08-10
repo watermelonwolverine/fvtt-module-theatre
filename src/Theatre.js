@@ -24,7 +24,7 @@
 import _TheatreSettings from './settings.js';
 import _TheatreWorkers from './workers/workers.js';
 import KHelpers from "./workers/KHelpers.js";
-import TheatreActors from './TheatreActors.js';
+import ActorExtensions from './ActorExtensions.js';
 import TheatreActorConfig from './TheatreActorConfig.js';
 import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory.js"
 import TextStandingAnimationsFactory from './workers/standing_animations_factory.js';
@@ -1577,7 +1577,7 @@ export default class Theatre {
 		let theatreId = `theatre-${actor._id}`;
 		let portrait = (actor.img ? actor.img : "icons/mystery-man.png");
 		let optAlign = "top";
-		let name = TheatreActors.getDisplayName(actor._id);
+		let name = ActorExtensions.getDisplayName(actor._id);
 		let emotes = {};
 		let settings = {};
 
@@ -2485,7 +2485,7 @@ export default class Theatre {
 			imgSrcs.push({ imgpath: params.src, resname: params.src });
 
 			// load all rigging assets
-			let rigResources = TheatreActors.getRiggingResources(actorId);
+			let rigResources = ActorExtensions.getRiggingResources(actorId);
 
 			if (Theatre.DEBUG) console.log("RigResources for %s :", params.name, rigResources);
 
@@ -2527,7 +2527,7 @@ export default class Theatre {
 		imgSrcs.push({ imgpath: params.src, resname: params.src });
 
 		// load all rigging assets
-		let rigResources = TheatreActors.getActorResources(actorId);
+		let rigResources = ActorExtensions.getRiggingResources(actorId);
 
 		if (Theatre.DEBUG) console.log("RigResources for %s :", params.name, rigResources);
 
@@ -2603,7 +2603,7 @@ export default class Theatre {
 
 		if (actor.data.flags.theatre)
 			baseInsert = actor.data.flags.theatre.baseinsert ? actor.data.flags.theatre.baseinsert : baseInsert;
-		let emotes = TheatreActors.getEmotes(actorId);
+		let emotes = ActorExtensions.getEmotes(actorId);
 
 		// emote already active
 		//if ((this.speakingAs != insert.imgId && !this.isDelayEmote) || this.delayedSentState > 2)
@@ -4553,7 +4553,7 @@ export default class Theatre {
 		if (actorId)
 			actor = game.actors.get(actorId);
 		const flyinAnimationsDefinitions = TextFlyinAnimationsFactory.getDefinitions();
-		let emotes = TheatreActors.getEmotes(actorId);
+		let emotes = ActorExtensions.getEmotes(actorId);
 		let fonts = Theatre.FONTS;
 		let textStandingAnimationDefinitions = TextStandingAnimationsFactory.getDefinitions();
 		let sideBar = document.getElementById("sidebar");
@@ -6235,7 +6235,7 @@ export default class Theatre {
 		// stage event
 		Theatre.instance.stageInsertById(theatreId);
 		// Store reference
-		Theatre.instance.stage[theatreId] = new TheatreActors(actor, navItem);
+		Theatre.instance.stage[theatreId] = new ActorExtensions(actor, navItem);
 	}
 
 	/**

@@ -4,7 +4,7 @@ import Resources from "../foundry_extensions.js";
 import Params from "../Params.js";
 import { RiggingResource } from "../resources/resources_types.js";
 import Theatre from "../Theatre.js";
-import TheatreActors from "../TheatreActors.js";
+import ActorExtensions from "../ActorExtensions.js";
 import _TheatreWorkers from "./workers.js";
 
 
@@ -111,7 +111,7 @@ export default class _TheatrePixiContainerFactory {
             return null;
         }
         // load all rigging assets
-        let rigResources : RiggingResource[] = TheatreActors.getRiggingResources(actorId);
+        let rigResources : RiggingResource[] = ActorExtensions.getRiggingResources(actorId);
 
         if (Theatre.DEBUG) console.log("RigResources for %s :", portName, rigResources);
 

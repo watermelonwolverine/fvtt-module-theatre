@@ -2,7 +2,7 @@ import DefaultEmotes from "./resources/default_emotes.js";
 import DefaultRiggingResources from "./resources/default_riggings.js";
 import { EmoteDictionary, RiggingResource } from "./resources/resources_types.js";
 
-export default class TheatreActors {
+export default class ActorExtensions {
 
 
     /**
@@ -19,8 +19,8 @@ export default class TheatreActors {
         actorId: string,
         disableDefault?: boolean): EmoteDictionary {
 
-        let actor: Actor = game.actors.get(actorId);
-        let actorData: ActorData = actor ? undefined : actor.data;
+        const actor: Actor = game.actors.get(actorId);
+        const actorData: ActorData = actor ? actor.data : undefined;
 
         if (actorData && actorData.flags.theatre) {
             const actorEmotes = actorData.flags.theatre.emotes;
@@ -60,18 +60,15 @@ export default class TheatreActors {
      *							 representing the rigging resource map for the specified actorId. 
      */
     static getRiggingResources(actorId: string): RiggingResource[] {
-        let actor: Actor = game.actors.get(actorId);
-        let actorData: ActorData;
-        let actorRiggings;
+        const actor: Actor = game.actors.get(actorId);
+        const actorData: ActorData = actor ? actor.data : undefined;
 
-        if (actor)
-            actorData = actor.data;
 
         if (actorData
             && actorData.flags.theatre
             && actorData.flags.theatre.rigging
             && actorData.flags.theatre.rigging.resources) {
-            actorRiggings = actorData.flags.theatre.rigging.resources;
+            const actorRiggings = actorData.flags.theatre.rigging.resources;
             return DefaultRiggingResources.get().concat(actorRiggings);
         } else
             return DefaultRiggingResources.get();
