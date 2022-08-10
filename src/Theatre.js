@@ -21,20 +21,20 @@
  *
  */
 
-import TheatreSettings from './settings.js';
+import TheatreSettings from './extensions/settings.js';
 import _TheatreWorkers from './workers/workers.js';
 import KHelpers from "./workers/KHelpers.js";
-import ActorExtensions from './ActorExtensions.js';
-import TheatreActorConfig from './TheatreActorConfig.js';
+import ActorExtensions from './extensions/ActorExtensions.js';
+import TheatreActorConfig from './types/TheatreActorConfig.js';
 import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory.js"
 import TextStandingAnimationsFactory from './workers/standing_animations_factory.js';
-import TheatreActor from './TheatreActor.js';
-import Stage from './Stage.js';
+import TheatreActor from './types/TheatreActor.js';
+import Stage from './types/Stage.js';
+import TheatreSettingsInitializer from './workers/SettingsInitializer.js';
 
 export default class Theatre {
 
 	static SOCKET = "module.theatre";
-	static SETTINGS = "theatre";
 	static NARRATOR = "Narrator";
 	static ICONLIB = "modules/theatre/app/graphics/emotes";
 	static DEBUG = false;
@@ -98,7 +98,7 @@ export default class Theatre {
 				theatreStyle: undefined,
 			}
 			// module settings
-			TheatreSettings.initModuleSettings();
+			TheatreSettingsInitializer.initModuleSettings();
 
 			// Load in default settings (theatreStyle is loaded on HTML Injection)
 			this.settings.decayMin = (game.settings.get("theatre", "textDecayMin") || 30) * 1000;
@@ -185,10 +185,10 @@ export default class Theatre {
 
 		body.appendChild(this.theatreGroup);
 		// set theatreStyle
-		this.settings.theatreStyle = game.settings.get(Theatre.SETTINGS, "theatreStyle");
+		this.settings.theatreStyle = TheatreSettings.get("theatreStyle");
 		this.configTheatreStyle(this.settings.theatreStyle);
 		// set narrator height
-		this.settings.narrHeight = game.settings.get(Theatre.SETTINGS, "theatreNarratorHeight");
+		this.settings.narrHeight = TheatreSettings.get("theatreNarratorHeight");
 		this.theatreNarrator.style.top = `calc(${this.settings.narrHeight} - 50px)`;
 
 		// set dock canvas hard dimensions after CSS has caclulated it
@@ -205,7 +205,7 @@ export default class Theatre {
 		this.theatreNavBar = document.createElement("div");
 		this.theatreChatCover = document.createElement("div");
 
-		if (!game.user.isGM && game.settings.get(Theatre.SETTINGS, "gmOnly")) {
+		if (!game.user.isGM && TheatreSettings.get(TheatreSettings.GM_ONLY)) {
 			this.theatreControls.style.display = "none";
 		}
 
@@ -290,7 +290,7 @@ export default class Theatre {
 		btnQuote.style["margin"] = "0 4px";
 		btnResync.style["margin"] = "0 4px";
 
-		if (game.user.isGM || !game.settings.get(Theatre.SETTINGS, "gmOnly")) {
+		if (game.user.isGM || !TheatreSettings.get(TheatreSettings.GM_ONLY)) {
 			if (controlButtons) {
 				controlButtons.style["flex-basis"] = "100%";
 				KHelpers.insertBefore(btnResync, controlButtons.children[0]);
@@ -5453,8 +5453,8 @@ export default class Theatre {
 				}
 			}
 			// pre-split measurement
-			insert.label.style.fontSize = game.settings.get(Theatre.SETTINGS, "nameFontSize");
-			insert.label.style.lineHeight = game.settings.get(Theatre.SETTINGS, "nameFontSize") * 1.5;
+			insert.label.style.fontSize = TheatreSettings.get("nameFontSize");
+			insert.label.style.lineHeight = TheatreSettings.get("nameFontSize") * 1.5;
 			insert.label.style.wordWrap = false;
 			insert.label.style.wordWrapWidth = insert.portrait.width;
 			let labelExceeds = (insert.label.width + 20 + insert.label.style.fontSize) > textBox.offsetWidth;

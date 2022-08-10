@@ -1,5 +1,5 @@
 import { ActorData as ActorData_ } from "@league-of-foundry-developers/foundry-vtt-types/src/foundry/common/data/module.mjs";
-import { AnimationRigging, EmoteDictionary } from "./resources/resources_types.js";
+import { AnimationRigging, EmoteDictionary } from "../resources/resources_types.js";
 
 declare global {
 	interface LenientGlobalVariableTypes {

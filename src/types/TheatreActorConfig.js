@@ -20,7 +20,7 @@
  *
  */
 import Theatre from "./Theatre.js";
-import ActorExtensions from "./ActorExtensions.js";
+import ActorExtensions from "./extensions/ActorExtensions.js";
 import KHelpers from "./workers/KHelpers.js";
 
 export default class TheatreActorConfig extends FormApplication {

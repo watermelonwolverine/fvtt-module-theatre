@@ -22,10 +22,10 @@
 
 import Theatre from "./Theatre.js";
 import KHelpers from "./workers/KHelpers.js";
-import TheatreSettings from "./settings.js"
+import TheatreSettings from "./extensions/settings.js"
 import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory.js";
 import TextStandingAnimationsFactory from "./workers/standing_animations_factory.js";
-import ActorExtensions from "./ActorExtensions.js";
+import ActorExtensions from "./extensions/ActorExtensions.js";
 
 /**
  * Concat helper
@@ -769,7 +769,7 @@ Hooks.once("ready", () => {
 	if (!TheatreSettings.get("autoHideBottom")) return;
 	if (!game.modules.get("enhancedcombathud")?.active) return;
 
-	libWrapper.register(Theatre.SETTINGS, "CombatHudCanvasElement.prototype.toggleMacroPlayers", (wrapped, togg) => {
+	libWrapper.register(TheatreSettings.NAMESPACE, "CombatHudCanvasElement.prototype.toggleMacroPlayers", (wrapped, togg) => {
 		if (togg && theatre?.dockActive) return;
 		return wrapped(togg);
 	}, "MIXED");

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-import Resources from "../foundry_extensions.js";
+import Resources from "../extensions/foundry_extensions.js";
 import Theatre from "../Theatre.js";
-import ActorExtensions from "../ActorExtensions.js";
+import ActorExtensions from "../extensions/ActorExtensions.js";
 import _TheatreWorkers from "./workers.js";
 import TheatreSettings from "../settings.js";
 

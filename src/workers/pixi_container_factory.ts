@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
-import EmotionDefinition from "../EmotionDefinition.js";
-import Resources from "../foundry_extensions.js";
-import Params from "../Params.js";
+import EmotionDefinition from "../types/EmotionDefinition.js";
+import Resources from "../extensions/foundry_extensions.js";
+import Params from "../types/Params.js";
 import { RiggingResource } from "../resources/resources_types.js";
 import Theatre from "../Theatre.js";
-import ActorExtensions from "../ActorExtensions.js";
+import ActorExtensions from "../extensions/ActorExtensions.js";
 import _TheatreWorkers from "./workers.js";
 
 

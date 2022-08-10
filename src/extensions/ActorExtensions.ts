@@ -1,6 +1,6 @@
-import DefaultEmotes from "./resources/default_emotes.js";
-import DefaultRiggingResources from "./resources/default_riggings.js";
-import { EmoteDictionary, RiggingResource } from "./resources/resources_types.js";
+import DefaultEmotes from "../resources/default_emotes.js";
+import DefaultRiggingResources from "../resources/default_riggings.js";
+import { EmoteDictionary, RiggingResource } from "../resources/resources_types.js";
 
 export default class ActorExtensions {
 
