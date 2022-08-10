@@ -319,10 +319,10 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 				insert.textColor
 			);
 			// Pump up the speaker's render order
-			for (let dockInsert of Theatre.instance.portraitDocks)
+			for (let dockInsert of Theatre.instance.stage.portraitDocks)
 				dockInsert.renderOrder = dockInsert.order;
 			insert.renderOrder = 999999;
-			Theatre.instance.portraitDocks.sort((a, b) => {
+			Theatre.instance.stage.portraitDocks.sort((a, b) => {
 				return a.renderOrder - b.renderOrder;
 			});
 			// Pop our insert a little
@@ -578,7 +578,7 @@ Hooks.once("init", () => {
 			const imgId = Theatre.instance.speakingAs;
 			if (!imgId) return;
 
-			const insert = Theatre.instance.portraitDocks.find(p => p.imgId === imgId);
+			const insert = Theatre.instance.stage.portraitDocks.find(p => p.imgId === imgId);
 			const oleft = insert.portraitContainer.x, otop = insert.portraitContainer.y;
 			const tweenId = "portraitMove";
 			const tween = TweenMax.to(insert.portraitContainer, 0.5, {
@@ -613,7 +613,7 @@ Hooks.once("init", () => {
 			const imgId = Theatre.instance.speakingAs;
 			if (!imgId) return;
 
-			const insert = Theatre.instance.portraitDocks.find(p => p.imgId === imgId);
+			const insert = Theatre.instance.stage.portraitDocks.find(p => p.imgId === imgId);
 			const oleft = insert.portraitContainer.x, otop = insert.portraitContainer.y;
 			const tweenId = "portraitMove";
 			const tween = TweenMax.to(insert.portraitContainer, 0.5, {
@@ -648,7 +648,7 @@ Hooks.once("init", () => {
 			const imgId = Theatre.instance.speakingAs;
 			if (!imgId) return;
 
-			const insert = Theatre.instance.portraitDocks.find(p => p.imgId === imgId);
+			const insert = Theatre.instance.stage.portraitDocks.find(p => p.imgId === imgId);
 			const oleft = insert.portraitContainer.x, otop = insert.portraitContainer.y;
 			const tweenId = "portraitMove";
 			const tween = TweenMax.to(insert.portraitContainer, 0.5, {
@@ -683,7 +683,7 @@ Hooks.once("init", () => {
 			const imgId = Theatre.instance.speakingAs;
 			if (!imgId) return;
 
-			const insert = Theatre.instance.portraitDocks.find(p => p.imgId === imgId);
+			const insert = Theatre.instance.stage.portraitDocks.find(p => p.imgId === imgId);
 			const oleft = insert.portraitContainer.x, otop = insert.portraitContainer.y;
 			const tweenId = "portraitMove";
 			const tween = TweenMax.to(insert.portraitContainer, 0.5, {

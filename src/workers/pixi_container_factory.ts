@@ -72,7 +72,7 @@ export default class _TheatrePixiContainerFactory {
             textColor = emotions.textColor;
         }
 
-        this.context.portraitDocks.push({
+        this.context.stage.portraitDocks.push({
             imgId: imgId,
             dockContainer: dockContainer,
             name: portName,
@@ -111,7 +111,7 @@ export default class _TheatrePixiContainerFactory {
             return null;
         }
         // load all rigging assets
-        let rigResources : RiggingResource[] = ActorExtensions.getRiggingResources(actorId);
+        let rigResources: RiggingResource[] = ActorExtensions.getRiggingResources(actorId);
 
         if (Theatre.DEBUG) console.log("RigResources for %s :", portName, rigResources);
 

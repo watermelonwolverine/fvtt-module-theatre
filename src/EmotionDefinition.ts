@@ -3,6 +3,6 @@ export default class EmotionDefinition {
     textFlyin: string;
     textStanding: string;
     textFont: string;
-    textSize: string;
+    textSize: number;
     textColor: string;
 }

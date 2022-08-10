@@ -125,7 +125,7 @@ export default class _TheatrePortraitContainerSetupWorker {
             insert.label.x = 20;
         }
         // position the label
-        insert.label.y = portHeight - (optAlign == "top" ? 0 : this.context.theatreBar.offsetHeight) - insert.label.lineHeight - 20;
+        insert.label.y = portHeight - (optAlign == "top" ? 0 : this.context.theatreBar.offsetHeight) - insert.label.style.lineHeight - 20;
 
         // setup typing bubble
         if (!insert.typingBubble) {

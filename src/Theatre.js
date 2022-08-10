@@ -28,6 +28,8 @@ import ActorExtensions from './ActorExtensions.js';
 import TheatreActorConfig from './TheatreActorConfig.js';
 import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory.js"
 import TextStandingAnimationsFactory from './workers/standing_animations_factory.js';
+import TheatreActor from './TheatreActor.js';
+import Stage from './Stage.js';
 
 export default class Theatre {
 
@@ -75,8 +77,7 @@ export default class Theatre {
 			// global insert state related
 			this.speakingAs = null;
 			// Map of theatreId to TheatreActor
-			this.stage = {};
-			this.portraitDocks = [];
+			this.stage = new Stage();
 			this.userEmotes = {};
 			this.usersTyping = {};
 			this.userSettings = {};
@@ -430,7 +431,7 @@ export default class Theatre {
 		this.settings.theatreStyle = theatreStyle;
 
 		// re-render all inserts
-		for (let insert of this.portraitDocks)
+		for (let insert of this.stage.portraitDocks)
 			this.renderInsertById(insert.imgId);
 
 		// apply resize adjustments (ev is unused)
@@ -598,8 +599,8 @@ export default class Theatre {
 	 */
 	_buildResyncData() {
 		let insertData = [];
-		for (let idx = 0; idx < this.portraitDocks.length; ++idx) {
-			let insert = this.portraitDocks[idx];
+		for (let idx = 0; idx < this.stage.portraitDocks.length; ++idx) {
+			let insert = this.stage.portraitDocks[idx];
 			let insertEmote = this._getEmoteFromInsert(insert);
 			let insertTextFlyin = this._getTextFlyinFromInsert(insert);
 			let insertTextStanding = this._getTextStandingFromInsert(insert);
@@ -697,7 +698,7 @@ export default class Theatre {
 			return;
 		} else if (type == "players") {
 			// clear our theatre
-			for (let insert of this.portraitDocks)
+			for (let insert of this.stage.portraitDocks)
 				this.removeInsertById(insert.imgId, true);
 			// process this as if it were a resyncevent
 			this.resync.timeoutId = 1;
@@ -733,7 +734,7 @@ export default class Theatre {
 			this.resync.timeoutId = null;
 
 			// clear our theatre
-			for (let insert of this.portraitDocks)
+			for (let insert of this.stage.portraitDocks)
 				this.removeInsertById(insert.imgId, true);
 
 			if (type == "gm")
@@ -752,7 +753,7 @@ export default class Theatre {
 				if (Theatre.DEBUG) console.log("params + emotions: ", params, dat.emotions);
 				toInject.push({ params: params, emotions: dat.emotions });
 			}
-			
+
 			// let the clearing animation complete
 			window.setTimeout(() => {
 				// stage all inserts; 
@@ -1897,7 +1898,7 @@ export default class Theatre {
 		// let the ticker update all its objects
 		this.pixiCTX.ticker.update(time);
 		// this.pixiCTX.renderer.clear(); // PIXI.v6 does not respect transparency for clear
-		for (let insert of this.portraitDocks) {
+		for (let insert of this.stage.portraitDocks) {
 			if (insert.dockContainer) {
 				if (Theatre.DEBUG) this.updateTheatreDebugInfo(insert);
 				// PIXI.v6 The renderer should not clear the canvas on rendering
@@ -2023,8 +2024,8 @@ export default class Theatre {
 			// destroy self
 			insert.dockContainer.destroy();
 			insert.dockContainer = null;
-			let idx = this.portraitDocks.findIndex(e => e.imgId == imgId);
-			this.portraitDocks.splice(idx, 1);
+			let idx = this.stage.portraitDocks.findIndex(e => e.imgId == imgId);
+			this.stage.portraitDocks.splice(idx, 1);
 			// The "MyTab" module inserts another element with id "pause". Use querySelectorAll to make sure we catch both
 			if (game.settings.get(_TheatreSettings.THEATRE, _TheatreSettings.SHIFT_PAUSE_ICON))
 				document.querySelectorAll("#pause").forEach(ele => KHelpers.removeClass(ele, "theatre-centered"));
@@ -2918,7 +2919,7 @@ export default class Theatre {
 			console.log('ID "%s" already exists! Refusing to inject %s', imgId, portName);
 			return;
 		}
-		if (this.portraitDocks.length == 1) {
+		if (this.stage.portraitDocks.length == 1) {
 			// inject Right instread
 			this.injectRightPortrait(imgPath, portName, imgId, optAlign, emotions, remote);
 			return;
@@ -2956,7 +2957,7 @@ export default class Theatre {
 			console.log('ID "%s" already exists! Refusing to inject %s', imgId, portName);
 			return;
 		}
-		if (this.portraitDocks.length == 0) {
+		if (this.stage.portraitDocks.length == 0) {
 			// inject Left instread
 			this.injectLeftPortrait(imgPath, portName, imgId, optAlign, emotions, remote);
 			return;
@@ -2989,7 +2990,7 @@ export default class Theatre {
 	removeInsertById(id, remote) {
 		let toRemoveInsert,
 			toRemoveTextBox;
-		for (let insert of this.portraitDocks) {
+		for (let insert of this.stage.portraitDocks) {
 			if (insert.imgId == id && !insert.deleting) {
 				insert.deleting = true;
 				toRemoveInsert = insert;
@@ -3025,7 +3026,7 @@ export default class Theatre {
 		let id = null,
 			toRemoveInsert,
 			toRemoveTextBox;
-		for (let insert of this.portraitDocks) {
+		for (let insert of this.stage.portraitDocks) {
 			if (insert.name == name && !insert.deleting) {
 				id = insert.imgId;
 				//insert.parentNode.removeChild(insert); 
@@ -3190,7 +3191,7 @@ export default class Theatre {
 	 * @return (Number) : The number of inserts in the dock
 	 */
 	get dockActive() {
-		return this.portraitDocks.length;
+		return this.stage.portraitDocks.length;
 	}
 
 	/**
@@ -3201,7 +3202,7 @@ export default class Theatre {
 	 * @return (HTMLElement) : The nav item, if found, else undefined. 
 	 */
 	getNavItemById(id) {
-		const theatreActor = this.stage[id];
+		const theatreActor = this.stage.actors[id];
 		if (theatreActor)
 			return theatreActor.navElement;
 	}
@@ -3263,12 +3264,12 @@ export default class Theatre {
 	 * @return (Object) : The Object representing the insert, or undefined.
 	 */
 	getInsertById(id) {
-		for (let idx = this.portraitDocks.length - 1; idx >= 0; --idx)
-			if (this.portraitDocks[idx].imgId == id) {
-				if (this.portraitDocks[idx].dockContainer)
-					return this.portraitDocks[idx];
+		for (let idx = this.stage.portraitDocks.length - 1; idx >= 0; --idx)
+			if (this.stage.portraitDocks[idx].imgId == id) {
+				if (this.stage.portraitDocks[idx].dockContainer)
+					return this.stage.portraitDocks[idx];
 				else {
-					this.portraitDocks.splice(idx, 1);
+					this.stage.portraitDocks.splice(idx, 1);
 					return undefined;
 				}
 			}
@@ -3282,12 +3283,12 @@ export default class Theatre {
 	 * @return (Object) : The Object representing the insert, or undefined.
 	 */
 	getInsertByName(name) {
-		for (let idx = this.portraitDocks.length - 1; idx >= 0; --idx)
-			if (this.portraitDocks[idx].name == name) {
-				if (this.portraitDocks[idx].dockContainer)
-					return this.portraitDocks[idx];
+		for (let idx = this.stage.portraitDocks.length - 1; idx >= 0; --idx)
+			if (this.stage.portraitDocks[idx].name == name) {
+				if (this.stage.portraitDocks[idx].dockContainer)
+					return this.stage.portraitDocks[idx];
 				else {
-					this.portraitDocks.splice(idx, 1);
+					this.stage.portraitDocks.splice(idx, 1);
 					return undefined;
 				}
 			}
@@ -3397,13 +3398,13 @@ export default class Theatre {
 	 * @params remote (Boolean) : Wither this is being invoked remotely, or locally. 
 	 */
 	swapInsertsById(id1, id2, remote) {
-		if (this.portraitDocks.length < 2) return;
+		if (this.stage.portraitDocks.length < 2) return;
 
 		let insert1,
 			insert2,
 			textBox1,
 			textBox2;
-		for (let insert of this.portraitDocks) {
+		for (let insert of this.stage.portraitDocks) {
 			if (insert.imgId == id1 && !insert1)
 				insert1 = insert;
 			else if (insert.imgId == id2 && !insert2)
@@ -3431,7 +3432,7 @@ export default class Theatre {
 	 * @params remote (Boolean) : Wither this is being invoked remotely, or locally. 
 	 */
 	swapInsertsByName(name1, name2, remote) {
-		if (this.portraitDocks.length < 2) return;
+		if (this.stage.portraitDocks.length < 2) return;
 
 		let insert1,
 			insert2,
@@ -3439,7 +3440,7 @@ export default class Theatre {
 			textBox2;
 		name1 = name1.toLowerCase();
 		name2 = name2.toLowerCase();
-		for (let insert of this.portraitDocks) {
+		for (let insert of this.stage.portraitDocks) {
 			if (insert.name == name1 && !insert1)
 				insert1 = insert;
 			else if (insert.name == name2 && !insert2)
@@ -3554,13 +3555,13 @@ export default class Theatre {
 	 * @params remote (Boolean) : Wither this is being invoked remotely, or locally. 
 	 */
 	moveInsertById(id1, id2, remote) {
-		if (this.portraitDocks.length < 2) return;
+		if (this.stage.portraitDocks.length < 2) return;
 
 		let insert1,
 			insert2,
 			textBox1,
 			textBox2;
-		for (let insert of this.portraitDocks) {
+		for (let insert of this.stage.portraitDocks) {
 			if (insert.imgId == id1 && !insert1)
 				insert1 = insert;
 			else if (insert.imgId == id2 && !insert2)
@@ -3703,11 +3704,11 @@ export default class Theatre {
 	 * @params remote (Boolean) : Wither this is being invoked remotely, or locally. 
 	 */
 	pushInsertById(id, isLeft, remote) {
-		if (this.portraitDocks.length <= 2) return;
+		if (this.stage.portraitDocks.length <= 2) return;
 
 		let targInsert;
 		let targTextBox;
-		for (let insert of this.portraitDocks) {
+		for (let insert of this.stage.portraitDocks) {
 			if (insert.imgId == id) {
 				targInsert = insert;
 				break;
@@ -3732,11 +3733,11 @@ export default class Theatre {
 	 * @params remote (Boolean) : Wither this is being invoked remotely, or locally. 
 	 */
 	pushInsertByName(name, isLeft, remote) {
-		if (this.portraitDocks.length <= 2) return;
+		if (this.stage.portraitDocks.length <= 2) return;
 
 		let targInsert;
 		let targTextBox;
-		for (let insert of this.portraitDocks) {
+		for (let insert of this.stage.portraitDocks) {
 			if (insert.name == name) {
 				targInsert = insert;
 				break;
@@ -3765,8 +3766,8 @@ export default class Theatre {
 	 */
 	_pushInsert(insert, textBox, isLeft, remote) {
 		let textBoxes = this._getTextBoxes();
-		let firstInsert = this.portraitDocks[0];
-		let lastInsert = this.portraitDocks[this.portraitDocks.length - 1];
+		let firstInsert = this.stage.portraitDocks[0];
+		let lastInsert = this.stage.portraitDocks[this.stage.portraitDocks.length - 1];
 		let firstTextBox = textBoxes[0];
 		let lastTextBox = textBoxes[textBoxes.length - 1];
 
@@ -5578,7 +5579,7 @@ export default class Theatre {
 			Theatre.instance._addDockTween(theatreId, tween, tweenId);
 		}
 		// sort the render order by left position order
-		Theatre.instance.portraitDocks.sort((a, b) => { return a.order - b.order });
+		Theatre.instance.stage.portraitDocks.sort((a, b) => { return a.order - b.order });
 
 	}
 
@@ -5592,11 +5593,11 @@ export default class Theatre {
 	static setDebug(state) {
 		if (state) {
 			Theatre.DEBUG = true;
-			for (let insert of Theatre.instance.portraitDocks)
+			for (let insert of Theatre.instance.stage.portraitDocks)
 				Theatre.instance.renderInsertById(insert.imgId);
 		} else {
 			Theatre.DEBUG = false;
-			for (let insert of Theatre.instance.portraitDocks)
+			for (let insert of Theatre.instance.stage.portraitDocks)
 				Theatre.instance.renderInsertById(insert.imgId);
 		}
 	}
@@ -5776,7 +5777,7 @@ export default class Theatre {
 
 
 
-	
+
 
 	/**
 	 * Split to chars, logically group words based on language. 
@@ -6206,7 +6207,7 @@ export default class Theatre {
 				optAlign = actor.flags.theatre.optalign;
 		}
 
-		if (Theatre.instance.stage[theatreId]) {
+		if (Theatre.instance.stage.actors[theatreId]) {
 			ui.notifications.info(actor.name + game.i18n.localize("Theatre.UI.Notification.AlreadyStaged"));
 			return;
 		}
@@ -6235,7 +6236,7 @@ export default class Theatre {
 		// stage event
 		Theatre.instance.stageInsertById(theatreId);
 		// Store reference
-		Theatre.instance.stage[theatreId] = new ActorExtensions(actor, navItem);
+		Theatre.instance.stage.actors[theatreId] = new TheatreActor(actor, navItem);
 	}
 
 	/**
@@ -6256,13 +6257,13 @@ export default class Theatre {
 	 * @params id (string) : The theatreId to remove from the stage.
 	 */
 	_removeFromStage(theatreId) {
-		const staged = Theatre.instance.stage[theatreId];
+		const staged = Theatre.instance.stage.actors[theatreId];
 		if (staged) {
 			if (staged.navElement) {
 				Theatre.instance.theatreNavBar.removeChild(staged.navElement);
 			}
 			Theatre.instance.removeInsertById(theatreId);
-			delete Theatre.instance.stage[theatreId];
+			delete Theatre.instance.stage.actors[theatreId];
 		}
 	}
 
@@ -6272,7 +6273,7 @@ export default class Theatre {
 	 */
 	static isActorStaged(actor) {
 		if (!actor) return false;
-		return !!Theatre.instance.stage[Theatre._getTheatreId(actor)]
+		return !!Theatre.instance.stage.actors[Theatre._getTheatreId(actor)]
 	}
 
 	static clearStage() {
