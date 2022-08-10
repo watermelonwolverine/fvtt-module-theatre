@@ -3,7 +3,7 @@ import Resources from "../extensions/foundry_extensions.js";
 import Theatre from "../Theatre.js";
 import ActorExtensions from "../extensions/ActorExtensions.js";
 import _TheatreWorkers from "./workers.js";
-import TheatreSettings from "../settings.js";
+import TheatreSettings from "../extensions/settings.js";
 
 export default class _TheatrePortraitContainerSetupWorker {
 
@@ -35,7 +35,7 @@ export default class _TheatrePortraitContainerSetupWorker {
         optAlign: string,
         resName: string,
         resources: Resources,
-        reorder: boolean) {
+        reorder: boolean) : void {
         let insert = this.context.getInsertById(imgId);
 
 

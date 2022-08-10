@@ -46,15 +46,15 @@
 
 	"Theatre.UI.Notification.ErrorFatal" : "Fatal Error, please submit console log (f12 -> console) with bug report",
 
-	"Theatre.UI.Settings.displayMode" : "Theaterleiste Anzeigemodus",
-	"Theatre.UI.Settings.displayModeHint" : "Der Anzeigemodus für den Textbereich unter dem Theater Einsatz. Der Textbox-Stil ist auf textbasierte Spiele ausgerichtet, da er einen soliden Hintergrund für den Text bietet. Der Lichtkasten-Stil ist auf Sprach- oder Sprach-Hybrid-Spiele mit einem visuellen, neuartigen Erscheinungsbild ausgerichtet. Der Transparente Box-Stil ist nur für Sprachspiele gedacht, bei denen Text nicht so wichtig ist, da der Text * schwer zu lesen ist *. Es ist eher als Modus gedacht, um das Porträt allein durch Bewegungen und Emotes zu kontrollieren.",
+	"Theatre.UI.Settings.theatreStyle" : "Theaterleiste Anzeigemodus",
+	"Theatre.UI.Settings.theatreStyleHint" : "Der Anzeigemodus für den Textbereich unter dem Theater Einsatz. Der Textbox-Stil ist auf textbasierte Spiele ausgerichtet, da er einen soliden Hintergrund für den Text bietet. Der Lichtkasten-Stil ist auf Sprach- oder Sprach-Hybrid-Spiele mit einem visuellen, neuartigen Erscheinungsbild ausgerichtet. Der Transparente Box-Stil ist nur für Sprachspiele gedacht, bei denen Text nicht so wichtig ist, da der Text * schwer zu lesen ist *. Es ist eher als Modus gedacht, um das Porträt allein durch Bewegungen und Emotes zu kontrollieren.",
 	"Theatre.UI.Settings.displayModeTextBox" : "Textbox-Stil",
 	"Theatre.UI.Settings.displayModeLightBox" : "Lichtkasten-Stil",
 	"Theatre.UI.Settings.displayModeClearBox" : "Transparenter Box-Stil",
 	"Theatre.UI.Settings.gmOnly" : "Steuerung nur für Spielleiter",
 	"Theatre.UI.Settings.gmOnlyHint" : "Wenn diese Option aktiviert ist, kann nur der Spielleiter die Bühne steuern. Die Theatre-Steuerelemente werden für die Spieler ausgeblendet.",
-	"Theatre.UI.Settings.narrHeight" : "Erzähler-Leisten-Position",
-	"Theatre.UI.Settings.narrHeightHint" : "Die Position der Erzähler-Leiste als Prozentwert der Bildschirmhöhe.",
+	"Theatre.UI.Settings.theatreNarratorHeight" : "Erzähler-Leisten-Position",
+	"Theatre.UI.Settings.theatreNarratorHeightHint" : "Die Position der Erzähler-Leiste als Prozentwert der Bildschirmhöhe.",
 	"Theatre.UI.Settings.textDecayMin" : "Minimum Textverfall-Zeit",
 	"Theatre.UI.Settings.textDecayMinHint" : "Das Minimum an Zeit in Sekunden befor der Theater Text Eintrag beginnt zu verschwinden.",
 	"Theatre.UI.Settings.textDecayRate" : "Textverfallrate",
@@ -88,6 +88,8 @@
 	"Theatre.UI.Settings.suppressOpacityHint": "Deckkraft der Bühne, wenn sie unterdrückt ist.",
 	"Theatre.UI.Settings.shiftPauseIcon": "Pause-Symbol Verschieben",
 	"Theatre.UI.Settings.shiftPauseIconHint": "Verschiebe das Pausensymbol bei der Aktivierung der Bühne.",
+	"Theatre.UI.Settings.theatreImageSize": "TODO",
+	"Theatre.UI.Settings.theatreImageSizeHint": "TODO",
 
 	"Theatre.Text.OpenBracket" : "\"",
 	"Theatre.Text.CloseBracket" : "\"",

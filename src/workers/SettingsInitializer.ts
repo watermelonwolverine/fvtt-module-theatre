@@ -1,4 +1,4 @@
-import TheatreSettings from "../settings.js";
+import TheatreSettings from "../extensions/settings.js";
 import Theatre from "../Theatre.js";
 
 export default class TheatreSettingsInitializer {
@@ -14,7 +14,7 @@ export default class TheatreSettingsInitializer {
      * @private
      */
     static getHintLocalizationKey(name: string): string {
-        return this.getNameLocalizationKey + "Hint";
+        return this.getNameLocalizationKey(name) + "Hint";
     }
 
     /**
@@ -31,7 +31,7 @@ export default class TheatreSettingsInitializer {
             data.name = this.getNameLocalizationKey(key);
             data.hint = this.getHintLocalizationKey(key);
         }
-        
+
         game.settings.register<string, string, T>(TheatreSettings.NAMESPACE, key, data);
     }
 
@@ -53,9 +53,7 @@ export default class TheatreSettingsInitializer {
             onChange: () => { if (!game.user.isGM) debouncedReload(); },
         });
 
-        game.settings.register<string, string, string>(TheatreSettings.NAMESPACE, "theatreStyle", {
-            name: "Theatre.UI.Settings.displayMode",
-            hint: "Theatre.UI.Settings.displayModeHint",
+        this.register<string>("theatreStyle", {
             scope: "world",
             config: true,
             default: "textbox",
@@ -69,7 +67,6 @@ export default class TheatreSettingsInitializer {
         });
 
         this.register(TheatreSettings.THEATRE_IMAGE_SIZE, {
-            name: "Maximum image height",
             scope: "client",
             config: true,
             default: 400,
@@ -77,8 +74,6 @@ export default class TheatreSettingsInitializer {
         });
 
         this.register<string>("theatreNarratorHeight", {
-            name: "Theatre.UI.Settings.narrHeight",
-            hint: "Theatre.UI.Settings.narrHeightHint",
             scope: "world",
             config: true,
             default: "50%",
@@ -153,7 +148,6 @@ export default class TheatreSettingsInitializer {
         });
 
         this.register<number>("motdNewInfo", {
-            name: "MOTD New Info",
             scope: "client",
             default: 0,
             type: Number,

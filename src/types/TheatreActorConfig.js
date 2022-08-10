@@ -19,9 +19,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
  *
  */
-import Theatre from "./Theatre.js";
-import ActorExtensions from "./extensions/ActorExtensions.js";
-import KHelpers from "./workers/KHelpers.js";
+import Theatre from "../Theatre.js";
+import ActorExtensions from "../extensions/ActorExtensions.js";
+import KHelpers from "../workers/KHelpers.js";
 
 export default class TheatreActorConfig extends FormApplication {
 	constructor(object = {}, options = {}) {

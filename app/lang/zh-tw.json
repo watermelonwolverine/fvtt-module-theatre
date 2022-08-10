@@ -46,17 +46,19 @@
 
 	"Theatre.UI.Notification.ErrorFatal" : "致命錯誤，請提交帶有錯誤報告的控制台日志（f12->控制台）",
 
-	"Theatre.UI.Settings.displayMode" : "文本框顯示模式",
-	"Theatre.UI.Settings.displayModeHint" : "劇場立繪下方的文本區域的顯示模式。 【框式】適用于基于文本的游戲，因爲它爲文本提供了堅實的背景。 【輕小說式】適用于具有視覺新穎外觀的語音或語音混合游戲。 【無對話框】適用于文字不太重要的語音游戲，因爲文字*難以閱讀*； 它更適合作爲僅通過動作和表情來顯示立繪的方式。",
+	"Theatre.UI.Settings.theatreStyle" : "文本框顯示模式",
+	"Theatre.UI.Settings.theatreStyleHint" : "劇場立繪下方的文本區域的顯示模式。 【框式】適用于基于文本的游戲，因爲它爲文本提供了堅實的背景。 【輕小說式】適用于具有視覺新穎外觀的語音或語音混合游戲。 【無對話框】適用于文字不太重要的語音游戲，因爲文字*難以閱讀*； 它更適合作爲僅通過動作和表情來顯示立繪的方式。",
 	"Theatre.UI.Settings.displayModeTextBox" : "框式",
 	"Theatre.UI.Settings.displayModeLightBox" : "輕小說式",
 	"Theatre.UI.Settings.displayModeClearBox" : "無對話框",
-	"Theatre.UI.Settings.narrHeight" : "旁白欄位置",
-	"Theatre.UI.Settings.narrHeightHint" : "旁白欄的位置占屏幕高度的百分比。",
+	"Theatre.UI.Settings.theatreNarratorHeight" : "旁白欄位置",
+	"Theatre.UI.Settings.theatreNarratorHeightHint" : "旁白欄的位置占屏幕高度的百分比。",
 	"Theatre.UI.Settings.textDecayMin" : "最大文字延遲",
 	"Theatre.UI.Settings.textDecayMinHint" : "劇院文本輸入衰减之前的最短時間（以秒爲單位）。",
 	"Theatre.UI.Settings.textDecayRate" : "文字延遲率",
 	"Theatre.UI.Settings.textDecayRateHint" : "基于消息的長度（以秒爲單位），文本衰减的速率。 這是“按每個字符”應用的，因此，如果衰减率爲1s或最小衰减時間（以較大者爲准），則在衰减之前100s的消息是100s。",
+	"Theatre.UI.Settings.theatreImageSize": "TODO",
+	"Theatre.UI.Settings.theatreImageSizeHint": "TODO",
 
 	"Theatre.MOTD.Header" : "通知",
 	"Theatre.MOTD.OldVersion" : "劇院當前已過時，請在設置屏幕中啓用GM更新劇場。",

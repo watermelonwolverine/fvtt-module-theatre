@@ -47,13 +47,13 @@
 
 	"Theatre.UI.Notification.ErrorFatal" : "Error fatal, por favor, envíe un notificación de este error adjuntando el texto que aparezca en la consola (f12 -> console)",
 
-	"Theatre.UI.Settings.displayMode" : "Modo de visualización de barras del teatro",
-	"Theatre.UI.Settings.displayModeHint" : "Modo de visualización del área bajo el encarte del teatro. El estilo cuadro de texto está dirigido a partidas basadas en texto ya que ofrece un fondo sólido. Cuadro ligero se dirige a partidas de voz o híbridas voz-texto que tengan un enfoque novelesco. El estilo cuadro limpio está diseñado para partidas exclusivamente de voz donde el texto no es lo más importante, en este modo el texto *será más difícil de leer*; se enfoca más en manejar los retratos como marionetas, unicamente moviéndolos y poniéndoles emoticonos",
+	"Theatre.UI.Settings.theatreStyle" : "Modo de visualización de barras del teatro",
+	"Theatre.UI.Settings.theatreStyleHint" : "Modo de visualización del área bajo el encarte del teatro. El estilo cuadro de texto está dirigido a partidas basadas en texto ya que ofrece un fondo sólido. Cuadro ligero se dirige a partidas de voz o híbridas voz-texto que tengan un enfoque novelesco. El estilo cuadro limpio está diseñado para partidas exclusivamente de voz donde el texto no es lo más importante, en este modo el texto *será más difícil de leer*; se enfoca más en manejar los retratos como marionetas, unicamente moviéndolos y poniéndoles emoticonos",
 	"Theatre.UI.Settings.displayModeTextBox" : "Estilo cuadro de texto",
 	"Theatre.UI.Settings.displayModeLightBox" : "Estilo cuadro ligero",
 	"Theatre.UI.Settings.displayModeClearBox" : "Estilo cuadro limpio",
-	"Theatre.UI.Settings.narrHeight" : "Posición de la barra de narrador",
-	"Theatre.UI.Settings.narrHeightHint" : "Posición de la barra de narrador como porcentaje de la altura de la pantalla",
+	"Theatre.UI.Settings.theatreNarratorHeight" : "Posición de la barra de narrador",
+	"Theatre.UI.Settings.theatreNarratorHeightHint" : "Posición de la barra de narrador como porcentaje de la altura de la pantalla",
 	"Theatre.UI.Settings.textDecayMin" : "Tiempo de desaparición mínima de texto",
 	"Theatre.UI.Settings.textDecayMinHint" : "El tiempo mínimo en segundos antes de que la entrada de texto del teatro comience a desaparecer",
 	"Theatre.UI.Settings.textDecayRate" : "Tasa de desaparición de texto",
@@ -66,6 +66,8 @@
 	"Theatre.UI.Settings.autoHideBottomHint": "Oculta la UI inferior (jugador & barra de acceso rápido) cuando un actor sale a escena",
 	"Theatre.UI.Settings.removeLabelSheetHeader": "Quitar etiquetas de las hojas de personaje",
 	"Theatre.UI.Settings.removeLabelSheetHeaderHint": "Quita la etiqueta del encabezado de las hojas de personaje, es útil cuando se usan monitores pequeños o dispositivos móviles",
+	"Theatre.UI.Settings.theatreImageSize": "TODO",
+	"Theatre.UI.Settings.theatreImageSizeHint": "TODO",
 
 	"Theatre.UI.Keybinds.unfocusTextArea": "Quitar foco del área de texto",
 	"Theatre.UI.Keybinds.addOwnedToStage": "Añadir tus actores a la escena",

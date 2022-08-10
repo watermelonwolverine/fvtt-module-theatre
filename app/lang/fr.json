@@ -44,8 +44,8 @@
 
 	"Theatre.UI.Notification.ErrorFatal" : "Erreur Fatale. Veuillez soumettre le log de la console (F12 -> console) avec votre rapport de bug",
 
-	"Theatre.UI.Settings.displayMode" : "Mode d'Affichage de la Zone de Théâtre",
-	"Theatre.UI.Settings.displayModeHint" : "Le mode d'affichage de la portion texte en dessous de l'insertion théâtrale. Le Style Texte se prête plus aux jeux textuels alors que le Style Clair se prête plus pour les jeux audios ou hybrides.",
+	"Theatre.UI.Settings.theatreStyle" : "Mode d'Affichage de la Zone de Théâtre",
+	"Theatre.UI.Settings.theatreStyleHint" : "Le mode d'affichage de la portion texte en dessous de l'insertion théâtrale. Le Style Texte se prête plus aux jeux textuels alors que le Style Clair se prête plus pour les jeux audios ou hybrides.",
 	"Theatre.UI.Settings.displayModeTextBox" : "Style Texte",
 	"Theatre.UI.Settings.displayModeLightBox" : "Style Clair",
 	"Theatre.UI.Settings.displayModeClearBox" : "Style Verre",
@@ -53,6 +53,10 @@
 	"Theatre.UI.Settings.textDecayMinHint" : "Le temps minimum en secondes avant que le texte affiché dans théâtre ne commence a disparaître.",
 	"Theatre.UI.Settings.textDecayRate" : "Vitesse de disparition du texte",
 	"Theatre.UI.Settings.textDecayRateHint" : "La vitesse à laquelle le texte disparaît, en fonction de la durée du message en secondes. Ceci dépend du nombre de caractères, donc un texte de 100 caractères met 100s avant de disparaitre si la vitesse de disparition est de 1s.",
+	"Theatre.UI.Settings.theatreImageSize": "TODO",
+	"Theatre.UI.Settings.theatreImageSizeHint": "TODO",
+	"Theatre.UI.Settings.theatreNarratorHeight" : "TODO",
+	"Theatre.UI.Settings.theatreNarratorHeightHint" : "TODO",
 
 	"Theatre.MOTD.Header" : "Notification de Théâtre",
 	"Theatre.MOTD.OldVersion" : "Théâtre n'est plus a jour, s'il vous plait demandez au GM de mètre a jour Théâtre.",

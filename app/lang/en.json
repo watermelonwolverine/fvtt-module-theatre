@@ -46,15 +46,15 @@
 
 	"Theatre.UI.Notification.ErrorFatal" : "Fatal Error, please submit console log (f12 -> console) with bug report",
 
-	"Theatre.UI.Settings.displayMode" : "Theatre Bar Display Mode",
-	"Theatre.UI.Settings.displayModeHint" : "The display mode for the text area under a theatre insert. Text Box style is geared for text-based games as it provides a solid background for the text. Light Box style is geared for voice or voice hybrid games with a visual novel look and feel. Clear style is intended for voice only games where text isn't as important since the text *will be difficult to read*; it is more intended as a mode for puppeting the portrait by movements and emotes alone.",
+	"Theatre.UI.Settings.theatreStyle" : "Theatre Bar Display Mode",
+	"Theatre.UI.Settings.theatreStyleHint" : "The display mode for the text area under a theatre insert. Text Box style is geared for text-based games as it provides a solid background for the text. Light Box style is geared for voice or voice hybrid games with a visual novel look and feel. Clear style is intended for voice only games where text isn't as important since the text *will be difficult to read*; it is more intended as a mode for puppeting the portrait by movements and emotes alone.",
 	"Theatre.UI.Settings.displayModeTextBox" : "Text Box Style",
 	"Theatre.UI.Settings.displayModeLightBox" : "Light Box Style",
 	"Theatre.UI.Settings.displayModeClearBox" : "Clear Box Style",
 	"Theatre.UI.Settings.gmOnly" : "GM controls only",
 	"Theatre.UI.Settings.gmOnlyHint" : "If enabled, only the GM will be able to control the stage. The Theatre controls will be hidden for the players.",
-	"Theatre.UI.Settings.narrHeight" : "Narrator Bar Position",
-	"Theatre.UI.Settings.narrHeightHint" : "The position of the narrator bar as a percentage of the screen height.",
+	"Theatre.UI.Settings.theatreNarratorHeight" : "Narrator Bar Position",
+	"Theatre.UI.Settings.theatreNarratorHeightHint" : "The position of the narrator bar as a percentage of the screen height.",
 	"Theatre.UI.Settings.textDecayMin" : "Minimum Text Decay Time",
 	"Theatre.UI.Settings.textDecayMinHint" : "The minimum amount of time in seconds before a theatre text entry will decay.",
 	"Theatre.UI.Settings.textDecayRate" : "Text Decay Rate",
@@ -72,6 +72,8 @@
 	"Theatre.UI.Settings.suppressOpacityHint": "Opacity of the stage while it is suppressed.",
 	"Theatre.UI.Settings.shiftPauseIcon": "Shift Pause Icon",
 	"Theatre.UI.Settings.shiftPauseIconHint": "Shift the pause icon when the stage is activated.",
+	"Theatre.UI.Settings.theatreImageSize": "Maximum image height",
+	"Theatre.UI.Settings.theatreImageSizeHint": "TODO",
 
 	"Theatre.UI.Keybinds.unfocusTextArea": "Unfocus Text Area",
 	"Theatre.UI.Keybinds.addOwnedToStage": "Add Owned Actors to Stage",

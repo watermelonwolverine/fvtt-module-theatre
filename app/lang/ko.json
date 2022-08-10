@@ -46,13 +46,13 @@
 
  	"Theatre.UI.Notification.ErrorFatal" : "치명적 오류. 버그 리포트와 함께 콘솔 로그 (F12->console)를 제출해주십시오.",
 
-	"Theatre.UI.Settings.displayMode" : "극장 바 표시 모드",
-	"Theatre.UI.Settings.displayModeHint" : "극장 그래픽 아래의 텍스트 영역에 관한 표시 모드입니다. 텍스트 박스 스타일은 텍스트에 명확한 배경을 제공하므로 텍스트 기반 게임에 적합합니다. 라이트 박스 스타일은 비주얼 노벨 외관과 느낌을 가지고 있어서 음성만 사용하거나 또는 음성과 텍스트를 복합적으로 사용하는 게임에 어울립니다. 클리어 스타일은 텍스트를 *읽기가 어렵기 때문에* 텍스트의 중요성이 떨어지는 음성 전용 게임용으로 제작되었습니다. 이 모드는 포트레잇을 움직이고 감정을 드러내는 등의 용도로 사용됩니다.",
+	"Theatre.UI.Settings.theatreStyle" : "극장 바 표시 모드",
+	"Theatre.UI.Settings.theatreStyleHint" : "극장 그래픽 아래의 텍스트 영역에 관한 표시 모드입니다. 텍스트 박스 스타일은 텍스트에 명확한 배경을 제공하므로 텍스트 기반 게임에 적합합니다. 라이트 박스 스타일은 비주얼 노벨 외관과 느낌을 가지고 있어서 음성만 사용하거나 또는 음성과 텍스트를 복합적으로 사용하는 게임에 어울립니다. 클리어 스타일은 텍스트를 *읽기가 어렵기 때문에* 텍스트의 중요성이 떨어지는 음성 전용 게임용으로 제작되었습니다. 이 모드는 포트레잇을 움직이고 감정을 드러내는 등의 용도로 사용됩니다.",
 	"Theatre.UI.Settings.displayModeTextBox" : "텍스트 박스 스타일",
 	"Theatre.UI.Settings.displayModeLightBox" : "라이트 박스 스타일",
 	"Theatre.UI.Settings.displayModeClearBox" : "클리어 박스 스타일",
-	"Theatre.UI.Settings.narrHeight" : "나레이터 바 위치",
-	"Theatre.UI.Settings.narrHeightHint" : "나레이터 바가 위치할 곳을 화면 높이의 퍼센트로 나타낸 수치값. 퍼센트가 작을 수록 높은 곳에 위치합니다.",
+	"Theatre.UI.Settings.theatreNarratorHeight" : "나레이터 바 위치",
+	"Theatre.UI.Settings.theatreNarratorHeightHint" : "나레이터 바가 위치할 곳을 화면 높이의 퍼센트로 나타낸 수치값. 퍼센트가 작을 수록 높은 곳에 위치합니다.",
 	"Theatre.UI.Settings.textDecayMin" : "최소 텍스트 삭제 시간",
 	"Theatre.UI.Settings.textDecayMinHint" : "극장에 입력된 텍스트 삭제가 시작 되는 최소 시간을 설정합니다.",
 	"Theatre.UI.Settings.textDecayRate" : "텍스트 삭제 속도",
@@ -65,6 +65,8 @@
 	"Theatre.UI.Settings.autoHideBottomHint": "액터가 화면에 표시될 때 하단 UI (플레이어 목록, 단축바)를 감춥니다.",
 	"Theatre.UI.Settings.removeLabelSheetHeader": "캐릭터 시트 헤더에서 라벨 미표시",
 	"Theatre.UI.Settings.removeLabelSheetHeaderHint": "캐릭터 시트 헤더에서 라벨을 없앱니다. 작은 화면이나 모바일에서 유용합니다.",
+	"Theatre.UI.Settings.theatreImageSize": "TODO",
+	"Theatre.UI.Settings.theatreImageSizeHint": "TODO",
 
 	"Theatre.MOTD.Header" : "극장 알림",
 	"Theatre.MOTD.OldVersion" : "극장 모드가 현재 오래된 버전입니다. GM은 구성 화면에서 극장 모드를 업데이트 해주세요.",
