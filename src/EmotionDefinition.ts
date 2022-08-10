@@ -1,4 +1,4 @@
-export default class Emotes {
+export default class EmotionDefinition {
     emote: string;
     textFlyin: string;
     textStanding: string;

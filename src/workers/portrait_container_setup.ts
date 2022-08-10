@@ -170,7 +170,7 @@ export default class _TheatrePortraitContainerSetupWorker {
             let defaultDisabled = this.context.isDefaultDisabled(insert.imgId);
             if (Theatre.DEBUG) console.log("is default disabled? : %s", defaultDisabled);
             let emotes = TheatreActors.getEmotes(actorId, defaultDisabled);
-            let rigResMap = TheatreActors.getActorRiggingResources(actorId);
+            let rigResMap = TheatreActors.getRiggingResources(actorId);
             if (emotes[insert.emote] && emotes[insert.emote].rigging) {
                 for (let anim of emotes[insert.emote].rigging.animations) {
                     this.context.addTweensFromAnimationSyntax(anim.name, anim.syntax, rigResMap, insert);

@@ -1,6 +1,6 @@
-import DefaultEmotes from "./resources/default_emotes";
-import DefaultRiggingResources from "./resources/default_riggings";
-import { EmoteDictionary, RiggingResource } from "./resources/resources_types";
+import DefaultEmotes from "./resources/default_emotes.js";
+import DefaultRiggingResources from "./resources/default_riggings.js";
+import { EmoteDictionary, RiggingResource } from "./resources/resources_types.js";
 
 export default class TheatreActors {
 
@@ -59,7 +59,7 @@ export default class TheatreActors {
      * @return (Array[(Object)]) : An array of {name: (String), path: (String)} tuples
      *							 representing the rigging resource map for the specified actorId. 
      */
-    static getActorRiggingResources(actorId: string): RiggingResource[] {
+    static getRiggingResources(actorId: string): RiggingResource[] {
         let actor: Actor = game.actors.get(actorId);
         let actorData: ActorData;
         let actorRiggings;

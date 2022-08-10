@@ -1,8 +1,10 @@
 /* eslint-disable no-unused-vars */
-import Emotes from "../Emotes.js";
+import EmotionDefinition from "../EmotionDefinition.js";
 import Resources from "../foundry_extensions.js";
 import Params from "../Params.js";
+import { RiggingResource } from "../resources/resources_types.js";
 import Theatre from "../Theatre.js";
+import TheatreActors from "../TheatreActors.js";
 import _TheatreWorkers from "./workers.js";
 
 
@@ -37,7 +39,7 @@ export default class _TheatrePixiContainerFactory {
         portName: string,
         imgId: string,
         optAlign: string,
-        emotions: Emotes,
+        emotions: EmotionDefinition,
         isLeft: boolean): void {
         // given an image, we will generate a PIXI container to add to the theatreDock and size
         // it to the image loaded
@@ -109,7 +111,7 @@ export default class _TheatrePixiContainerFactory {
             return null;
         }
         // load all rigging assets
-        let rigResources = Theatre.getActorRiggingResources(actorId);
+        let rigResources : RiggingResource[] = TheatreActors.getRiggingResources(actorId);
 
         if (Theatre.DEBUG) console.log("RigResources for %s :", portName, rigResources);
 

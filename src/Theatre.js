@@ -28,7 +28,6 @@ import TheatreActors from './TheatreActors.js';
 import TheatreActorConfig from './TheatreActorConfig.js';
 import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory.js"
 import TextStandingAnimationsFactory from './workers/standing_animations_factory.js';
-import DefaultRiggingResources from './resources/default_riggings.js';
 
 export default class Theatre {
 
@@ -753,6 +752,7 @@ export default class Theatre {
 				if (Theatre.DEBUG) console.log("params + emotions: ", params, dat.emotions);
 				toInject.push({ params: params, emotions: dat.emotions });
 			}
+			
 			// let the clearing animation complete
 			window.setTimeout(() => {
 				// stage all inserts; 
@@ -2485,7 +2485,7 @@ export default class Theatre {
 			imgSrcs.push({ imgpath: params.src, resname: params.src });
 
 			// load all rigging assets
-			let rigResources = Theatre.getActorRiggingResources(actorId);
+			let rigResources = TheatreActors.getRiggingResources(actorId);
 
 			if (Theatre.DEBUG) console.log("RigResources for %s :", params.name, rigResources);
 
@@ -2527,7 +2527,7 @@ export default class Theatre {
 		imgSrcs.push({ imgpath: params.src, resname: params.src });
 
 		// load all rigging assets
-		let rigResources = Theatre.getActorRiggingResources(actorId);
+		let rigResources = TheatreActors.getActorResources(actorId);
 
 		if (Theatre.DEBUG) console.log("RigResources for %s :", params.name, rigResources);
 
