@@ -1,23 +1,23 @@
 import Theatre from "../Theatre.js";
 import KHelpers from "./KHelpers.js";
-import { StandingAnimationFunction } from "./standing_animations_factory.js";
+import { TextStandingAnimationFunction } from "./standing_animations_factory.js";
 
 export type Context = any;
 
-export type FlyinAnimationFunction = (
+export type TextFlyinAnimationFunction = (
     charSpans: any,
     animTime: number,
     speed: number,
-    standingAnim: StandingAnimationFunction) => void
+    standingAnim: TextStandingAnimationFunction) => void
 
-export type FlyinAnimationDefinition = {
-    func: FlyinAnimationFunction;
+export type TextFlyinAnimationDefinition = {
+    func: TextFlyinAnimationFunction;
     label: string;
 }
 
 
 
-export class FlyinAnimationsFactory {
+export class TextFlyinAnimationsFactory {
 
     static TYPEWRITER: "typewriter";
     static FADEIN: "fadein";
@@ -31,24 +31,24 @@ export class FlyinAnimationsFactory {
     static ASSEMBLE: "assemble";
 
     static ALL_ANIMATIONS: string[] = [
-        FlyinAnimationsFactory.TYPEWRITER,
-        FlyinAnimationsFactory.FADEIN,
-        FlyinAnimationsFactory.SLIDE_IN,
-        FlyinAnimationsFactory.SCALE_IN,
-        FlyinAnimationsFactory.FALL_IN,
-        FlyinAnimationsFactory.SPIN,
-        FlyinAnimationsFactory.SPIN_SCALE,
-        FlyinAnimationsFactory.OUTLAW,
-        FlyinAnimationsFactory.VORTEX,
-        FlyinAnimationsFactory.ASSEMBLE
+        TextFlyinAnimationsFactory.TYPEWRITER,
+        TextFlyinAnimationsFactory.FADEIN,
+        TextFlyinAnimationsFactory.SLIDE_IN,
+        TextFlyinAnimationsFactory.SCALE_IN,
+        TextFlyinAnimationsFactory.FALL_IN,
+        TextFlyinAnimationsFactory.SPIN,
+        TextFlyinAnimationsFactory.SPIN_SCALE,
+        TextFlyinAnimationsFactory.OUTLAW,
+        TextFlyinAnimationsFactory.VORTEX,
+        TextFlyinAnimationsFactory.ASSEMBLE
     ]
 
-    static get_all_animations(context: Context, targets: HTMLElement[]): { [key: string]: FlyinAnimationDefinition } {
+    static getAllAnimations(context: Context, targets: HTMLElement[]): { [key: string]: TextFlyinAnimationDefinition } {
 
-        const result: { [key: string]: FlyinAnimationDefinition } = {};
+        const result: { [key: string]: TextFlyinAnimationDefinition } = {};
 
         for (const name in this.ALL_ANIMATIONS) {
-            result[name] = this.getTextFlyinAnimationForName(name,
+            result[name] = this.getAnimationForName(name,
                 context,
                 targets);
         }
@@ -56,10 +56,10 @@ export class FlyinAnimationsFactory {
         return result;
     }
 
-    static getTextFlyinAnimationForName(
+    static getAnimationForName(
         name: string,
         context: Context,
-        targets: HTMLElement[]): FlyinAnimationDefinition {
+        targets: HTMLElement[]): TextFlyinAnimationDefinition {
         switch (name) {
             case this.TYPEWRITER:
                 return this.typewriter(context, targets);
@@ -73,7 +73,7 @@ export class FlyinAnimationsFactory {
                                 each: speed,
                                 onComplete: function () {
                                     if (standingAnim)
-                                        standingAnim(context, targets[0]);
+                                        standingAnim.call(context, targets[0]);
                                 }
                             },
                             opacity: 0,
@@ -407,7 +407,7 @@ export class FlyinAnimationsFactory {
 
     static typewriter(
         context: Context,
-        targets: HTMLElement[]): FlyinAnimationDefinition {
+        targets: HTMLElement[]): TextFlyinAnimationDefinition {
         return {
             func: function (charSpans, animTime, speed, standingAnim) {
                 gsap.from(charSpans, {

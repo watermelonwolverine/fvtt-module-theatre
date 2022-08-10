@@ -1,15 +1,15 @@
 
-export type StandingAnimationFunction = (
+export type TextStandingAnimationFunction = (
     target: HTMLElement,
     ...args: any) => void
 
-export type StandingAnimationDefinition = {
-    func: StandingAnimationFunction;
+export type TextStandingAnimationDefinition = {
+    func: TextStandingAnimationFunction;
     label: string;
 }
 
 
-export default class StandingAnimationsFactory {
+export default class TextStandingAnimationsFactory {
 
     static IMPACT: "impact";
     static QUIVER: "quiver";
@@ -22,33 +22,29 @@ export default class StandingAnimationsFactory {
     static INSANE: "insane";
 
     static ALL_ANIMATIONS: string[] = [
-        StandingAnimationsFactory.IMPACT,
-        StandingAnimationsFactory.QUIVER,
-        StandingAnimationsFactory.WAVE,
-        StandingAnimationsFactory.FADE,
-        StandingAnimationsFactory.EXCITED,
-        StandingAnimationsFactory.VIOLENT,
-        StandingAnimationsFactory.BUBBLY,
-        StandingAnimationsFactory.SPOOKY,
-        StandingAnimationsFactory.INSANE
+        TextStandingAnimationsFactory.IMPACT,
+        TextStandingAnimationsFactory.QUIVER,
+        TextStandingAnimationsFactory.WAVE,
+        TextStandingAnimationsFactory.FADE,
+        TextStandingAnimationsFactory.EXCITED,
+        TextStandingAnimationsFactory.VIOLENT,
+        TextStandingAnimationsFactory.BUBBLY,
+        TextStandingAnimationsFactory.SPOOKY,
+        TextStandingAnimationsFactory.INSANE
     ]
 
-    static get_all_animations(targets: HTMLElement[]): { [key: string]: StandingAnimationsFactory } {
+    static getAllAnimations(targets: HTMLElement[]): { [key: string]: TextStandingAnimationsFactory } {
 
-        const result: { [key: string]: StandingAnimationsFactory } = {};
+        const result: { [key: string]: TextStandingAnimationsFactory } = {};
 
         for (const name in this.ALL_ANIMATIONS) {
-            result[name] = this.getTextStandingAnimationForName(name);
+            result[name] = this.getAnimationForName(name);
         }
 
         return result;
     }
 
-    static getAllTextStandingAnimations() {
-
-    }
-
-    static getTextStandingAnimationForName(name: string): StandingAnimationDefinition {
+    static getAnimationForName(name: string): TextStandingAnimationDefinition {
 
         switch (name) {
 

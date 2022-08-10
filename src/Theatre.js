@@ -26,7 +26,7 @@ import _TheatreWorkers from './workers/workers.js';
 import KHelpers from "./workers/KHelpers.js";
 import TheatreActor from './TheatreActor.js';
 import TheatreActorConfig from './TheatreActorConfig.js';
-import FlyinAnimationsFactory from './workers/flyin_animations_factory.js';
+import { TextFlyinAnimationsFactory } from "./workers/flyin_animations_factory.js"
 
 export default class Theatre {
 
@@ -4550,7 +4550,7 @@ export default class Theatre {
 		let actor;
 		if (actorId)
 			actor = game.actors.get(actorId);
-		const flyinAnimations = FlyinAnimationsFactory.get_all_animations(this, this.targets);
+		const flyinAnimations = TextFlyinAnimationsFactory.getAllAnimations(this, this.targets);
 		let emotes = Theatre.getActorEmotes(actorId);
 		let fonts = Theatre.FONTS;
 		let textStanding = Theatre.STANDING_ANIMS;
@@ -4695,7 +4695,7 @@ export default class Theatre {
 					//console.log("child text: ",text,ev.currentTarget); 
 					ev.currentTarget.textContent = "";
 					let charSpans = Theatre.splitTextBoxToChars(text, ev.currentTarget);
-					FlyinAnimationsFactory.get_flyin_animation(anim, this, this.targets).func.call(this, charSpans, 0.5, 0.05, null);
+					TextFlyinAnimationsFactory.getAnimationForName(anim, this, this.targets).func.call(this, charSpans, 0.5, 0.05, null);
 				});
 				child.addEventListener("mouseout", (ev) => {
 					for (let c of ev.currentTarget.children) {
@@ -4766,7 +4766,7 @@ export default class Theatre {
 					//console.log("child text: ",text,ev.currentTarget); 
 					ev.currentTarget.textContent = "";
 					let charSpans = Theatre.splitTextBoxToChars(text, ev.currentTarget);
-					FlyinAnimationsFactory.typewriter(this, this.targets).func.call(this, charSpans, 0.5, 0.05, (textStanding[anim] ? textStanding[anim].func : null));
+					TextFlyinAnimationsFactory.typewriter(this, this.targets).func.call(this, charSpans, 0.5, 0.05, (textStanding[anim] ? textStanding[anim].func : null));
 				});
 				child.addEventListener("mouseout", (ev) => {
 					for (let c of ev.currentTarget.children) {
