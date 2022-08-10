@@ -11,15 +11,15 @@ export type TextStandingAnimationDefinition = {
 
 export default class TextStandingAnimationsFactory {
 
-    static IMPACT: "impact";
-    static QUIVER: "quiver";
-    static WAVE: "wave";
-    static FADE: "fade";
-    static EXCITED: "excited";
-    static VIOLENT: "violent";
-    static BUBBLY: "bubbly";
-    static SPOOKY: "spooky";
-    static INSANE: "insane";
+    static IMPACT = "impact";
+    static QUIVER = "quiver";
+    static WAVE = "wave";
+    static FADE = "fade";
+    static EXCITED = "excited";
+    static VIOLENT = "violent";
+    static BUBBLY = "bubbly";
+    static SPOOKY = "spooky";
+    static INSANE = "insane";
 
     static ALL_ANIMATIONS: string[] = [
         TextStandingAnimationsFactory.IMPACT,
@@ -37,15 +37,23 @@ export default class TextStandingAnimationsFactory {
 
         const result: { [key: string]: TextStandingAnimationsFactory } = {};
 
-        for (const name in this.ALL_ANIMATIONS) {
+        for (const name of this.ALL_ANIMATIONS) {
             result[name] = {
                 func: this.getForName(name),
-                label: game.i18n.localize("Theatre.Standing" + name)
+                label: game.i18n.localize("Theatre.Standing" + this.capitalizeFirstLetter(name))
             }
         }
 
         return result;
     }
+
+    /**
+     * @private
+     */
+    static capitalizeFirstLetter(word: string) {
+        return word.charAt(0).toUpperCase() + word.slice(1);
+    }
+
 
     static getForName(name: string): TextStandingAnimationFunction {
 
@@ -79,7 +87,7 @@ export default class TextStandingAnimationsFactory {
                 return this.do_insane;
 
             default:
-                throw "NotImplemented";
+                throw "NotImplemented: StandingAnimation for name " + name;
 
         };
     }

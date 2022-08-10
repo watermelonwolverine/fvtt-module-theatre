@@ -4696,7 +4696,7 @@ export default class Theatre {
 					ev.currentTarget.textContent = "";
 					let charSpans = Theatre.splitTextBoxToChars(text, ev.currentTarget);
 					TextFlyinAnimationsFactory.getForName(anim)(
-						this.targets[0],
+						this.targets()[0],
 						charSpans,
 						0.5,
 						0.05,
@@ -4771,7 +4771,7 @@ export default class Theatre {
 					//console.log("child text: ",text,ev.currentTarget); 
 					ev.currentTarget.textContent = "";
 					let charSpans = Theatre.splitTextBoxToChars(text, ev.currentTarget);
-					TextFlyinAnimationsFactory.do_typewriter(this.targets[0],
+					TextFlyinAnimationsFactory.do_typewriter(this.targets()[0],
 						charSpans,
 						0.5,
 						0.05,

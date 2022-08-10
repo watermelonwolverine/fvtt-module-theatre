@@ -18,16 +18,16 @@ export type TextFlyinAnimationDefinition = {
 
 export default class TextFlyinAnimationsFactory {
 
-    static TYPEWRITER: "typewriter";
-    static FADEIN: "fadein";
-    static SLIDE_IN: "slidein";
-    static SCALE_IN: "scalein";
-    static FALL_IN: "fallin";
-    static SPIN: "spin";
-    static SPIN_SCALE: "spinscale";
-    static OUTLAW: "outlaw";
-    static VORTEX: "vortex";
-    static ASSEMBLE: "assemble";
+    static TYPEWRITER = "typewriter";
+    static FADEIN = "fadein";
+    static SLIDE_IN = "slidein";
+    static SCALE_IN = "scalein";
+    static FALL_IN = "fallin";
+    static SPIN = "spin";
+    static SPIN_SCALE = "spinscale";
+    static OUTLAW = "outlaw";
+    static VORTEX = "vortex";
+    static ASSEMBLE = "assemble";
 
     static ALL_ANIMATIONS: string[] = [
         TextFlyinAnimationsFactory.TYPEWRITER,
@@ -46,14 +46,21 @@ export default class TextFlyinAnimationsFactory {
 
         const result: { [key: string]: TextFlyinAnimationDefinition } = {};
 
-        for (const name in this.ALL_ANIMATIONS) {
+        for (const name of this.ALL_ANIMATIONS) {
             result[name] = {
                 func: this.getForName(name),
-                label: game.i18n.localize("Theatre.Flyin" + name)
+                label: game.i18n.localize("Theatre.Flyin" + this.capitalizeFirstLetter(name))
             }
         }
 
         return result;
+    }
+
+    /**
+ * @private
+ */
+    static capitalizeFirstLetter(word: string) {
+        return word.charAt(0).toUpperCase() + word.slice(1);
     }
 
     static getForName(name: string): TextFlyinAnimationFunction {
@@ -89,7 +96,7 @@ export default class TextFlyinAnimationsFactory {
                 return this.do_assemble;
 
             default:
-                throw "NotImplemented";
+                throw "NotImplemented: FlyinAnimation for name " + name;
         }
 
 

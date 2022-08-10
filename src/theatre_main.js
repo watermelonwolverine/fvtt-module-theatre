@@ -422,7 +422,7 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 		if (Theatre.DEBUG) console.log("animating text: " + textContent);
 
 		TextFlyinAnimationsFactory.getForName(insertFlyinMode || "typewriter")(
-			Theatre.instance.targets[0],
+			Theatre.instance.targets()[0],
 			charSpans,
 			0.5,
 			0.05,
