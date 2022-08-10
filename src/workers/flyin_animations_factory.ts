@@ -1,19 +1,23 @@
-import Theatre from "./Theatre.js";
-import KHelpers from "./workers/KHelpers.js";
+import Theatre from "../Theatre.js";
+import KHelpers from "./KHelpers.js";
+import { StandingAnimationFunction } from "./standing_animations_factory.js";
 
-type SomeFun = (charSpans: any,
-    animTime: any,
-    speed: any,
-    standingAnim: any) => void
+export type Context = any;
 
-type AnimationDef = {
-    func: SomeFun;
+export type FlyinAnimationFunction = (
+    charSpans: any,
+    animTime: number,
+    speed: number,
+    standingAnim: StandingAnimationFunction) => void
+
+export type FlyinAnimationDefinition = {
+    func: FlyinAnimationFunction;
     label: string;
 }
 
 
 
-export default class FlyinAnimationsFactory {
+export class FlyinAnimationsFactory {
 
     static TYPEWRITER: "typewriter";
     static FADEIN: "fadein";
@@ -39,12 +43,12 @@ export default class FlyinAnimationsFactory {
         FlyinAnimationsFactory.ASSEMBLE
     ]
 
-    static get_all_animations(context: any, targets: any[]): { [key: string]: AnimationDef } {
+    static get_all_animations(context: Context, targets: HTMLElement[]): { [key: string]: FlyinAnimationDefinition } {
 
-        const result: { [key: string]: AnimationDef } = {};
+        const result: { [key: string]: FlyinAnimationDefinition } = {};
 
         for (const name in this.ALL_ANIMATIONS) {
-            result[name] = this.get_flyin_animation(name,
+            result[name] = this.getTextFlyinAnimationForName(name,
                 context,
                 targets);
         }
@@ -52,10 +56,10 @@ export default class FlyinAnimationsFactory {
         return result;
     }
 
-    static get_flyin_animation(
+    static getTextFlyinAnimationForName(
         name: string,
-        context: any,
-        targets: any[]): AnimationDef {
+        context: Context,
+        targets: HTMLElement[]): FlyinAnimationDefinition {
         switch (name) {
             case this.TYPEWRITER:
                 return this.typewriter(context, targets);
@@ -69,7 +73,7 @@ export default class FlyinAnimationsFactory {
                                 each: speed,
                                 onComplete: function () {
                                     if (standingAnim)
-                                        standingAnim.call(context, targets[0]);
+                                        standingAnim(context, targets[0]);
                                 }
                             },
                             opacity: 0,
@@ -304,10 +308,6 @@ export default class FlyinAnimationsFactory {
                                     if (textBox) {
                                         textBox.style.setProperty("overflow-y", "scroll");
                                         textBox.style.setProperty("overflow-x", "hidden");
-                                        // shaking box
-                                        //TweenMax.killTweensOf(charSpans[0].parentNode.parentNode); 
-                                        //charSpans[0].parentNode.parentNode.style.top = `${barTop}px`; 
-                                        //charSpans[0].parentNode.parentNode.style.left = `${barLeft}px`; 
                                     }
                                 }
                             }
@@ -405,8 +405,9 @@ export default class FlyinAnimationsFactory {
 
     }
 
-    static typewriter(context: any,
-        targets: any[]): AnimationDef {
+    static typewriter(
+        context: Context,
+        targets: HTMLElement[]): FlyinAnimationDefinition {
         return {
             func: function (charSpans, animTime, speed, standingAnim) {
                 gsap.from(charSpans, {

@@ -26,7 +26,7 @@ import _TheatreWorkers from './workers/workers.js';
 import KHelpers from "./workers/KHelpers.js";
 import TheatreActor from './TheatreActor.js';
 import TheatreActorConfig from './TheatreActorConfig.js';
-import FlyinAnimationsFactory from './flyin_animations_factory.js';
+import FlyinAnimationsFactory from './workers/flyin_animations_factory.js';
 
 export default class Theatre {
 
