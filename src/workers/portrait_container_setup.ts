@@ -43,14 +43,14 @@ export default class _TheatrePortraitContainerSetupWorker {
         if (!insert || !insert.dockContainer) {
             console.error("ERROR PIXI Container was destroyed before setup could execute for %s", imgId);
             ui.notifications.error(`${game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P1")} ${imgId} ${game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P2")} ${resName}`);
-            this.context.removeInsertById(imgId);
+            this.context.stage.removeInsertById(imgId);
             return;
         }
 
         if (!resources[resName] || !resources[resName].texture) {
             console.error("ERROR could not load texture %s", resName, resources);
             ui.notifications.error(`${game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P1")} ${imgId} ${game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P2")} ${resName}`);
-            this.context.removeInsertById(imgId);
+            this.context.stage.removeInsertById(imgId);
             return;
         }
 

@@ -155,7 +155,7 @@ export default class _TextBoxFactory {
             }
         } else if (ev.button == 2) {
             if (ev.ctrlKey) {
-                Theatre.instance.removeInsertById(id);
+                Theatre.instance.stage.removeInsertById(id);
                 ev.stopPropagation();
             } else if (ev.shiftKey) {
                 if (Theatre.instance.swapTarget

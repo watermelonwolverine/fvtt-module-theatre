@@ -699,7 +699,7 @@ export default class Theatre {
 		} else if (type == "players") {
 			// clear our theatre
 			for (let insert of this.stage.portraitDocks)
-				this.removeInsertById(insert.imgId, true);
+				this.stage.removeInsertById(insert.imgId, true);
 			// process this as if it were a resyncevent
 			this.resync.timeoutId = 1;
 			this._processResyncEvent("gm", senderId, {
@@ -735,7 +735,7 @@ export default class Theatre {
 
 			// clear our theatre
 			for (let insert of this.stage.portraitDocks)
-				this.removeInsertById(insert.imgId, true);
+				this.stage.removeInsertById(insert.imgId, true);
 
 			if (type == "gm")
 				ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.ResyncGM"));
@@ -915,7 +915,7 @@ export default class Theatre {
 				break;
 			case "exitscene":
 				if (Theatre.DEBUG) console.log("exitscene: tid:%s", data.insertid);
-				this.removeInsertById(data.insertid, true);
+				this.stage.removeInsertById(data.insertid, true);
 				break;
 			case "positionupdate":
 				if (Theatre.DEBUG) console.log("positionupdate: tid:%s", data.insertid);
@@ -2633,7 +2633,7 @@ export default class Theatre {
 					ui.notifications.error(game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P1") +
 						+ emoteResName
 						+ game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P2") + emotes[ename].insert + "'");
-					this.removeInsertById(insert.imgId);
+					this.stage.removeInsertById(insert.imgId);
 				}
 
 				// flag our insert with our emote state
@@ -2676,7 +2676,7 @@ export default class Theatre {
 						ui.notifications.error(game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P1") +
 							+ baseInsert
 							+ game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P2") + baseInsert + "'");
-						this.removeInsertById(insert.imgId);
+						this.stage.removeInsertById(insert.imgId);
 					}
 
 					// now fix up the PIXI Container and make it pretty
@@ -2979,38 +2979,6 @@ export default class Theatre {
 	}
 
 	/**
-	 * Removes insert by ID
-	 *
-	 * @params id (String) : The theatreId of the insert to remove.
-	 * @params remote (Boolean) : Boolean indicating if this is being invoked remotely, or locally. 
-	 *
-	 * @return (Object) : An object containing the items that were removed {insert : (Object), textBox: (HTMLElement)}
-	 *					 or null if there was nothing to remove. 
-	 */
-	removeInsertById(id, remote) {
-		let toRemoveInsert,
-			toRemoveTextBox;
-		for (let insert of this.stage.portraitDocks) {
-			if (insert.imgId == id && !insert.deleting) {
-				insert.deleting = true;
-				toRemoveInsert = insert;
-				break;
-			}
-		}
-		for (let textBox of this._getTextBoxes()) {
-			if (textBox.getAttribute("imgId") == id && !textBox.getAttribute("deleting")) {
-				textBox.setAttribute("deleting", "true");
-				toRemoveTextBox = textBox
-				break;
-			}
-		}
-		if (!toRemoveInsert || !toRemoveTextBox)
-			return null;
-
-		return this._removeInsert(toRemoveInsert, toRemoveTextBox, remote);
-	}
-
-	/**
 	 * Removes insert by name, in the event that there
 	 * are inserts with the same name, the first one is found
 	 * and removed.
@@ -3060,7 +3028,6 @@ export default class Theatre {
 	 * @return (Object) : An object containing the items that were removed {insert : (Object), textBox: (HTMLElement)}
 	 *					 or null if there was nothing to remove. 
 	 *
-	 * @private
 	 */
 	_removeInsert(toRemoveInsert, toRemoveTextBox, remote) {
 		let isOwner = this.isActorOwner(game.user.id, toRemoveInsert.imgId);
@@ -5354,7 +5321,7 @@ export default class Theatre {
 				Theatre.instance.activateInsertById(id, ev);
 				break;
 			case 2:
-				let removed = Theatre.instance.removeInsertById(id);
+				let removed = Theatre.instance.stage.removeInsertById(id);
 				let cimg = Theatre.instance.getTheatreCoverPortrait();
 				if (ev.ctrlKey) {
 					// unstage the actor
@@ -6262,7 +6229,7 @@ export default class Theatre {
 			if (staged.navElement) {
 				Theatre.instance.theatreNavBar.removeChild(staged.navElement);
 			}
-			Theatre.instance.removeInsertById(theatreId);
+			Theatre.instance.stage.removeInsertById(theatreId);
 			delete Theatre.instance.stage.actors[theatreId];
 		}
 	}

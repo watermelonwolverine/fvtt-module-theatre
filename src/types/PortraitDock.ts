@@ -19,5 +19,7 @@ export default class PortraitDock{
     tweens: unknown;
     order: number;
     renderOrder: number;
+    /** If this dock is in the process of being deleted */
+    deleting?:boolean;
     meta: {}
 }

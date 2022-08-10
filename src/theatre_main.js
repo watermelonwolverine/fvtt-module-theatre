@@ -736,7 +736,7 @@ Hooks.once("init", () => {
 			onDown: () => {
 				const ids = Object.keys(Theatre.instance.stage);
 				const id = ids[i - 1];
-				if (id) Theatre.instance.removeInsertById(id);
+				if (id) Theatre.instance.stage.removeInsertById(id);
 			},
 			restricted: false
 		});
