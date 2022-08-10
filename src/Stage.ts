@@ -8,4 +8,9 @@ export default class Stage {
     };
 
     portraitDocks: PortraitDock[];
+
+    constructor(){
+        this.actors = {};
+        this.portraitDocks = [];
+    }
 }
