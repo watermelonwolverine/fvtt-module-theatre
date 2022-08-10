@@ -5,7 +5,6 @@ import { TextStandingAnimationFunction } from "./standing_animations_factory.js"
 export type Context = any;
 
 export type TextFlyinAnimationFunction = (
-    target: HTMLElement,
     charSpans: any,
     animTime: number,
     speed: number,
@@ -49,7 +48,7 @@ export default class TextFlyinAnimationsFactory {
         for (const name of this.ALL_ANIMATIONS) {
             result[name] = {
                 func: this.getForName(name),
-                label: game.i18n.localize("Theatre.Flyin" + this.capitalizeFirstLetter(name))
+                label: game.i18n.localize("Theatre.Flyin." + this.capitalizeFirstLetter(name))
             }
         }
 
@@ -96,27 +95,23 @@ export default class TextFlyinAnimationsFactory {
                 return this.do_assemble;
 
             default:
-                throw "NotImplemented: FlyinAnimation for name " + name;
+                return this.do_typewriter;
         }
-
-
     }
 
     static do_typewriter(
-        target: HTMLElement,
         charSpans: any,
         animTime: number,
         speed: number,
         standingAnim: TextStandingAnimationFunction): void {
 
-
-        gsap.from(charSpans, {
+        TweenMax.from(charSpans, {
             duration: 0.05,
             stagger: {
                 each: 0.05,
                 onComplete: function () {
                     if (standingAnim)
-                        standingAnim(target);
+                        standingAnim((<gsap.TweenVars>this).targets()[0]);
                 }
             },
             opacity: 0,
@@ -126,18 +121,18 @@ export default class TextFlyinAnimationsFactory {
     }
 
     static do_fade_in(
-        target: HTMLElement,
         charSpans: any,
         animTime: number,
         speed: number,
         standingAnim: TextStandingAnimationFunction) {
-        gsap.from(charSpans, {
+
+        TweenMax.from(charSpans, {
             duration: animTime,
             stagger: {
                 each: speed,
                 onComplete: function () {
                     if (standingAnim)
-                        standingAnim(target);
+                        standingAnim((<gsap.TweenVars>this).targets()[0]);
                 }
             },
             opacity: 0,
@@ -145,20 +140,19 @@ export default class TextFlyinAnimationsFactory {
     }
 
     static do_slide_in(
-        target: HTMLElement,
         charSpans: any,
         animTime: number,
         speed: number,
         standingAnim: TextStandingAnimationFunction) {
 
-        gsap.from(charSpans,
+        TweenMax.from(charSpans,
             {
                 duration: animTime,
                 stagger: {
                     each: speed,
                     onComplete: function () {
                         if (standingAnim)
-                            standingAnim(target);
+                            standingAnim((<gsap.TweenVars>this).targets()[0]);
                     }
                 },
                 opacity: 0,
@@ -167,20 +161,20 @@ export default class TextFlyinAnimationsFactory {
         );
     }
 
-    static do_scale_in(
-        target: HTMLElement,
+    static do_scale_in = function (
         charSpans: any,
         animTime: number,
         speed: number,
         standingAnim: TextStandingAnimationFunction) {
-        gsap.from(charSpans,
+
+        TweenMax.from(charSpans,
             {
                 duration: animTime,
                 stagger: {
                     each: speed,
                     onComplete: function () {
                         if (standingAnim)
-                            standingAnim(target);
+                            standingAnim((<gsap.TweenVars>this).targets()[0]);
                     }
                 },
                 opacity: 0,
@@ -192,7 +186,6 @@ export default class TextFlyinAnimationsFactory {
     }
 
     static do_fall_in(
-        target: HTMLElement,
         charSpans: any,
         animTime: number,
         speed: number,
@@ -224,14 +217,15 @@ export default class TextFlyinAnimationsFactory {
                 textBox.style.setProperty("overflow-x", "visible");
             }
         }
-        gsap.from(charSpans,
+
+        TweenMax.from(charSpans,
             {
                 duration: animTime,
                 stagger: {
                     each: speed,
                     onComplete: function () {
                         if (standingAnim)
-                            standingAnim(target);
+                            standingAnim((<gsap.TweenVars>this).targets()[0]);
                     }
                 },
                 opacity: 0,
@@ -249,20 +243,19 @@ export default class TextFlyinAnimationsFactory {
     }
 
     static do_spin(
-        target: HTMLElement,
         charSpans: any,
         animTime: number,
         speed: number,
         standingAnim: TextStandingAnimationFunction) {
 
-        gsap.from(charSpans,
+        TweenMax.from(charSpans,
             {
                 duration: animTime,
                 stagger: {
                     each: speed,
                     onComplete: function () {
                         if (standingAnim)
-                            standingAnim(target);
+                            standingAnim((<gsap.TweenVars>this).targets()[0]);
                     }
                 },
                 opacity: 0,
@@ -274,7 +267,6 @@ export default class TextFlyinAnimationsFactory {
     }
 
     static do_spin_scale(
-        target: HTMLElement,
         charSpans: any,
         animTime: number,
         speed: number,
@@ -305,14 +297,15 @@ export default class TextFlyinAnimationsFactory {
                 textBox.style.setProperty("overflow-x", "visible");
             }
         }
-        gsap.from(charSpans, animTime * 1.5,
+
+        TweenMax.from(charSpans, animTime * 1.5,
             {
                 duration: animTime * 1.5,
                 stagger: {
                     each: speed,
                     onComplete: function () {
                         if (standingAnim)
-                            standingAnim(target);
+                            standingAnim((<gsap.TweenVars>this).targets()[0]);
                     }
                 },
                 opacity: 0,
@@ -332,13 +325,11 @@ export default class TextFlyinAnimationsFactory {
     }
 
     static do_vortex(
-        target: HTMLElement,
         charSpans: any,
         animTime: number,
         speed: number,
         standingAnim: TextStandingAnimationFunction) {
-        //let barTop = 0;
-        //let barLeft = 0;
+
         let textBox: HTMLElement = null;
         if (charSpans[0]) {
             switch (Theatre.instance.settings.theatreStyle) {
@@ -364,14 +355,15 @@ export default class TextFlyinAnimationsFactory {
                 textBox.style.setProperty("overflow-x", "visible");
             }
         }
-        gsap.from(charSpans,
+
+        TweenMax.from(charSpans,
             {
                 duration: animTime * 1.5,
                 stagger: {
                     each: speed,
                     onComplete: function () {
                         if (standingAnim)
-                            standingAnim(target);
+                            standingAnim((<gsap.TweenVars>this).targets()[0]);
                     }
                 },
                 opacity: 0,
@@ -390,7 +382,6 @@ export default class TextFlyinAnimationsFactory {
     }
 
     static do_outlaw(
-        target: HTMLElement,
         charSpans: any,
         animTime: number,
         speed: number,
@@ -421,6 +412,7 @@ export default class TextFlyinAnimationsFactory {
                 textBox.style.setProperty("overflow-x", "visible");
             }
         }
+        
         for (let idx = 0; idx < charSpans.length; ++idx) {
             TweenMax.from(charSpans[idx], animTime, {
                 delay: idx * speed,
@@ -431,10 +423,11 @@ export default class TextFlyinAnimationsFactory {
                 top: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * 500}px`,
                 onComplete: function () {
                     if (standingAnim)
-                        standingAnim(target);
+                        standingAnim(this.targets()[0]);
                 }
             });
         }
+
         if (textBox) {
             if (Theatre.DEBUG) console.log("vortext all start");
             TweenMax.from(textBox, 0.1, {
@@ -442,9 +435,9 @@ export default class TextFlyinAnimationsFactory {
                 //opacity: 1,
                 onComplete: function () {
                     if (Theatre.DEBUG) console.log("vortex all complete");
-                    if (target) {
-                        target.style.setProperty("overflow-y", "scroll");
-                        target.style.setProperty("overflow-x", "visible");
+                    if (this.targets().length) {
+                        this.targets()[0].style.setProperty("overflow-y", "scroll");
+                        this.targets()[0].style.setProperty("overflow-x", "visible");
                     }
                 }
             });
@@ -453,7 +446,6 @@ export default class TextFlyinAnimationsFactory {
     }
 
     static do_assemble(
-        target: HTMLElement,
         charSpans: any,
         animTime: number,
         speed: number,
@@ -469,7 +461,7 @@ export default class TextFlyinAnimationsFactory {
                 top: `${Math.random() * 500}px`,
                 onComplete: function () {
                     if (standingAnim)
-                        standingAnim(target);
+                        standingAnim(this.targets()[0]);
                 }
             });
         }

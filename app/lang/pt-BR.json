@@ -134,7 +134,7 @@
 	"Theatre.Flyin.Scalein" : "Crescer",
 	"Theatre.Flyin.Fallin" : "Cair",
 	"Theatre.Flyin.Spin" : "Girar",
-	"Theatre.Flyin.SpinScale" : "Girar e Crescer",
+	"Theatre.Flyin.Spinscale" : "Girar e Crescer",
 	"Theatre.Flyin.Outlaw" : "Fora da Lei",
 	"Theatre.Flyin.Vortex" : "Redemoinho",
 	"Theatre.Flyin.Assemble" : "Ajuntar",

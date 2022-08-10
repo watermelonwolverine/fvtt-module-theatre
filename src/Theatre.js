@@ -4555,7 +4555,13 @@ export default class Theatre {
 		let fonts = Theatre.FONTS;
 		let textStandingAnimationDefinitions = TextStandingAnimationsFactory.getDefinitions();
 		let sideBar = document.getElementById("sidebar");
-		renderTemplate("modules/theatre/app/templates/emote_menu.html", { emotes, flyinAnimations: flyinAnimationsDefinitions, textStanding: textStandingAnimationDefinitions, fonts }).then(template => {
+		renderTemplate("modules/theatre/app/templates/emote_menu.html", {
+			emotes,
+			textFlyin: flyinAnimationsDefinitions,
+			textStanding: textStandingAnimationDefinitions,
+			fonts
+		}
+		).then(template => {
 			if (Theatre.DEBUG) console.log("emote window template rendered");
 			Theatre.instance.theatreEmoteMenu.style.top = `${Theatre.instance.theatreControls.offsetTop - 410}px`;
 			Theatre.instance.theatreEmoteMenu.innerHTML = template;
@@ -4696,7 +4702,6 @@ export default class Theatre {
 					ev.currentTarget.textContent = "";
 					let charSpans = Theatre.splitTextBoxToChars(text, ev.currentTarget);
 					TextFlyinAnimationsFactory.getForName(anim)(
-						this.targets()[0],
 						charSpans,
 						0.5,
 						0.05,
@@ -4771,7 +4776,7 @@ export default class Theatre {
 					//console.log("child text: ",text,ev.currentTarget); 
 					ev.currentTarget.textContent = "";
 					let charSpans = Theatre.splitTextBoxToChars(text, ev.currentTarget);
-					TextFlyinAnimationsFactory.do_typewriter(this.targets()[0],
+					TextFlyinAnimationsFactory.do_typewriter(
 						charSpans,
 						0.5,
 						0.05,

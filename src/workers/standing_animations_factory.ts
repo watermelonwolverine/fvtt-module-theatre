@@ -40,7 +40,7 @@ export default class TextStandingAnimationsFactory {
         for (const name of this.ALL_ANIMATIONS) {
             result[name] = {
                 func: this.getForName(name),
-                label: game.i18n.localize("Theatre.Standing" + this.capitalizeFirstLetter(name))
+                label: game.i18n.localize("Theatre.Standing." + this.capitalizeFirstLetter(name))
             }
         }
 
@@ -87,7 +87,7 @@ export default class TextStandingAnimationsFactory {
                 return this.do_insane;
 
             default:
-                throw "NotImplemented: StandingAnimation for name " + name;
+                return undefined;
 
         };
     }
@@ -110,7 +110,7 @@ export default class TextStandingAnimationsFactory {
         TweenMax.to(target, 0.025, {
             left: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * shakeradius}px`,
             top: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * shakeradius}px`,
-            onComplete: this.do_impact,
+            onComplete: TextStandingAnimationsFactory.do_impact,
             onCompleteParams: [target, shakeradius]
         });
     }
@@ -132,7 +132,7 @@ export default class TextStandingAnimationsFactory {
         TweenMax.to(target, 0.1, {
             left: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * quiverAmt}px`,
             top: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * quiverAmt}px`,
-            onComplete: this.do_quiver,
+            onComplete: TextStandingAnimationsFactory.do_quiver,
             onCompleteParams: [target, quiverAmt]
         });
     }
@@ -156,7 +156,7 @@ export default class TextStandingAnimationsFactory {
 
         TweenMax.to(target, 0.5, {
             top: `${waveAmp}px`,
-            onComplete: this.do_wave,
+            onComplete: TextStandingAnimationsFactory.do_wave,
             onCompleteParams: [target, -waveAmp]
         });
     }
@@ -176,7 +176,7 @@ export default class TextStandingAnimationsFactory {
 
         TweenMax.to(target, 0.1, {
             opacity: fade,
-            onComplete: this.do_fade,
+            onComplete: TextStandingAnimationsFactory.do_fade,
             onCompleteParams: [target, fade]
         });
     }
@@ -189,7 +189,7 @@ export default class TextStandingAnimationsFactory {
         TweenMax.to(target, 0.025, {
             left: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * 1}px`,
             top: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * 1}px`,
-            onComplete: this.do_excited,
+            onComplete: TextStandingAnimationsFactory.do_excited,
             onCompleteParams: [target]
         });
     }
@@ -216,7 +216,7 @@ export default class TextStandingAnimationsFactory {
             left: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * shakeradius + ox}px`,
             top: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * shakeradius + oy}px`,
             scale: `${Math.random() / 3 + 0.9}`,
-            onComplete: this.do_violent,
+            onComplete: TextStandingAnimationsFactory.do_violent,
             onCompleteParams: [target, oshakeradius, ox, oy]
         });
     }
@@ -228,7 +228,7 @@ export default class TextStandingAnimationsFactory {
 
         TweenMax.to(target, 0.5, {
             scale: `${Math.floor((Math.random() * 0.4 + 0.8) * 100) / 100}`,
-            onComplete: this.do_bubbly,
+            onComplete: TextStandingAnimationsFactory.do_bubbly,
             onCompleteParams: [target]
         });
     }
@@ -241,7 +241,7 @@ export default class TextStandingAnimationsFactory {
         TweenMax.to(target, Math.floor((Math.random() * 0.25 + 0.2) * 100) / 100, {
             left: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * 3}px`,
             top: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * 3}px`,
-            onComplete: this.do_spooky,
+            onComplete: TextStandingAnimationsFactory.do_spooky,
             onCompleteParams: [target]
         });
 
@@ -284,7 +284,7 @@ export default class TextStandingAnimationsFactory {
             top: `${(Math.random() < 0.5 ? -1 : 1) * Math.random() * 1}px`,
             rotation: rotation,
             scale: scale,
-            onComplete: this.do_insane,
+            onComplete: TextStandingAnimationsFactory.do_insane,
             onCompleteParams: [target, rotation, scale]
         });
     }
