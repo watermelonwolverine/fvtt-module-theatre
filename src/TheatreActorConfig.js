@@ -20,6 +20,7 @@
  *
  */
 import Theatre from "./Theatre.js";
+import TheatreActors from "./TheatreActors.js";
 import KHelpers from "./workers/KHelpers.js";
 
 export default class TheatreActorConfig extends FormApplication {
@@ -72,7 +73,7 @@ export default class TheatreActorConfig extends FormApplication {
 			entityName: entityName,
 			isGM: game.user.isGM,
 			object: duplicate(this.object.data),
-			emote: Theatre.getActorEmotes(this.object.data._id),
+			emote: TheatreActors.getEmotes(this.object.data._id),
 			options: this.options,
 		}
 	}

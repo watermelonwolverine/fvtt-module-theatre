@@ -1,14 +1,15 @@
-type Rigging = { name: string, path: string };
+import { RiggingResource } from "./resources_types";
 
-export default class DefaultRiggings {
+
+export default class DefaultRiggingResources {
 
     /**
      * Default rigging resources
      *
-     * @return {Rigging[]} : An array of {name: (String), path: (String)} tuples
+     * @return {RiggingResource[]} : An array of {name: (String), path: (String)} tuples
      *							 representing the default rigging resource map. 
      */
-    static get(): Rigging[] {
+    static get(): RiggingResource[] {
         return [
             // bubbles
             { name: "angry", path: "modules/theatre/app/graphics/bubbles/angry.png" },

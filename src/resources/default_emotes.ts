@@ -1,24 +1,6 @@
-export type Animation = {
-    name: string,
-    syntax: string
-}
+import { EmoteDictionary } from "./resources_types";
 
-export type Rigging = {
-    animations: Animation[]
-}
-
-export type EmoteDefinition = {
-    name: string,
-    fatype: string,
-    faname: string,
-    label: string,
-    image?: string,
-    rigging: Rigging
-}
-
-export type EmoteDictionary = { [key: string]: EmoteDefinition };
-
-export class DefaultEmotes {
+export default class DefaultEmotes {
 
     static get(): EmoteDictionary {
         return {

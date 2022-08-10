@@ -24,12 +24,11 @@
 import _TheatreSettings from './settings.js';
 import _TheatreWorkers from './workers/workers.js';
 import KHelpers from "./workers/KHelpers.js";
-import TheatreActor from './TheatreActor.js';
+import TheatreActors from './TheatreActors.js';
 import TheatreActorConfig from './TheatreActorConfig.js';
 import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory.js"
 import TextStandingAnimationsFactory from './workers/standing_animations_factory.js';
-import { DefaultEmotes } from './resources/default_emotes.js';
-import DefaultRiggings from './resources/default_riggings.js';
+import DefaultRiggingResources from './resources/default_riggings.js';
 
 export default class Theatre {
 
@@ -1578,7 +1577,7 @@ export default class Theatre {
 		let theatreId = `theatre-${actor._id}`;
 		let portrait = (actor.img ? actor.img : "icons/mystery-man.png");
 		let optAlign = "top";
-		let name = Theatre.getActorDisplayName(actor._id);
+		let name = TheatreActors.getDisplayName(actor._id);
 		let emotes = {};
 		let settings = {};
 
@@ -2601,9 +2600,10 @@ export default class Theatre {
 		if (!actor) return;
 
 		let baseInsert = actor.data.img ? actor.data.img : "icons/mystery-man.png";
+
 		if (actor.data.flags.theatre)
 			baseInsert = actor.data.flags.theatre.baseinsert ? actor.data.flags.theatre.baseinsert : baseInsert;
-		let emotes = Theatre.getActorEmotes(actorId);
+		let emotes = TheatreActors.getEmotes(actorId);
 
 		// emote already active
 		//if ((this.speakingAs != insert.imgId && !this.isDelayEmote) || this.delayedSentState > 2)
@@ -4553,7 +4553,7 @@ export default class Theatre {
 		if (actorId)
 			actor = game.actors.get(actorId);
 		const flyinAnimationsDefinitions = TextFlyinAnimationsFactory.getDefinitions();
-		let emotes = Theatre.getActorEmotes(actorId);
+		let emotes = TheatreActors.getEmotes(actorId);
 		let fonts = Theatre.FONTS;
 		let textStandingAnimationDefinitions = TextStandingAnimationsFactory.getDefinitions();
 		let sideBar = document.getElementById("sidebar");
@@ -5772,76 +5772,11 @@ export default class Theatre {
 	}
 
 
-	static getActorDisplayName(actorId) {
-		const actor = game.actors.get(actorId);
-		if (game.modules.get("combat-utility-belt")?.active) {
-			if (game.settings.get("combat-utility-belt", "enableHideNPCNames")) {
-				if (game.cub.hideNames.constructor.shouldReplaceName(actor)) {
-					return game.cub.hideNames.constructor.getReplacementName(actor);
-				}
-			}
-		}
-		return actor.name;
-	}
-
-	/**
-	 * Get the emotes for the actor by merging
-	 * whatever is in the emotes flag with the default base
-	 *
-	 * @param actorId (String) : The actorId of the actor to get emotes from.
-	 * @param disableDefault (Boolean) : Wither or not default emotes are disabled.
-	 *								   in which case, we don't merge the actor 
-	 *								   emotes with the default ones.  
-	 *
-	 * @return (Object) : An Object containg the emotes for the requested actorId. 
-	 */
-	static getActorEmotes(actorId, disableDefault = undefined) {
-		let actor = game.actors.get(actorId);
-		let data;
-
-		if (actor)
-			data = actor.data;
-
-		if (data && data.flags.theatre) {
-			const ae = data.flags.theatre.emotes;
-			if (disableDefault) {
-				return  ae;
-			} else {
-				const de = DefaultEmotes.get();
-				return mergeObject(de, ae);
-			}
-		} else
-			return DefaultEmotes.get();
-	}
-
-	/**
-	 * Get the rigging resources for the actor by merging
-	 * whater is in the rigging.resources flag with the default base
-	 *
-	 * @params actorId (String) : The actorId of the actor to get rigging resources
-	 *							from.
-	 *
-	 * @return (Array[(Object)]) : An array of {name: (String), path: (String)} tuples
-	 *							 representing the rigging resource map for the specified actorId. 
-	 */
-	static getActorRiggingResources(actorId) {
-		let actor = game.actors.get(actorId);
-		let actorData, actorRiggings;
-
-		if (actor)
-			actorData = actor.data;
-
-		if (actorData
-			&& actorData.flags.theatre
-			&& actorData.flags.theatre.rigging
-			&& actorData.flags.theatre.rigging.resources) {
-			actorRiggings = actorData.flags.theatre.rigging.resources;
-			return DefaultRiggings.get().concat(actorRiggings);
-		} else
-			return DefaultRiggings.get();
 
 
-	}
+
+
+	
 
 	/**
 	 * Split to chars, logically group words based on language. 
@@ -6300,7 +6235,7 @@ export default class Theatre {
 		// stage event
 		Theatre.instance.stageInsertById(theatreId);
 		// Store reference
-		Theatre.instance.stage[theatreId] = new TheatreActor(actor, navItem);
+		Theatre.instance.stage[theatreId] = new TheatreActors(actor, navItem);
 	}
 
 	/**

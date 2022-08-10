@@ -25,6 +25,7 @@ import KHelpers from "./workers/KHelpers.js";
 import _TheatreSettings from "./settings.js"
 import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory.js";
 import TextStandingAnimationsFactory from "./workers/standing_animations_factory.js";
+import TheatreActors from "./TheatreActors.js";
 
 /**
  * Concat helper
@@ -807,7 +808,7 @@ Hooks.on("updateActor", (actor, data) => {
 	const insert = Theatre.instance.getInsertById(`theatre-${actor.id}`);
 	if (!insert) return;
 
-	insert.label.text = Theatre.getActorDisplayName(actor.id);
+	insert.label.text = TheatreActors.getDisplayName(actor.id);
 	Theatre.instance._renderTheatre(performance.now());
 });
 

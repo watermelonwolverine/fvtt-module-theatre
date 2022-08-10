@@ -1,10 +1,8 @@
 /* eslint-disable no-unused-vars */
-import Resources, { PIXISprite, PIXIText } from "../foundry_extensions.js";
+import Resources from "../foundry_extensions.js";
 import Theatre from "../Theatre.js";
+import TheatreActors from "../TheatreActors.js";
 import _TheatreWorkers from "./workers.js";
-
-
-
 
 export default class _TheatrePortraitContainerSetupWorker {
 
@@ -118,7 +116,7 @@ export default class _TheatrePortraitContainerSetupWorker {
                 wordWrap: true,
                 wordWrapWidth: portWidth
             });
-            let label = new PIXIText(insert.name, textStyle);
+            let label = new PIXI.Text(insert.name, textStyle);
             // save and stage our label
             label.theatreComponentName = "label";
             insert.label = label;
@@ -131,7 +129,7 @@ export default class _TheatrePortraitContainerSetupWorker {
 
         // setup typing bubble
         if (!insert.typingBubble) {
-            let typingBubble = new PIXISprite();
+            let typingBubble = new PIXI.Sprite();
             typingBubble.texture = resources["modules/theatre/app/graphics/typing.png"].texture;
             typingBubble.width = 55;
             typingBubble.height = 55;
@@ -171,8 +169,8 @@ export default class _TheatrePortraitContainerSetupWorker {
             let actorId = insert.imgId.replace("theatre-", "");
             let defaultDisabled = this.context.isDefaultDisabled(insert.imgId);
             if (Theatre.DEBUG) console.log("is default disabled? : %s", defaultDisabled);
-            let emotes = Theatre.getActorEmotes(actorId, defaultDisabled);
-            let rigResMap = Theatre.getActorRiggingResources(actorId);
+            let emotes = TheatreActors.getEmotes(actorId, defaultDisabled);
+            let rigResMap = TheatreActors.getActorRiggingResources(actorId);
             if (emotes[insert.emote] && emotes[insert.emote].rigging) {
                 for (let anim of emotes[insert.emote].rigging.animations) {
                     this.context.addTweensFromAnimationSyntax(anim.name, anim.syntax, rigResMap, insert);
@@ -224,7 +222,7 @@ export default class _TheatrePortraitContainerSetupWorker {
             });
             let dims = new PIXI.Text(`${portWidth} px x ${portHeight} px`, dimStyle);
             let path = new PIXI.Text(resources[resName].url, pathStyle);
-            let info = new PIXIText("X", infoStyle);
+            let info = new PIXI.Text("X", infoStyle);
             info.theatreComponentName = "debugInfo";
             dims.x = 20;
             path.x = 20;
