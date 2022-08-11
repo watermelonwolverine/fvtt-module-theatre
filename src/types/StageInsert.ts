@@ -1,4 +1,4 @@
-export default class PortraitDock{
+export default class StageInsert {
     /** Id of the image, usually theatre-<actorId> */
     imgId: string;
     dockContainer: PIXI.Container;
@@ -21,6 +21,6 @@ export default class PortraitDock{
     order: number;
     renderOrder: number;
     /** If this dock is in the process of being deleted */
-    deleting?:boolean;
+    deleting?: boolean;
     meta: {}
 }

@@ -6,6 +6,7 @@ import _TheatreWorkers from "./workers.js";
 import TheatreSettings from "../extensions/settings.js";
 import TheatreStyle from "../types/TheatreStyle.js";
 import Stage from "../types/Stage.js";
+import Portrait from "../types/Portrait.js";
 
 export default class _TheatrePortraitContainerSetupWorker {
 
@@ -62,33 +63,11 @@ export default class _TheatrePortraitContainerSetupWorker {
 
         let sprite = new PIXI.Sprite(resources[resName].texture);
 
-        const portraitDimensions = this.getPortraitHeight(
-            stage,
-            resources[resName]);
-
-        const portWidth = portraitDimensions.width;
-        const portHeight = portraitDimensions.height;
-
-        // adjust dockContainer + portraitContainer dimensions to fit the image
-        dockContainer.width = portWidth
-        dockContainer.height = portHeight
-        portraitContainer.width = portWidth
-        portraitContainer.height = portHeight
-
+        insert.portrait = sprite;
+        portraitContainer.addChild(sprite);
         // set the initial dockContainer position + state
         //dockContainer.x = 0;
-        dockContainer.y = stage.theatreDock.offsetHeight - (optAlign == "top" ? this.context.theatreBar.offsetHeight : 0) - portHeight;
 
-        // save and stage our sprite
-        insert.portrait = sprite;
-        insert.portrait.width = portWidth;
-        insert.portrait.height = portHeight;
-
-        portraitContainer.addChild(sprite);
-        portraitContainer.pivot.x = portWidth / 2;
-        portraitContainer.pivot.y = portHeight / 2;
-        portraitContainer.x = portraitContainer.x + portWidth / 2;
-        portraitContainer.y = portraitContainer.y + portHeight / 2;
         // set sprite initial coordinates + state
         sprite.x = 0;
         sprite.y = 0;
@@ -117,8 +96,7 @@ export default class _TheatrePortraitContainerSetupWorker {
                 dropShadowBlur: 1,
                 dropShadowAngle: Math.PI / 6,
                 breakWords: true,
-                wordWrap: true,
-                wordWrapWidth: portWidth
+                wordWrap: true
             });
             let label = new PIXI.Text(insert.name, textStyle);
             // save and stage our label
@@ -128,8 +106,7 @@ export default class _TheatrePortraitContainerSetupWorker {
             // initital positioning
             insert.label.x = 20;
         }
-        // position the label
-        insert.label.y = portHeight - (optAlign == "top" ? 0 : this.context.theatreBar.offsetHeight) - insert.label.style.lineHeight - 20;
+
 
         // setup typing bubble
         if (!insert.typingBubble) {
@@ -139,34 +116,11 @@ export default class _TheatrePortraitContainerSetupWorker {
             typingBubble.height = 55;
             typingBubble.theatreComponentName = "typingBubble";
             typingBubble.alpha = 0;
-            typingBubble.y = portHeight -
-                (optAlign == "top" ? 0 : this.context.theatreBar.offsetHeight) - insert.label.style.lineHeight + typingBubble.height / 2;
+
 
             insert.typingBubble = typingBubble;
             dockContainer.addChild(typingBubble);
         }
-
-        // TheatreStyle specific adjustments
-        switch (this.context.settings.theatreStyle) {
-            case TheatreStyle.LIGHTBOX:
-                // to allow top-aligned portraits to work without a seam
-                dockContainer.y += (optAlign == "top" ? 8 : 0);
-                insert.label.y -= (insert.optAlign == "top" ? 8 : 0);
-                break;
-            case TheatreStyle.CLEARBOX:
-                dockContainer.y = stage.theatreDock.offsetHeight - portHeight;
-                insert.label.y += (optAlign == "top" ? 0 : this.context.theatreBar.offsetHeight);
-                insert.typingBubble.y += (optAlign == "top" ? 0 : this.context.theatreBar.offsetHeight);
-                break;
-            case TheatreStyle.MANGABUBBLE:
-                break;
-            case TheatreStyle.TEXTBOX:
-                break;
-            default:
-                break;
-        }
-
-        if (Theatre.DEBUG) console.log("Portrait loaded with w:%s h:%s", portWidth, portHeight, sprite);
 
         // run rigging animations if we have have any
         if (insert.emote) {
@@ -180,73 +134,6 @@ export default class _TheatrePortraitContainerSetupWorker {
                     this.context.addTweensFromAnimationSyntax(anim.name, anim.syntax, rigResMap, insert);
                 }
             }
-        }
-
-        if (Theatre.DEBUG) {
-            // DEBUG BOX dockContainer
-            let graphics = new PIXI.Graphics();
-            graphics.lineStyle(1, 0xFEEB77, 1);
-            graphics.moveTo(0, 0);
-            graphics.lineTo(portWidth, 0);
-            graphics.lineTo(portWidth, portHeight);
-            graphics.lineTo(0, portHeight);
-            graphics.lineTo(0, 0);
-            dockContainer.addChild(graphics);
-            let dimStyle = new PIXI.TextStyle({
-                fontSize: 10,
-                lineHeight: 30,
-                fontWeight: "bold",
-                fill: ['#FF383A'],
-                stroke: '#000000',
-                strokeThickness: 2,
-                wordWrap: true,
-                wordWrapWidth: portWidth
-            });
-            let pathStyle = new PIXI.TextStyle({
-                fontSize: 22,
-                lineHeight: 22,
-                fontWeight: "bold",
-                fill: ['#38FFEB'],
-                stroke: '#000000',
-                strokeThickness: 2,
-                wordWrap: true,
-                breakWords: true,
-                wordWrapWidth: portWidth
-            });
-            let infoStyle = new PIXI.TextStyle({
-                fontSize: 14,
-                lineHeight: 14,
-                fontWeight: "bold",
-                fill: ['#ffffff'],
-                stroke: '#000000',
-                strokeThickness: 2,
-                wordWrap: true,
-                breakWords: true,
-                wordWrapWidth: portWidth
-            });
-            let dims = new PIXI.Text(`${portWidth} px x ${portHeight} px`, dimStyle);
-            let path = new PIXI.Text(resources[resName].url, pathStyle);
-            let info = new PIXI.Text("X", infoStyle);
-            info.theatreComponentName = "debugInfo";
-            dims.x = 20;
-            path.x = 20;
-            path.y = 30;
-            info.x = 20;
-            info.y = 90;
-            dockContainer.addChild(dims);
-            dockContainer.addChild(path);
-            dockContainer.addChild(info);
-            this.context._updateTheatreDebugInfo(insert);
-
-            // DEBUG BOX portraitContainer
-            graphics = new PIXI.Graphics();
-            graphics.lineStyle(1, 0xFFFFFF, 1);
-            graphics.moveTo(0, 0);
-            graphics.lineTo(portWidth, 0);
-            graphics.lineTo(portWidth, portHeight);
-            graphics.lineTo(0, portHeight);
-            graphics.lineTo(0, 0);
-            portraitContainer.addChild(graphics);
         }
 
         if (reorder) {
@@ -267,48 +154,12 @@ export default class _TheatrePortraitContainerSetupWorker {
             dockContainer.alpha = 1;
         }
 
+        new Portrait(
+            stage,
+            insert).updatePortraitDimensions();
+
         if (!this.context.rendering)
             this.context._renderTheatre(performance.now());
-    }
-
-    getPortraitHeight(
-        stage: Stage,
-        resource: PIXI.LoaderResource): { width: number, height: number } {
-
-
-        const portWidth = resource.texture.width;
-        const portHeight = resource.texture.height;
-
-        const heightStr = TheatreSettings.getTheatreImageSize();
-
-        let height: number;
-
-        if (isNaN(heightStr as unknown as number)) {
-            if (heightStr.endsWith("%")) {
-
-                const relativeHeight = parseInt(
-                    heightStr.substring(0, heightStr.length - 1)
-                ) / 100;
-
-                ui.notifications.info(`${stage.pixiApplication.renderer.height}`);
-                height = relativeHeight * stage.pixiApplication.renderer.height;
-            }
-            else {
-                ui.notifications.error(`Illegal value for: ${TheatreSettings.getNameLocalizationKey(TheatreSettings.THEATRE_IMAGE_SIZE)}`);
-                height = TheatreSettings.THEATRE_IMAGE_SIZE_DEFAULT;
-            }
-        }
-        else {
-            height = parseInt(heightStr);
-        }
-
-        stage.pixiApplication.renderer.height;
-
-        return {
-            width: portWidth * height / portHeight,
-            height: height
-        };
-
     }
 
 }

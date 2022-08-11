@@ -198,7 +198,7 @@ export default class InsertReorderer {
             this.context._addDockTween(theatreId, tween, tweenId);
         }
         // sort the render order by left position order
-        this.context.stage.portraitDocks.sort((a, b) => { return a.order - b.order });
+        this.context.stage.stageInserts.sort((a, b) => { return a.order - b.order });
 
     }
 }

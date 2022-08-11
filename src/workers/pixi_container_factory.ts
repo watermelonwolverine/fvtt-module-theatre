@@ -72,7 +72,7 @@ export default class _TheatrePixiContainerFactory {
             textColor = emotions.textColor;
         }
 
-        this.context.stage.portraitDocks.push({
+        this.context.stage.stageInserts.push({
             imgId: imgId,
             dockContainer: dockContainer,
             name: portName,

@@ -1,7 +1,7 @@
 import ActorExtensions from "../extensions/ActorExtensions.js";
 import { EmoteDictionary } from "../resources/resources_types.js";
 import Theatre from "../Theatre.js";
-import PortraitDock from "../types/PortraitDock.js";
+import StageInsert from "../types/StageInsert.js";
 import TextFlyinAnimationsFactory from "./flyin_animations_factory.js";
 import KHelpers from "./KHelpers.js";
 import TextStandingAnimationsFactory, { TextStandingAnimationDefinitionDictionary } from "./standing_animations_factory.js";
@@ -65,7 +65,7 @@ export default class EmoteMenuRenderer {
         this.do_stuff_3(insert,
             emotes);
     }
-    configure_selects(insert: PortraitDock) {
+    configure_selects(insert: StageInsert) {
         const colorSelect = <HTMLSelectElement>this.context.theatreEmoteMenu.getElementsByClassName('colorselect')[0];
         const fontSelect = <HTMLSelectElement>this.context.theatreEmoteMenu.getElementsByClassName('fontselect')[0];
 
@@ -103,7 +103,7 @@ export default class EmoteMenuRenderer {
             (<HTMLElement>e).addEventListener("wheel", ev => this.wheelFunc2(ev));
         }
     }
-    configure_size_select(insert: PortraitDock) {
+    configure_size_select(insert: StageInsert) {
 
         let sizeSelect = <HTMLSelectElement>this.context.theatreEmoteMenu.getElementsByClassName('sizeselect')[0];
 
@@ -138,7 +138,7 @@ export default class EmoteMenuRenderer {
         wheelEvent.stopPropagation();
     }
 
-    set_fontSelect_value(insert: PortraitDock,
+    set_fontSelect_value(insert: StageInsert,
         fontSelect: HTMLSelectElement) {
         // assign font from insert
         if (insert && insert.textFont) {
@@ -191,7 +191,7 @@ export default class EmoteMenuRenderer {
         wheelEvent.stopPropagation();
     }
 
-    do_stuff(insert: PortraitDock) {
+    do_stuff(insert: StageInsert) {
 
         const textflying_box = <HTMLElement>this.context.theatreEmoteMenu.getElementsByClassName("textflyin-box")[0];
         const theatre_container_column = <HTMLElement>textflying_box.getElementsByClassName("theatre-container-column")[0];
@@ -277,7 +277,7 @@ export default class EmoteMenuRenderer {
         }
     }
 
-    do_stuff_2(insert: PortraitDock,
+    do_stuff_2(insert: StageInsert,
         textStandingAnimationDefinitions: TextStandingAnimationDefinitionDictionary) {
 
         const textStanding_Box = <HTMLElement>this.context.theatreEmoteMenu.getElementsByClassName("textstanding-box")[0];
@@ -364,7 +364,7 @@ export default class EmoteMenuRenderer {
 
     }
 
-    do_stuff_3(insert: PortraitDock,
+    do_stuff_3(insert: StageInsert,
         emotes: EmoteDictionary) {
 
         // If speaking as theatre, minimize away the emote section

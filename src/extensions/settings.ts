@@ -9,9 +9,11 @@ export default class TheatreSettings {
 	static THEATRE_IMAGE_SIZE = "theatreImageSize";
 	static GM_ONLY = "gmOnly";
 	static NARRATOR_HEIGHT = "theatreNarratorHeight";
+	static THEATRE_STYLE = "theatreStyle";
 
 	// default values
 	static THEATRE_IMAGE_SIZE_DEFAULT = 400;
+
 
 	static getNameLocalizationKey(name: string): string {
 		return "Theatre.UI.Settings" + "." + name;
@@ -35,6 +37,10 @@ export default class TheatreSettings {
 
 	static getTheatreImageSize(): string {
 		return this.get(TheatreSettings.THEATRE_IMAGE_SIZE);
+	}
+
+	static getTheatreStyle(): string {
+		return this.get(TheatreSettings.THEATRE_STYLE);
 	}
 
 }

@@ -48,7 +48,7 @@ export default class TheatreSettingsInitializer {
         choices[TheatreStyle.LIGHTBOX] = "Theatre.UI.Settings.displayModeLightBox";
         choices[TheatreStyle.CLEARBOX] = "Theatre.UI.Settings.displayModeClearBox";
 
-        this.register<string>("theatreStyle", {
+        this.register<string>(TheatreSettings.THEATRE_STYLE, {
             scope: "world",
             config: true,
             default: TheatreStyle.TEXTBOX,

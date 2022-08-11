@@ -1,23 +1,49 @@
+import TheatreSettings from "../extensions/settings.js";
 import Theatre from "../Theatre.js";
 import KHelpers from "../workers/KHelpers.js";
 import getTheatreId from "../workers/Tools.js";
-import PortraitDock from "./PortraitDock.js"
+import Portrait from "./Portrait.js";
+import StageInsert from "./StageInsert.js"
 import TheatreActor from "./TheatreActor.js"
 import TheatreStyle from "./TheatreStyle.js";
 
 export default class Stage {
 
+    /**
+     * Actors by theatre-id
+     */
     actors: Map<string, TheatreActor>;
-
-    portraitDocks: PortraitDock[];
+    stageInserts: StageInsert[];
     theatreDock: HTMLCanvasElement;
     pixiApplication: PIXI.Application;
+    theatreBar: HTMLDivElement;
 
     constructor() {
         this.actors = new Map();
-        this.portraitDocks = [];
+        this.stageInserts = [];
+
     }
 
+
+    init(){
+
+        this.theatreBar = document.createElement("div");
+        this.theatreBar.id = "theatre-bar";
+        KHelpers.addClass(this.theatreBar, "theatre-bar");
+
+        let barContainerPrime = document.createElement("div");
+		let barContainerSecond = document.createElement("div");
+
+		barContainerPrime.id = "theatre-prime-bar";
+		barContainerSecond.id = "theatre-second-bar";
+
+		KHelpers.addClass(barContainerPrime, "theatre-bar-left");
+		KHelpers.addClass(barContainerSecond, "theatre-bar-right");
+
+		this.theatreBar.appendChild(barContainerPrime);
+		this.theatreBar.appendChild(barContainerSecond);
+    }
+    
     /**
      * Create the initial dock canvas, future 'portraits'
      * will be PIXI containers whom are sized to the portraits
@@ -70,41 +96,23 @@ export default class Stage {
 
     }
 
-    /**
-     * Removes insert by ID
-     *
-     * @params id (String) : The theatreId of the insert to remove.
-     * @params remote (Boolean) : Boolean indicating if this is being invoked remotely, or locally. 
-     *
-     * @return (Object) : An object containing the items that were removed {insert : (Object), textBox: (HTMLElement)}
-     *					 or null if there was nothing to remove. 
-     */
     removeInsertById(
-        imgId: string,
+        theatreId: string,
         remote?: boolean) {
 
-        let toRemoveInsert: PortraitDock;
-        let toRemoveTextBox: HTMLElement;
+        const toRemoveInsert = this.getInsertBy(insert => insert.imgId == theatreId && !insert.deleting);
 
-        for (const insert of this.portraitDocks) {
-            if (insert.imgId == imgId && !insert.deleting) {
-                insert.deleting = true;
-                toRemoveInsert = insert;
-                break;
-            }
-        }
+        const textBoxFilter =
+            (textBox: HTMLElement) =>
+                textBox.getAttribute("imgId") == theatreId && !textBox.getAttribute("deleting");
 
-        for (const textBox of Theatre.instance._getTextBoxes()) {
-            if (textBox.getAttribute("imgId") == imgId && !textBox.getAttribute("deleting")) {
-                textBox.setAttribute("deleting", "true");
-                toRemoveTextBox = <HTMLElement>textBox;
-                break;
-            }
-        }
+        const toRemoveTextBox: HTMLElement = Theatre.instance._getTextBoxes().filter(textBoxFilter);
+
+        toRemoveInsert.deleting = true;
 
         if (toRemoveInsert && !toRemoveTextBox ||
             !toRemoveInsert && toRemoveTextBox)
-            logger.error("TODO")
+            console.error("Illegal Program State")
 
         if (!toRemoveInsert || !toRemoveTextBox)
             return null;
@@ -115,23 +123,30 @@ export default class Stage {
             remote);
     }
 
-    getInsertByName(name: string): PortraitDock {
+    /**
+     * @private
+     */
+    _getInsertToRemove() {
+
+    }
+
+    getInsertByName(name: string): StageInsert {
         return this.getInsertBy(dock => dock.name == name);
     }
 
-    getInsertById(theatreId: string): PortraitDock {
+    getInsertById(theatreId: string): StageInsert {
         return this.getInsertBy(dock => dock.imgId == theatreId);
     }
 
-    getInsertBy(filter: (dock: PortraitDock) => boolean): PortraitDock {
+    getInsertBy(filter: (dock: StageInsert) => boolean): StageInsert {
 
-        for (let idx = this.portraitDocks.length - 1; idx >= 0; --idx) {
+        for (let idx = this.stageInserts.length - 1; idx >= 0; --idx) {
 
-            const portraitDock = this.portraitDocks[idx];
+            const portraitDock = this.stageInserts[idx];
 
             // WMW: I don't know why this is there, I just found it roughly like so..
-            if (!this.portraitDocks[idx].dockContainer) {
-                this.portraitDocks.splice(idx, 1);
+            if (!this.stageInserts[idx].dockContainer) {
+                this.stageInserts.splice(idx, 1);
                 console.error(`Illegal Portrait Dock state for ${portraitDock.imgId}`)
                 continue;
             }
@@ -173,8 +188,20 @@ export default class Stage {
         this.pixiApplication.renderer.view.width = dockWidth;
         this.pixiApplication.renderer.view.height = dockHeight;
 
-        this.pixiApplication.renderer.resize(dockWidth, dockHeight);
+        this.maybeReapplyRelativePortraitSize();
 
+        this.pixiApplication.renderer.resize(dockWidth, dockHeight);
         // TODO update size of portraits, now that they support relative heights
+    }
+
+    maybeReapplyRelativePortraitSize() {
+
+        const imageSizeStr: string = TheatreSettings.getTheatreImageSize();
+        if (!imageSizeStr.endsWith("%"))
+            return; // no-op
+
+        for (const insert of this.stageInserts) {
+            new Portrait(this, insert).updatePortraitDimensions();
+        }
     }
 }

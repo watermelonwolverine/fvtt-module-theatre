@@ -149,39 +149,23 @@ export default class Theatre {
 		}
 
 		this.theatreGroup.id = "theatre-group";
-
 		this.theatreToolTip.id = "theatre-tooltip";
-		this.theatreBar = document.createElement("div");
-		this.theatreBar.id = "theatre-bar";
+
 		this.theatreNarrator = document.createElement("div");
 		this.theatreNarrator.id = "theatre-narrator";
-		//this.theatreError = document.createElement("div"); 
-		//this.theatreError.id = "theatre-error"; 
-
-		let barContainerPrime = document.createElement("div");
-		let barContainerSecond = document.createElement("div");
-		barContainerPrime.id = "theatre-prime-bar";
-		barContainerSecond.id = "theatre-second-bar";
 
 		let narratorBackdrop = document.createElement("div");
 		let narratorContent = document.createElement("div");
 
-		KHelpers.addClass(barContainerPrime, "theatre-bar-left");
-		KHelpers.addClass(barContainerSecond, "theatre-bar-right");
+
 		KHelpers.addClass(narratorBackdrop, "theatre-narrator-backdrop");
 		KHelpers.addClass(narratorContent, "theatre-narrator-content");
 		KHelpers.addClass(narratorContent, "no-scrollbar");
 		KHelpers.addClass(this.theatreGroup, "theatre-group");
-
-
-		KHelpers.addClass(this.theatreBar, "theatre-bar");
 		KHelpers.addClass(this.theatreNarrator, "theatre-narrator");
 
 		this.theatreNarrator.appendChild(narratorBackdrop);
 		this.theatreNarrator.appendChild(narratorContent);
-
-		this.theatreBar.appendChild(barContainerPrime);
-		this.theatreBar.appendChild(barContainerSecond);
 
 		this.theatreGroup.appendChild(this.stage.theatreDock);
 		this.theatreGroup.appendChild(this.theatreBar);
@@ -428,7 +412,7 @@ export default class Theatre {
 		this.settings.theatreStyle = theatreStyle;
 
 		// re-render all inserts
-		for (let insert of this.stage.portraitDocks)
+		for (let insert of this.stage.stageInserts)
 			this.renderInsertById(insert.imgId);
 
 		// apply resize adjustments (ev is unused)
@@ -596,8 +580,8 @@ export default class Theatre {
 	 */
 	_buildResyncData() {
 		let insertData = [];
-		for (let idx = 0; idx < this.stage.portraitDocks.length; ++idx) {
-			let insert = this.stage.portraitDocks[idx];
+		for (let idx = 0; idx < this.stage.stageInserts.length; ++idx) {
+			let insert = this.stage.stageInserts[idx];
 			let insertEmote = this._getEmoteFromInsert(insert);
 			let insertTextFlyin = this._getTextFlyinFromInsert(insert);
 			let insertTextStanding = this._getTextStandingFromInsert(insert);
@@ -695,7 +679,7 @@ export default class Theatre {
 			return;
 		} else if (type == "players") {
 			// clear our theatre
-			for (let insert of this.stage.portraitDocks)
+			for (let insert of this.stage.stageInserts)
 				this.stage.removeInsertById(insert.imgId, true);
 			// process this as if it were a resyncevent
 			this.resync.timeoutId = 1;
@@ -731,7 +715,7 @@ export default class Theatre {
 			this.resync.timeoutId = null;
 
 			// clear our theatre
-			for (let insert of this.stage.portraitDocks)
+			for (let insert of this.stage.stageInserts)
 				this.stage.removeInsertById(insert.imgId, true);
 
 			if (type == "gm")
@@ -1857,7 +1841,7 @@ export default class Theatre {
 		// let the ticker update all its objects
 		this.stage.pixiApplication.ticker.update(time);
 		// this.stage.pixiCTX.renderer.clear(); // PIXI.v6 does not respect transparency for clear
-		for (let insert of this.stage.portraitDocks) {
+		for (let insert of this.stage.stageInserts) {
 			if (insert.dockContainer) {
 				if (Theatre.DEBUG) this.updateTheatreDebugInfo(insert);
 				// PIXI.v6 The renderer should not clear the canvas on rendering
@@ -1980,8 +1964,8 @@ export default class Theatre {
 			// destroy self
 			insert.dockContainer.destroy();
 			insert.dockContainer = null;
-			let idx = this.stage.portraitDocks.findIndex(e => e.imgId == imgId);
-			this.stage.portraitDocks.splice(idx, 1);
+			let idx = this.stage.stageInserts.findIndex(e => e.imgId == imgId);
+			this.stage.stageInserts.splice(idx, 1);
 			// The "MyTab" module inserts another element with id "pause". Use querySelectorAll to make sure we catch both
 			if (game.settings.get(TheatreSettings.NAMESPACE, TheatreSettings.SHIFT_PAUSE_ICON))
 				document.querySelectorAll("#pause").forEach(ele => KHelpers.removeClass(ele, "theatre-centered"));
@@ -2662,7 +2646,7 @@ export default class Theatre {
 	/**
 	 * Scour the theatreBar for all text boxes
 	 *
-	 * @return (Array[HTMLElement]) : An array of HTMLElements which are the textboxes
+	 * @return {Array[HTMLElement]} : An array of HTMLElements which are the textboxes
 	 *
 	 */
 	_getTextBoxes() {
@@ -2867,7 +2851,7 @@ export default class Theatre {
 			console.log('ID "%s" already exists! Refusing to inject %s', imgId, portName);
 			return;
 		}
-		if (this.stage.portraitDocks.length == 1) {
+		if (this.stage.stageInserts.length == 1) {
 			// inject Right instread
 			this.injectRightPortrait(imgPath, portName, imgId, optAlign, emotions, remote);
 			return;
@@ -2912,7 +2896,7 @@ export default class Theatre {
 			console.log('ID "%s" already exists! Refusing to inject %s', imgId, portName);
 			return;
 		}
-		if (this.stage.portraitDocks.length == 0) {
+		if (this.stage.stageInserts.length == 0) {
 			// inject Left instread
 			this.injectLeftPortrait(imgPath, portName, imgId, optAlign, emotions, remote);
 			return;
@@ -2956,7 +2940,7 @@ export default class Theatre {
 		let id = null,
 			toRemoveInsert,
 			toRemoveTextBox;
-		for (let insert of this.stage.portraitDocks) {
+		for (let insert of this.stage.stageInserts) {
 			if (insert.name == name && !insert.deleting) {
 				id = insert.imgId;
 				//insert.parentNode.removeChild(insert); 
@@ -3120,7 +3104,7 @@ export default class Theatre {
 	 * @return (Number) : The number of inserts in the dock
 	 */
 	get dockActive() {
-		return this.stage.portraitDocks.length;
+		return this.stage.stageInserts.length;
 	}
 
 	/**
@@ -3275,13 +3259,13 @@ export default class Theatre {
 	 * @params remote (Boolean) : Wither this is being invoked remotely, or locally. 
 	 */
 	swapInsertsById(id1, id2, remote) {
-		if (this.stage.portraitDocks.length < 2) return;
+		if (this.stage.stageInserts.length < 2) return;
 
 		let insert1,
 			insert2,
 			textBox1,
 			textBox2;
-		for (let insert of this.stage.portraitDocks) {
+		for (let insert of this.stage.stageInserts) {
 			if (insert.imgId == id1 && !insert1)
 				insert1 = insert;
 			else if (insert.imgId == id2 && !insert2)
@@ -3309,7 +3293,7 @@ export default class Theatre {
 	 * @params remote (Boolean) : Wither this is being invoked remotely, or locally. 
 	 */
 	swapInsertsByName(name1, name2, remote) {
-		if (this.stage.portraitDocks.length < 2) return;
+		if (this.stage.stageInserts.length < 2) return;
 
 		let insert1,
 			insert2,
@@ -3317,7 +3301,7 @@ export default class Theatre {
 			textBox2;
 		name1 = name1.toLowerCase();
 		name2 = name2.toLowerCase();
-		for (let insert of this.stage.portraitDocks) {
+		for (let insert of this.stage.stageInserts) {
 			if (insert.name == name1 && !insert1)
 				insert1 = insert;
 			else if (insert.name == name2 && !insert2)
@@ -3432,13 +3416,13 @@ export default class Theatre {
 	 * @params remote (Boolean) : Wither this is being invoked remotely, or locally. 
 	 */
 	moveInsertById(id1, id2, remote) {
-		if (this.stage.portraitDocks.length < 2) return;
+		if (this.stage.stageInserts.length < 2) return;
 
 		let insert1,
 			insert2,
 			textBox1,
 			textBox2;
-		for (let insert of this.stage.portraitDocks) {
+		for (let insert of this.stage.stageInserts) {
 			if (insert.imgId == id1 && !insert1)
 				insert1 = insert;
 			else if (insert.imgId == id2 && !insert2)
@@ -3581,11 +3565,11 @@ export default class Theatre {
 	 * @params remote (Boolean) : Wither this is being invoked remotely, or locally. 
 	 */
 	pushInsertById(id, isLeft, remote) {
-		if (this.stage.portraitDocks.length <= 2) return;
+		if (this.stage.stageInserts.length <= 2) return;
 
 		let targInsert;
 		let targTextBox;
-		for (let insert of this.stage.portraitDocks) {
+		for (let insert of this.stage.stageInserts) {
 			if (insert.imgId == id) {
 				targInsert = insert;
 				break;
@@ -3610,11 +3594,11 @@ export default class Theatre {
 	 * @params remote (Boolean) : Wither this is being invoked remotely, or locally. 
 	 */
 	pushInsertByName(name, isLeft, remote) {
-		if (this.stage.portraitDocks.length <= 2) return;
+		if (this.stage.stageInserts.length <= 2) return;
 
 		let targInsert;
 		let targTextBox;
-		for (let insert of this.stage.portraitDocks) {
+		for (let insert of this.stage.stageInserts) {
 			if (insert.name == name) {
 				targInsert = insert;
 				break;
@@ -3642,8 +3626,8 @@ export default class Theatre {
 	 */
 	_pushInsert(insert, textBox, isLeft, remote) {
 		let textBoxes = this._getTextBoxes();
-		let firstInsert = this.stage.portraitDocks[0];
-		let lastInsert = this.stage.portraitDocks[this.stage.portraitDocks.length - 1];
+		let firstInsert = this.stage.stageInserts[0];
+		let lastInsert = this.stage.stageInserts[this.stage.stageInserts.length - 1];
 		let firstTextBox = textBoxes[0];
 		let lastTextBox = textBoxes[textBoxes.length - 1];
 
@@ -4882,11 +4866,11 @@ export default class Theatre {
 	static setDebug(state) {
 		if (state) {
 			Theatre.DEBUG = true;
-			for (let insert of Theatre.instance.stage.portraitDocks)
+			for (let insert of Theatre.instance.stage.stageInserts)
 				Theatre.instance.renderInsertById(insert.imgId);
 		} else {
 			Theatre.DEBUG = false;
-			for (let insert of Theatre.instance.stage.portraitDocks)
+			for (let insert of Theatre.instance.stage.stageInserts)
 				Theatre.instance.renderInsertById(insert.imgId);
 		}
 	}
