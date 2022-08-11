@@ -1,5 +1,6 @@
 import Theatre from "../Theatre.js";
 import KHelpers from "../workers/KHelpers.js";
+import getTheatreId from "../workers/Tools.js";
 import PortraitDock from "./PortraitDock.js"
 import TheatreActor from "./TheatreActor.js"
 import TheatreStyle from "./TheatreStyle.js";
@@ -107,7 +108,7 @@ export default class Stage {
 
         if (toRemoveInsert && !toRemoveTextBox ||
             !toRemoveInsert && toRemoveTextBox)
-            logger.error("OOF")
+            logger.error("TODO")
 
         if (!toRemoveInsert || !toRemoveTextBox)
             return null;
@@ -116,5 +117,21 @@ export default class Stage {
             toRemoveInsert,
             toRemoveTextBox,
             remote);
+    }
+
+    removeActorFromStage(theatreActorId: string) {
+        this.removeInsertById(theatreActorId);
+        delete this.actors[theatreActorId];
+    }
+
+    /**
+     * Returns whether the actor is on the stage.
+     * @params actor (Actor) : The actor. 
+     */
+    isActorStaged(actor: Actor) {
+        if (!actor)
+            throw "NullPointerException";
+            
+        return this.actors[getTheatreId(actor)]
     }
 }

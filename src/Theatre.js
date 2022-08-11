@@ -32,6 +32,7 @@ import TheatreActor from './types/TheatreActor.js';
 import Stage from './types/Stage.js';
 import TheatreSettingsInitializer from './workers/SettingsInitializer.js';
 import TheatreStyle from './types/TheatreStyle.js';
+import getTheatreId from "../workers/Tools.js";
 
 export default class Theatre {
 
@@ -6079,19 +6080,16 @@ export default class Theatre {
 		const addLabel = removeLabelSheetHeader ? "" : game.i18n.localize("Theatre.UI.Config.AddToStage");
 		const removeLabel = removeLabelSheetHeader ? "" : game.i18n.localize("Theatre.UI.Config.RemoveFromStage");
 		let newText;
-		if (Theatre.isActorStaged(actor)) {
+		if (Theatre.instance.stage.isActorStaged(actor)) {
 			Theatre.removeFromNavBar(actor)
 			newText = addLabel
 		} else {
 			Theatre.addToNavBar(actor);
 			newText = removeLabel;
 		}
-		ev.currentTarget.innerHTML = Theatre.isActorStaged(actor) ? `<i class="fas fa-theater-masks"></i>${newText}` : `<i class="fas fa-mask"></i>${newText}`;
+		ev.currentTarget.innerHTML = Theatre.isntance.stage.isActorStaged(actor) ? `<i class="fas fa-theater-masks"></i>${newText}` : `<i class="fas fa-mask"></i>${newText}`;
 	}
 
-	static _getTheatreId(actor) {
-		return `theatre-${actor._id}`;
-	}
 
 	/**
 	 * Add to the NavBar staging area
@@ -6109,7 +6107,7 @@ export default class Theatre {
 		// add click handler to push it into the theatre bar, if it already exists on the bar, remove it
 		// from the bar
 		// add click handler logic to remove it from the stage
-		let theatreId = Theatre._getTheatreId(actor);
+		let theatreId = getTheatreId(actor);
 		let portrait = (actor.img ? actor.img : "icons/mystery-man.png");
 		let optAlign = "top";
 		let name = actor.name;
@@ -6168,7 +6166,7 @@ export default class Theatre {
 	 */
 	static removeFromNavBar(actor) {
 		if (!actor) return;
-		const theatreId = Theatre._getTheatreId(actor);
+		const theatreId = getTheatreId(actor);
 		Theatre.instance._removeFromStage(theatreId);
 
 	}
@@ -6184,24 +6182,12 @@ export default class Theatre {
 			if (staged.navElement) {
 				Theatre.instance.theatreNavBar.removeChild(staged.navElement);
 			}
-			Theatre.instance.stage.removeInsertById(theatreId);
-			delete Theatre.instance.stage.actors[theatreId];
+
+			this.stage.removeActorFromStage(theatreId)
 		}
 	}
 
-	/**
-	 * Returns whether the actor is on the stage.
-	 * @params actor (Actor) : The actor. 
-	 */
-	static isActorStaged(actor) {
-		if (!actor) return false;
-		return !!Theatre.instance.stage.actors[Theatre._getTheatreId(actor)]
-	}
 
-	static clearStage() {
-		Object.keys(Theatre.instance.stage).forEach(theatreId => {
-			Theatre._removeFromStage(theatreId);
-		})
-	}
+
 }
 

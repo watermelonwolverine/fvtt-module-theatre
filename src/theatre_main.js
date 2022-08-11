@@ -66,7 +66,7 @@ Hooks.on("getActorSheetHeaderButtons", (app, buttons) => {
 		}
 
 		const removeLabelSheetHeader = game.settings.get(TheatreSettings.NAMESPACE, TheatreSettings.REMOVE_LABEL_SHEET_HEADER);
-		let label = Theatre.isActorStaged(app.object.data) ? "Theatre.UI.Config.RemoveFromStage" : "Theatre.UI.Config.AddToStage";
+		let label = Theatre.instance.stage.isActorStaged(app.object.data) ? "Theatre.UI.Config.RemoveFromStage" : "Theatre.UI.Config.AddToStage";
 		label = removeLabelSheetHeader ? "" : label;
 
 		theatreButtons.push({
@@ -474,12 +474,12 @@ Hooks.on("getActorDirectoryEntryContext", async (html, options) => {
 
 	options.splice(3, 0, {
 		name: "Add to Stage",
-		condition: target => !Theatre.isActorStaged(getActorData(target)),
+		condition: target => !Theatre.instance.stage.isActorStaged(getActorData(target)),
 		icon: '<i class="fas fa-theater-masks"></i>',
 		callback: target => Theatre.addToNavBar(getActorData(target))
 	}, {
 		name: "Remove from Stage",
-		condition: target => Theatre.isActorStaged(getActorData(target)),
+		condition: target => Theatre.instance.stage.isActorStaged(getActorData(target)),
 		icon: '<i class="fas fa-theater-masks"></i>',
 		callback: target => Theatre.removeFromNavBar(getActorData(target))
 	});
