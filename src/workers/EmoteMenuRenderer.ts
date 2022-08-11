@@ -54,8 +54,6 @@ export default class EmoteMenuRenderer {
 
         this.configure_selects(insert);
 
-
-
         // bind click listeners for the textanim elements to animate a preview
         // hover-off will reset the text content
 
@@ -102,7 +100,7 @@ export default class EmoteMenuRenderer {
         for (let e of textAnims) {
             let font = fontSelect.value;
             this.context.applyFontFamily(e, font);
-            (<HTMLElement>e).addEventListener("wheel", this.wheelFunc2);
+            (<HTMLElement>e).addEventListener("wheel", ev => this.wheelFunc2(ev));
         }
     }
     configure_size_select(insert: PortraitDock) {
@@ -197,7 +195,7 @@ export default class EmoteMenuRenderer {
 
         const textflying_box = <HTMLElement>this.context.theatreEmoteMenu.getElementsByClassName("textflyin-box")[0];
         const theatre_container_column = <HTMLElement>textflying_box.getElementsByClassName("theatre-container-column")[0];
-        (<HTMLElement>theatre_container_column).addEventListener("wheel", this.wheelFunc);
+        (<HTMLElement>theatre_container_column).addEventListener("wheel", ev => this.wheelFunc(ev));
 
         for (let child_ of theatre_container_column.children) {
 
@@ -285,7 +283,7 @@ export default class EmoteMenuRenderer {
         const textStanding_Box = <HTMLElement>this.context.theatreEmoteMenu.getElementsByClassName("textstanding-box")[0];
         const standingBox = <HTMLElement>textStanding_Box.getElementsByClassName("theatre-container-column")[0];
 
-        (<HTMLElement>standingBox).addEventListener("wheel", this.wheelFunc)
+        (<HTMLElement>standingBox).addEventListener("wheel", ev => this.wheelFunc(ev))
 
         for (let child_ of standingBox.children) {
 

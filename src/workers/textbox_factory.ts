@@ -67,16 +67,16 @@ export default class _TextBoxFactory {
                 && !ev.shiftKey
                 && !ev.altKey) {
                 // if old dragPoint exists reset the style, and clear any interval that may exist
-                if (!!Theatre.instance.dragPoint && !!Theatre.instance.dragPoint.insert) {
+                if (!!this.context.dragPoint && !!this.context.dragPoint.insert) {
                     console.log("PREXISTING DRAGPOINT!");
-                    //Theatre.instance.dragPoint.port.style.transition = "top 0.5s ease, left 0.5s ease, transform 0.5s ease"; 
+                    //this.context.dragPoint.port.style.transition = "top 0.5s ease, left 0.5s ease, transform 0.5s ease"; 
                 }
                 // calculate bouding box
                 let boundingBox: { [key: string]: number } = {};
-                let insert = Theatre.instance.getInsertById(id);
+                let insert = this.context.getInsertById(id);
 
                 // permission check
-                if (!Theatre.instance.isActorOwner(game.user.id, insert.imgId)) {
+                if (!this.context.isActorOwner(game.user.id, insert.imgId)) {
                     ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.DoNotControl"));
                     return;
                 }
@@ -101,7 +101,7 @@ export default class _TextBoxFactory {
                 //port.style.transition = "top 0.5s ease, left 0.5s ease, transform 0.5s ease"; 
 
                 // normal mouse down, start "drag" tracking
-                Theatre.instance.dragPoint = {
+                this.context.dragPoint = {
                     otop: origY,
                     oleft: origX,
                     ix: (ev.clientX || ev.pageX),
@@ -110,12 +110,12 @@ export default class _TextBoxFactory {
                     box: boundingBox,
                 }
                 // bind listeners
-                window.removeEventListener("mouseup", Theatre.instance.handleWindowMouseUp);
-                window.addEventListener("mouseup", Theatre.instance.handleWindowMouseUp);
+                window.removeEventListener("mouseup", this.context.handleWindowMouseUp);
+                window.addEventListener("mouseup", this.context.handleWindowMouseUp);
                 ev.stopPropagation();
             }
         } else if (ev.button == 2) {
-            Theatre.instance.swapTarget = id;
+            this.context.swapTarget = id;
             ev.stopPropagation();
         }
     }
@@ -129,7 +129,7 @@ export default class _TextBoxFactory {
     handleTextBoxMouseDoubleClick(ev: MouseEvent) {
         if (Theatre.DEBUG) console.log("MOUSE DOUBLE CLICK");
         let id = (ev.currentTarget as HTMLElement).getAttribute("imgId");
-        Theatre.instance.resetInsertById(id);
+        this.context.resetInsertById(id);
     }
 
     /**
@@ -143,45 +143,45 @@ export default class _TextBoxFactory {
         let chatMessage = document.getElementById("chat-message");
         if (ev.button == 0) {
             if (ev.ctrlKey) {
-                Theatre.instance.decayTextBoxById(id);
+                this.context.decayTextBoxById(id);
                 ev.stopPropagation();
             } else if (ev.shiftKey) {
-                Theatre.instance.pushInsertById(id, true);
+                this.context.pushInsertById(id, true);
                 chatMessage.focus();
                 ev.stopPropagation();
             } else if (ev.altKey) {
                 // activate navitem
                 // activate insert
-                Theatre.instance.activateInsertById(id, ev);
+                this.context.activateInsertById(id, ev);
             }
         } else if (ev.button == 2) {
             if (ev.ctrlKey) {
-                Theatre.instance.stage.removeInsertById(id);
+                this.context.stage.removeInsertById(id);
                 ev.stopPropagation();
             } else if (ev.shiftKey) {
-                if (Theatre.instance.swapTarget
-                    && Theatre.instance.swapTarget != id) {
-                    Theatre.instance.swapInsertsById(id, Theatre.instance.swapTarget);
-                    Theatre.instance.swapTarget = null;
+                if (this.context.swapTarget
+                    && this.context.swapTarget != id) {
+                    this.context.swapInsertsById(id, this.context.swapTarget);
+                    this.context.swapTarget = null;
                 } else {
-                    Theatre.instance.pushInsertById(id, false);
+                    this.context.pushInsertById(id, false);
                 }
                 chatMessage.focus();
                 ev.stopPropagation();
             } else if (ev.altKey) {
                 let actor = game.actors.get(id.replace("theatre-", ""));
-                Theatre.addToNavBar(actor.data);
-            } else if (Theatre.instance.swapTarget) {
-                if (Theatre.instance.swapTarget != id) {
-                    //Theatre.instance.swapInsertsById(id,Theatre.instance.swapTarget); 
-                    Theatre.instance.moveInsertById(id, Theatre.instance.swapTarget);
-                    Theatre.instance.swapTarget = null;
+                this.context.addToNavBar(actor.data);
+            } else if (this.context.swapTarget) {
+                if (this.context.swapTarget != id) {
+                    //this.context.swapInsertsById(id,this.context.swapTarget); 
+                    this.context.moveInsertById(id, this.context.swapTarget);
+                    this.context.swapTarget = null;
                 } else {
-                    Theatre.instance.mirrorInsertById(id);
+                    this.context.mirrorInsertById(id);
                 }
                 ev.stopPropagation();
                 chatMessage.focus();
-                Theatre.instance.swapTarget = null;
+                this.context.swapTarget = null;
             }
         }
     }

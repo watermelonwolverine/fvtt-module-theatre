@@ -7,16 +7,14 @@ import TheatreStyle from "./TheatreStyle.js";
 
 export default class Stage {
 
-    actors: {
-        [key: string]: TheatreActor
-    };
+    actors: Map<string, TheatreActor>;
 
     portraitDocks: PortraitDock[];
     theatreDock: HTMLCanvasElement;
     pixiCTX: PIXI.Application;
 
     constructor() {
-        this.actors = {};
+        this.actors = new Map();
         this.portraitDocks = [];
     }
 
@@ -121,7 +119,7 @@ export default class Stage {
 
     removeActorFromStage(theatreActorId: string) {
         this.removeInsertById(theatreActorId);
-        delete this.actors[theatreActorId];
+        this.actors.delete(theatreActorId);
     }
 
     /**
@@ -130,8 +128,8 @@ export default class Stage {
      */
     isActorStaged(actor: Actor) {
         if (!actor)
-            throw "NullPointerException";
-            
-        return this.actors[getTheatreId(actor)]
+            return false;
+
+        return this.actors.has(getTheatreId(actor));
     }
 }

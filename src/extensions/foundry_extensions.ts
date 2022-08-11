@@ -36,6 +36,7 @@ declare global {
 	}
 
 	interface Actor {
+		_id: string;
 		data: ActorData;
 		name: string;
 	}

@@ -73,9 +73,8 @@ Hooks.on("getActorSheetHeaderButtons", (app, buttons) => {
 			label: label,
 			class: "add-to-theatre-navbar",
 			icon: "fas fa-theater-masks",
-			onclick: ev => {
-				Theatre.onAddToNavBar(ev, app.object.sheet);
-			}
+			onclick: ev => Theatre.instance.onAddToNavBar(ev, app.object.sheet)
+
 		})
 	}
 	buttons.unshift(...theatreButtons)
@@ -476,12 +475,12 @@ Hooks.on("getActorDirectoryEntryContext", async (html, options) => {
 		name: "Add to Stage",
 		condition: target => !Theatre.instance.stage.isActorStaged(getActorData(target)),
 		icon: '<i class="fas fa-theater-masks"></i>',
-		callback: target => Theatre.addToNavBar(getActorData(target))
+		callback: target => Theatre.instance.addToNavBar(getActorData(target))
 	}, {
 		name: "Remove from Stage",
 		condition: target => Theatre.instance.stage.isActorStaged(getActorData(target)),
 		icon: '<i class="fas fa-theater-masks"></i>',
-		callback: target => Theatre.removeFromNavBar(getActorData(target))
+		callback: target => Theatre.instance.removeFromNavBar(getActorData(target))
 	});
 });
 
@@ -519,7 +518,7 @@ Hooks.once("init", () => {
 		onDown: () => {
 			const ownedActors = game.actors.filter(a => a.permission === 3);
 			const ownedTokens = ownedActors.map(a => a.getActiveTokens());
-			for (const tokenArray of ownedTokens) tokenArray.forEach(t => Theatre.addToNavBar(t.actor.data));
+			for (const tokenArray of ownedTokens) tokenArray.forEach(t => Theatre.instance.addToNavBar(t.actor.data));
 		},
 		restricted: false
 	});
@@ -532,7 +531,7 @@ Hooks.once("init", () => {
 			modifiers: ['Shift']
 		}],
 		onDown: () => {
-			for (const tkn of canvas.tokens.controlled) Theatre.addToNavBar(tkn.actor.data);
+			for (const tkn of canvas.tokens.controlled) Theatre.instance.addToNavBar(tkn.actor.data);
 		},
 		restricted: false
 	});

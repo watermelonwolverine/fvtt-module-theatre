@@ -2877,7 +2877,14 @@ export default class Theatre {
 		if (navItem)
 			KHelpers.addClass(navItem, "theatre-control-nav-bar-item-active");
 
-		let dock = this.workers.pixi_container_factory.createPortraitPIXIContainer(imgPath, portName, imgId, optAlign, emotions, true);
+		let dock = this.workers.pixi_container_factory.createPortraitPIXIContainer(
+			imgPath,
+			portName,
+			imgId,
+			optAlign,
+			emotions,
+			true);
+
 		let textBox = this.workers.textbox_factory.create_textbox(portName, imgId);
 
 		// NOTE: we leave insert container positioning up to reorderInserts
@@ -4065,7 +4072,7 @@ export default class Theatre {
 		let navItem = this.getNavItemById(id);
 		if (!navItem) {
 			let actor = game.actors.get(actorId);
-			Theatre.addToNavBar(actor.data);
+			this.addToNavBar(actor.data);
 			navItem = this.getNavItemById(id);
 		}
 		if (!navItem) return;
@@ -4877,12 +4884,15 @@ export default class Theatre {
 	 * @param ev (Event) : The Event that triggered this handler
 	 */
 	handleNavItemMouseUp(ev) {
-		let navItem = ev.currentTarget;
+
 		let id = ev.currentTarget.getAttribute("imgId");
 		let actorId = id.replace("theatre-", "");
-		let params = Theatre.instance._getInsertParamsFromActorId(actorId);
+		let params = this._getInsertParamsFromActorId(actorId);
+
 		if (!params) {
-			console.log("ERROR, actorId %s does not exist!", actorId);
+			ui.notifications.error(`ERROR, actorId ${actorId}%s does not exist!`);
+			// TODO SHOW ERROR MESSAGE
+			console.error("ERROR, actorId %s does not exist!", actorId);
 			// remove the nav Item
 			ev.currentTarget.parentNode.removeChild(ev.currentTarget);
 			return;
@@ -4892,14 +4902,14 @@ export default class Theatre {
 
 		switch (ev.button) {
 			case 0:
-				Theatre.instance.activateInsertById(id, ev);
+				this.activateInsertById(id, ev);
 				break;
 			case 2:
-				let removed = Theatre.instance.stage.removeInsertById(id);
-				let cimg = Theatre.instance.getTheatreCoverPortrait();
+				let removed = this.stage.removeInsertById(id);
+				let cimg = this.getTheatreCoverPortrait();
 				if (ev.ctrlKey) {
 					// unstage the actor
-					Theatre.instance._removeFromStage(id);
+					this._removeFromStage(id);
 					return;
 				}
 				if (!removed) {
@@ -4910,17 +4920,17 @@ export default class Theatre {
 
 					// determine if to launch with actor saves or default settings
 					if (ev.altKey)
-						emotions = Theatre.instance._getInitialEmotionSetFromInsertParams(params, true);
+						emotions = this._getInitialEmotionSetFromInsertParams(params, true);
 					else
-						emotions = Theatre.instance._getInitialEmotionSetFromInsertParams(params);
+						emotions = this._getInitialEmotionSetFromInsertParams(params);
 
 					if (!ev.shiftKey) {
 						if (game.user.isGM)
-							Theatre.instance.injectLeftPortrait(src, name, id, optAlign, emotions);
+							this.injectLeftPortrait(src, name, id, optAlign, emotions);
 						else
-							Theatre.instance.injectRightPortrait(src, name, id, optAlign, emotions);
+							this.injectRightPortrait(src, name, id, optAlign, emotions);
 					} else
-						Theatre.instance.injectRightPortrait(src, name, id, optAlign, emotions);
+						this.injectRightPortrait(src, name, id, optAlign, emotions);
 
 				}
 				break;
@@ -5689,23 +5699,23 @@ export default class Theatre {
 	 *
 	 * @params ev (Event) : The event that triggered adding to the NavBar staging area.
 	 */
-	static onAddToNavBar(ev, actorSheet) {
+	onAddToNavBar(ev, actorSheet) {
 
-		const removeLabelSheetHeader = game.settings.get(TheatreSettings.NAMESPACE, TheatreSettings.REMOVE_LABEL_SHEET_HEADER);
+		const removeLabelSheetHeader = TheatreSettings.get(TheatreSettings.REMOVE_LABEL_SHEET_HEADER);
 
 		if (Theatre.DEBUG) console.log("Click Event on Add to NavBar!!", actorSheet, actorSheet.actor, actorSheet.position);
 		const actor = actorSheet.object.data;
 		const addLabel = removeLabelSheetHeader ? "" : game.i18n.localize("Theatre.UI.Config.AddToStage");
 		const removeLabel = removeLabelSheetHeader ? "" : game.i18n.localize("Theatre.UI.Config.RemoveFromStage");
 		let newText;
-		if (Theatre.instance.stage.isActorStaged(actor)) {
-			Theatre.removeFromNavBar(actor)
+		if (this.stage.isActorStaged(actor)) {
+			this.removeFromNavBar(actor)
 			newText = addLabel
 		} else {
-			Theatre.addToNavBar(actor);
+			this.addToNavBar(actor);
 			newText = removeLabel;
 		}
-		ev.currentTarget.innerHTML = Theatre.isntance.stage.isActorStaged(actor) ? `<i class="fas fa-theater-masks"></i>${newText}` : `<i class="fas fa-mask"></i>${newText}`;
+		ev.currentTarget.innerHTML = this.stage.isActorStaged(actor) ? `<i class="fas fa-theater-masks"></i>${newText}` : `<i class="fas fa-mask"></i>${newText}`;
 	}
 
 
@@ -5714,7 +5724,7 @@ export default class Theatre {
 	 *
 	 * @params actor (Actor) : The actor from which to add to the NavBar staging area. 
 	 */
-	static addToNavBar(actor) {
+	addToNavBar(actor) {
 		if (!actor) return;
 		if (Theatre.DEBUG) console.log("actor is valid!");
 		// if already on stage, dont add it again
@@ -5730,7 +5740,7 @@ export default class Theatre {
 		let optAlign = "top";
 		let name = actor.name;
 
-		if (!Theatre.instance.isActorOwner(game.user.id, theatreId)) {
+		if (!this.isActorOwner(game.user.id, theatreId)) {
 			ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.DoNotControl"));
 			return;
 		}
@@ -5745,7 +5755,7 @@ export default class Theatre {
 				optAlign = actor.flags.theatre.optalign;
 		}
 
-		if (Theatre.instance.stage.actors[theatreId]) {
+		if (this.stage.actors[theatreId]) {
 			ui.notifications.info(actor.name + game.i18n.localize("Theatre.UI.Notification.AlreadyStaged"));
 			return;
 		}
@@ -5762,19 +5772,19 @@ export default class Theatre {
 		navItem.setAttribute("optalign", optAlign);
 
 		// if the theatreId is present, then set our navItem as active!
-		if (Theatre.instance.getInsertById(theatreId))
+		if (this.getInsertById(theatreId))
 			KHelpers.addClass(navItem, "theatre-control-nav-bar-item-active");
 
-		navItem.addEventListener("mouseup", Theatre.instance.handleNavItemMouseUp);
-		navItem.addEventListener("dragstart", Theatre.instance.handleNavItemDragStart);
-		navItem.addEventListener("dragend", Theatre.instance.handleNavItemDragEnd);
-		navItem.addEventListener("dragover", Theatre.instance.handleNavItemDragOver);
-		navItem.addEventListener("drop", Theatre.instance.handleNavItemDragDrop);
-		Theatre.instance.theatreNavBar.appendChild(navItem);
+		navItem.addEventListener("mouseup", ev => this.handleNavItemMouseUp(ev));
+		navItem.addEventListener("dragstart", ev => this.handleNavItemDragStart(ev));
+		navItem.addEventListener("dragend", ev => this.handleNavItemDragEnd(ev));
+		navItem.addEventListener("dragover", ev => this.handleNavItemDragOver(ev));
+		navItem.addEventListener("drop", ev => this.handleNavItemDragDrop(ev));
+		this.theatreNavBar.appendChild(navItem);
 		// stage event
-		Theatre.instance.stageInsertById(theatreId);
+		this.stageInsertById(theatreId);
 		// Store reference
-		Theatre.instance.stage.actors[theatreId] = new TheatreActor(actor, navItem);
+		this.stage.actors[theatreId] = new TheatreActor(actor, navItem);
 	}
 
 	/**
@@ -5782,10 +5792,13 @@ export default class Theatre {
 	 *
 	 * @params actor (Actor) : The actor to remove from the NavBar staging area. 
 	 */
-	static removeFromNavBar(actor) {
-		if (!actor) return;
+	removeFromNavBar(actor) {
+
+		if (!actor)
+			return;
+
 		const theatreId = getTheatreId(actor);
-		Theatre.instance._removeFromStage(theatreId);
+		this._removeFromStage(theatreId);
 
 	}
 
