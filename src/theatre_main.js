@@ -94,17 +94,17 @@ Hooks.on("sidebarCollapse", function (a, collapsed) {
 
 	if (collapsed) {
 		// set width to 100%
-		Theatre.instance.theatreBar.style.width = "100%";
+		Theatre.instance.stage.theatreBar.style.width = "100%";
 		Theatre.instance.theatreNarrator.style.width = "100%";
 	} else {
 		// set width to sidebar offset size
-		Theatre.instance.theatreBar.style.width = `calc(100% - ${sideBar.offsetWidth +
+		Theatre.instance.stage.theatreBar.style.width = `calc(100% - ${sideBar.offsetWidth +
 			2}px)`;
 		Theatre.instance.theatreNarrator.style.width = `calc(100% - ${sideBar.offsetWidth +
 			2}px)`;
 		if (Theatre.instance._getTextBoxes().length == 2) {
 			let dualWidth = Math.min(
-				Math.floor(Theatre.instance.theatreBar.offsetWidth / 2),
+				Math.floor(Theatre.instance.stage.theatreBar.offsetWidth / 2),
 				650
 			);
 			primeBar.style.width = dualWidth + "px";
@@ -303,7 +303,7 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 
 		if (insert) {
 			// Highlight the most recent speaker's textBox
-			let lastSpeaking = Theatre.instance.theatreBar.getElementsByClassName(
+			let lastSpeaking = Theatre.instance.stage.theatreBar.getElementsByClassName(
 				"theatre-text-box-lastspeaking"
 			);
 			if (lastSpeaking[0]) {

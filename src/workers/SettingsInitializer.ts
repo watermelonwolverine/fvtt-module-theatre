@@ -76,11 +76,7 @@ export default class TheatreSettingsInitializer {
                 "50%": "50%",
                 "70%": "75%"
             },
-            onChange: narrHeight => {
-                Theatre.instance.settings.narrHeight = narrHeight;
-                if (Theatre.instance.theatreNarrator)
-                    Theatre.instance.theatreNarrator.style.top = `calc(${narrHeight} - 50px)`;
-            }
+            onChange: () => Theatre.instance.maybeUpdateNarratorHeight()
         });
 
         this.register<number>("nameFontSize", {
@@ -91,7 +87,7 @@ export default class TheatreSettingsInitializer {
             onChange: debouncedReload
         });
 
-        this.register<number>("textDecayMin", {
+        this.register<number>(TheatreSettings.TEXT_DECAY_MIN, {
             scope: "world",
             config: true,
             default: 30,
@@ -101,20 +97,18 @@ export default class TheatreSettingsInitializer {
                 const textDecayMinValue = textDecayMin.toNearest();
                 if (isNaN(textDecayMinValue) || textDecayMinValue <= 0) {
                     ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.InvalidDecayMin"));
-                    TheatreSettings.set("textDecayMin", 30);
+                    TheatreSettings.set(TheatreSettings.TEXT_DECAY_MIN, 30);
                     return;
                 }
                 if (textDecayMinValue > 600) {
                     ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.TooLongDecayMin"));
-                    TheatreSettings.set("textDecayMin", 600);
+                    TheatreSettings.set(TheatreSettings.TEXT_DECAY_MIN, 600);
                     return;
                 }
-
-                Theatre.instance.settings.decayMin = textDecayMinValue * 1000;
             }
         });
 
-        this.register<number>("textDecayRate", {
+        this.register<number>(TheatreSettings.TEXT_DECAY_RATE, {
             scope: "world",
             config: true,
             default: 1,
@@ -125,16 +119,15 @@ export default class TheatreSettingsInitializer {
                 if (isNaN(textDecayRateValue) || textDecayRateValue <= 0) {
                     textDecayRateValue = 1;
                     ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.InvalidDecayRate"));
-                    TheatreSettings.set("textDecayRate", 1);
+                    TheatreSettings.set(TheatreSettings.TEXT_DECAY_RATE, 1);
                     return;
                 }
                 if (textDecayRateValue > 10) {
                     textDecayRateValue = 10;
                     ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.TooLongDecayRate"));
-                    TheatreSettings.set("textDecayRate", 10);
+                    TheatreSettings.set(TheatreSettings.TEXT_DECAY_RATE, 10);
                     return;
                 }
-                Theatre.instance.settings.decayRate = textDecayRateValue * 1000;
             }
         });
 

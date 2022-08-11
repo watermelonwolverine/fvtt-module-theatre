@@ -64,6 +64,7 @@ export default class Theatre {
 			this.textFont = "SignikaBold";
 			this.fontWeight = "bold";
 			// position/order related
+			this.currentTheatreStyle = undefined;
 			this.reorderTOId = null;
 			this.swapTarget = null;
 			this.dragPoint = null;
@@ -92,24 +93,15 @@ export default class Theatre {
 				timeoutId: null
 			};
 			// configurable settings
-			this.settings = {
-				autoDecay: true,
-				decayRate: 1000,
-				decayMin: 30000,
-				barStyle: TheatreStyle.TEXTBOX,
-				narrHeight: "50%",
-				theatreStyle: undefined,
-			}
 			// module settings
 			TheatreSettingsInitializer.initModuleSettings();
 
 			// Load in default settings (theatreStyle is loaded on HTML Injection)
-			this.settings.decayMin = (game.settings.get("theatre", "textDecayMin") || 30) * 1000;
-			this.settings.decayRate = (game.settings.get("theatre", "textDecayRate") || 1) * 1000;
-			this.settings.motdNewInfo = game.settings.get("theatre", "motdNewInfo") || 1;
 
 			this.emoteMenuRenderer = new EmoteMenuRenderer(this);
-			this.insertReorderer = new InsertReorderer(this);
+			this.insertReorderer = new InsertReorderer(
+				this,
+				this.stage);
 
 		}
 		return Theatre.instance;
@@ -132,6 +124,8 @@ export default class Theatre {
 	 * @private
 	 */
 	_injectHTML() {
+
+		this.stage.init();
 
 		/**
 		 * Theatre Dock + Theatre Bar
@@ -168,17 +162,16 @@ export default class Theatre {
 		this.theatreNarrator.appendChild(narratorContent);
 
 		this.theatreGroup.appendChild(this.stage.theatreDock);
-		this.theatreGroup.appendChild(this.theatreBar);
+		this.theatreGroup.appendChild(this.stage.theatreBar);
 		this.theatreGroup.appendChild(this.theatreNarrator);
 		this.theatreGroup.appendChild(this.theatreToolTip);
 
 		body.appendChild(this.theatreGroup);
 		// set theatreStyle
-		this.settings.theatreStyle = TheatreSettings.get("theatreStyle");
-		this.configTheatreStyle(this.settings.theatreStyle);
+		this.configTheatreStyle(TheatreSettings.getTheatreStyle());
 		// set narrator height
-		this.settings.narrHeight = TheatreSettings.get(TheatreSettings.NARRATOR_HEIGHT);
-		this.theatreNarrator.style.top = `calc(${this.settings.narrHeight} - 50px)`;
+		const narrHeight = TheatreSettings.getNarratorHeight();
+		this.theatreNarrator.style.top = `calc(${narrHeight} - 50px)`;
 
 		// set dock canvas hard dimensions after CSS has caclulated it
 
@@ -323,8 +316,10 @@ export default class Theatre {
 	 * @param theatreStyle (String) : The theatre Style to apply
 	 */
 	configTheatreStyle(theatreStyle) {
-		if (Theatre.DEBUG) console.log("SWITCHING THEATRE BAR MODE : %s from %s", theatreStyle, this.settings.theatreStyle);
-		let oldStyle = this.settings.theatreStyle;
+
+		if (Theatre.DEBUG) console.log("SWITCHING THEATRE BAR MODE : %s from %s", theatreStyle, this.currentTheatreStyle);
+		let oldStyle = this.currentTheatreStyle;
+
 		let primeBar = document.getElementById("theatre-prime-bar");
 		let secondBar = document.getElementById("theatre-second-bar");
 		let textBoxes = this._getTextBoxes();
@@ -373,22 +368,22 @@ export default class Theatre {
 			case TheatreStyle.LIGHTBOX:
 				KHelpers.addClass(primeBar, "theatre-bar-lightleft");
 				KHelpers.addClass(secondBar, "theatre-bar-lightright");
-				this.theatreBar.style.top = "calc(100% - 170px)";
-				this.theatreBar.style.height = "170px";
-				this.theatreBar.style["border-radius"] = "5px 0px 0px 5px";
-				this.theatreBar.style["box-shadow"] = "0 0 40px #000";
-				this.theatreBar.style.background = "linear-gradient(transparent, rgba(20,20,20,0.98) 5%,rgba(20,20,20,0.85) 40%, rgba(20,20,20,0.6) 70%, rgba(20,20,20,0.5) 95%)";
+				this.stage.theatreBar.style.top = "calc(100% - 170px)";
+				this.stage.theatreBar.style.height = "170px";
+				this.stage.theatreBar.style["border-radius"] = "5px 0px 0px 5px";
+				this.stage.theatreBar.style["box-shadow"] = "0 0 40px #000";
+				this.stage.theatreBar.style.background = "linear-gradient(transparent, rgba(20,20,20,0.98) 5%,rgba(20,20,20,0.85) 40%, rgba(20,20,20,0.6) 70%, rgba(20,20,20,0.5) 95%)";
 				for (let tb of textBoxes)
 					KHelpers.addClass(tb, "theatre-text-box-light");
 				break;
 			case TheatreStyle.CLEARBOX:
 				KHelpers.addClass(primeBar, "theatre-bar-clearleft");
 				KHelpers.addClass(secondBar, "theatre-bar-clearright");
-				this.theatreBar.style.top = "calc(100% - 170px)";
-				this.theatreBar.style.height = "170px";
-				this.theatreBar.style["border-radius"] = "unset";
-				this.theatreBar.style["box-shadow"] = "unset";
-				this.theatreBar.style.background = "unset";
+				this.stage.theatreBar.style.top = "calc(100% - 170px)";
+				this.stage.theatreBar.style.height = "170px";
+				this.stage.theatreBar.style["border-radius"] = "unset";
+				this.stage.theatreBar.style["box-shadow"] = "unset";
+				this.stage.theatreBar.style.background = "unset";
 				for (let tb of textBoxes)
 					KHelpers.addClass(tb, "theatre-text-box-clear");
 				break;
@@ -399,17 +394,17 @@ export default class Theatre {
 			default:
 				KHelpers.addClass(primeBar, "theatre-bar-left");
 				KHelpers.addClass(secondBar, "theatre-bar-right");
-				this.theatreBar.style.top = "calc(100% - 160px - 0.5vh)";
-				this.theatreBar.style.height = "160px";
-				this.theatreBar.style["border-radius"] = "unset";
-				this.theatreBar.style["box-shadow"] = "unset";
-				this.theatreBar.style.background = "unset";
+				this.stage.theatreBar.style.top = "calc(100% - 160px - 0.5vh)";
+				this.stage.theatreBar.style.height = "160px";
+				this.stage.theatreBar.style["border-radius"] = "unset";
+				this.stage.theatreBar.style["box-shadow"] = "unset";
+				this.stage.theatreBar.style.background = "unset";
 				for (let tb of textBoxes)
 					KHelpers.addClass(tb, "theatre-text-box");
 				break;
 		}
 
-		this.settings.theatreStyle = theatreStyle;
+		this.currentTheatreStyle = theatreStyle;
 
 		// re-render all inserts
 		for (let insert of this.stage.stageInserts)
@@ -1348,14 +1343,14 @@ export default class Theatre {
 				this._removeDockTween(insert.imgId, null, "typingBounce");
 				// fade away
 				let oy = insert.portrait.height -
-					(insert.optAlign == "top" ? 0 : this.theatreBar.offsetHeight);
+					(insert.optAlign == "top" ? 0 : this.stage.theatreBar.offsetHeight);
 
 				// style specific settings
-				switch (this.settings.theatreStyle) {
+				switch (TheatreSettings.getTheatreStyle()) {
 					case TheatreStyle.LIGHTBOX:
 						break;
 					case TheatreStyle.CLEARBOX:
-						oy += (insert.optAlign == "top" ? 0 : this.theatreBar.offsetHeight);
+						oy += (insert.optAlign == "top" ? 0 : this.stage.theatreBar.offsetHeight);
 						break;
 					case TheatreStyle.MANGABUBBLE:
 						break;
@@ -1427,18 +1422,18 @@ export default class Theatre {
 				this._addDockTween(insert.imgId, tween, tweenId);
 
 				let oy = insert.portrait.height -
-					(insert.optAlign == "top" ? 0 : this.theatreBar.offsetHeight) - insert.label.style.lineHeight * 0.75;
+					(insert.optAlign == "top" ? 0 : this.stage.theatreBar.offsetHeight) - insert.label.style.lineHeight * 0.75;
 				// style specific settings
-				switch (this.settings.theatreStyle) {
+				switch (TheatreSettings.getTheatreStyle()) {
 					case TheatreStyle.CLEARBOX:
 						insert.typingBubble.y = insert.portrait.height;
-						oy += (insert.optAlign == "top" ? 0 : this.theatreBar.offsetHeight);
+						oy += (insert.optAlign == "top" ? 0 : this.stage.theatreBar.offsetHeight);
 						break;
 					case TheatreStyle.MANGABUBBLE:
 					case TheatreStyle.LIGHTBOX:
 					case TheatreStyle.TEXTBOX:
 					default:
-						insert.typingBubble.y = insert.portrait.height - (insert.optAlign == "top" ? 0 : this.theatreBar.offsetHeight);
+						insert.typingBubble.y = insert.portrait.height - (insert.optAlign == "top" ? 0 : this.stage.theatreBar.offsetHeight);
 						break;
 				}
 
@@ -1499,13 +1494,13 @@ export default class Theatre {
 				this._removeDockTween(insert.imgId, null, "typingBounce");
 				// fade away
 				let oy = insert.portrait.height -
-					(insert.optAlign == "top" ? 0 : this.theatreBar.offsetHeight);
+					(insert.optAlign == "top" ? 0 : this.stage.theatreBar.offsetHeight);
 				// style specific settings
-				switch (this.settings.theatreStyle) {
+				switch (TheatreSettings.getTheatreStyle()) {
 					case TheatreStyle.LIGHTBOX:
 						break;
 					case TheatreStyle.CLEARBOX:
-						oy += (insert.optAlign == "top" ? 0 : this.theatreBar.offsetHeight);
+						oy += (insert.optAlign == "top" ? 0 : this.stage.theatreBar.offsetHeight);
 						break;
 					case TheatreStyle.MANGABUBBLE:
 						break;
@@ -2042,7 +2037,7 @@ export default class Theatre {
 		let leftPos = Math.round(
 			Number(offset.left || 0)
 			- Number(KHelpers.style(textBox)["left"].match(/\-*\d+\.*\d*/) || 0)
-			- Number(KHelpers.style(this.theatreBar)["margin-left"].match(/\-*\d+\.*\d*/) || 0)
+			- Number(KHelpers.style(this.stage.theatreBar)["margin-left"].match(/\-*\d+\.*\d*/) || 0)
 		);
 		// pre-split measurement
 		insert.label.style.wordWrap = false;
@@ -2092,10 +2087,10 @@ export default class Theatre {
 		insert.typingBubble.rotation = 0.1745;
 		insert.dockContainer.x = leftPos;
 		insert.dockContainer.y = this.stage.theatreDock.offsetHeight
-			- (insert.optAlign == "top" ? this.theatreBar.offsetHeight : 0) - insert.portrait.height;
+			- (insert.optAlign == "top" ? this.stage.theatreBar.offsetHeight : 0) - insert.portrait.height;
 
 		// theatreStyle specific adjustments
-		switch (this.settings.theatreStyle) {
+		switch (TheatreSettings.getTheatreStyle()) {
 			case TheatreStyle.LIGHTBOX:
 				// to allow top-aligned portraits to work without a seam
 				insert.dockContainer.y += (insert.optAlign == "top" ? 8 : 0);
@@ -2651,7 +2646,7 @@ export default class Theatre {
 	 */
 	_getTextBoxes() {
 		let textBoxes = [];
-		for (let container of this.theatreBar.children)
+		for (let container of this.stage.theatreBar.children)
 			for (let textBox of container.children)
 				textBoxes.push(textBox);
 		return textBoxes;
@@ -2703,7 +2698,7 @@ export default class Theatre {
 			primeBar.style.left = "0%";
 			primeBar.style.opacity = "1";
 			primeBar.style["pointer-events"] = "all";
-			this.theatreBar.style.opacity = "1";
+			this.stage.theatreBar.style.opacity = "1";
 			Hooks.call("theatreDockActive", this.dockActive);
 		} else if (textBoxes.length == 1) {
 			// single dock
@@ -2714,7 +2709,7 @@ export default class Theatre {
 				insert.nameOrientation = "right";
 			}
 
-			let dualWidth = Math.min(Math.floor(this.theatreBar.offsetWidth / 2), 650);
+			let dualWidth = Math.min(Math.floor(this.stage.theatreBar.offsetWidth / 2), 650);
 			secondBar.style.left = `calc(100% - ${dualWidth}px)`;
 			secondBar.style.opacity = "1";
 			secondBar.style["pointer-events"] = "all";
@@ -2771,7 +2766,7 @@ export default class Theatre {
 		if (textBoxes.length == 0) {
 			// no dock
 			// Should be impossible
-			console.log("REMOVE TEXTBOX ERROR, NO TEXTBOXES", textBox, this.theatreBar);
+			console.log("REMOVE TEXTBOX ERROR, NO TEXTBOXES", textBox, this.stage.theatreBar);
 		} else if (textBoxes.length == 1) {
 			// single dock
 			// 1. Remove the text Box, and close the primary bar
@@ -2779,7 +2774,7 @@ export default class Theatre {
 			primeBar.style.opacity = "0";
 			primeBar.style["pointer-events"] = "none";
 			textBox.parentNode.removeChild(textBox);
-			this.theatreBar.style.opacity = "0";
+			this.stage.theatreBar.style.opacity = "0";
 			Hooks.call("theatreDockActive", this.dockActive);
 		} else if (textBoxes.length == 2) {
 			// dual docks
@@ -2820,7 +2815,7 @@ export default class Theatre {
 					break;
 				}
 			}
-			let dualWidth = Math.min(Math.floor(this.theatreBar.offsetWidth / 2), 650);
+			let dualWidth = Math.min(Math.floor(this.stage.theatreBar.offsetWidth / 2), 650);
 			secondBar.style.left = `calc(100% - ${dualWidth}px)`;
 			secondBar.style.opacity = "1";
 			secondBar.style["pointer-events"] = "all";
@@ -4187,7 +4182,7 @@ export default class Theatre {
 
 		// decay
 		TweenMax.to(textBox.children, 0.5, {
-			top: this.theatreBar.offsetHeight / 2,
+			top: this.stage.theatreBar.offsetHeight / 2,
 			opacity: 0,
 			ease: Power0.easeNone,
 			onComplete: function () {
@@ -4230,7 +4225,7 @@ export default class Theatre {
 		if (Theatre.DEBUG) console.log("color %s : red: %s:%s, green %s:%s, blue %s:%s", color, red, darkred, green, darkgreen, blue, darkblue);
 
 		// style specific settings
-		switch (this.settings.theatreStyle) {
+		switch (TheatreSettings.getTheatreStyle()) {
 			case TheatreStyle.CLEARBOX:
 				textBox.style.cssText += `background: linear-gradient(transparent 0%, rgba(${red},${green},${blue},0.30) 40%, rgba(${red},${green},${blue},0.30) 60%, transparent 100%); box-shadow: 0px 5px 2px 1px rgba(${darkred}, ${darkgreen}, ${darkblue}, 0.30)`;
 				break;
@@ -4410,12 +4405,12 @@ export default class Theatre {
 	 */
 	handleWindowResize(ev) {
 		let sideBar = document.getElementById("sidebar");
-		this.theatreBar.style.width = (ui.sidebar._collapsed ? "100%" : `calc(100% - ${sideBar.offsetWidth + 2}px)`);
+		this.stage.theatreBar.style.width = (ui.sidebar._collapsed ? "100%" : `calc(100% - ${sideBar.offsetWidth + 2}px)`);
 		this.theatreNarrator.style.width = (ui.sidebar._collapsed ? "100%" : `calc(100% - ${sideBar.offsetWidth + 2}px)`);
 		let primeBar = document.getElementById("theatre-prime-bar");
 		let secondBar = document.getElementById("theatre-second-bar");
 		if (this._getTextBoxes().length == 2) {
-			let dualWidth = Math.min(Math.floor(this.theatreBar.offsetWidth / 2), 650);
+			let dualWidth = Math.min(Math.floor(this.stage.theatreBar.offsetWidth / 2), 650);
 			primeBar.style.width = dualWidth + "px";
 			secondBar.style.width = dualWidth + "px";
 			secondBar.style.left = `calc(100% - ${dualWidth}px)`;
@@ -5539,6 +5534,11 @@ export default class Theatre {
 		}
 	}
 
+	maybeUpdateNarratorHeight() {
+
+		if (this.theatreNarrator)
+			this.theatreNarrator.style.top = `calc(${TheatreSettings.getNarratorHeight} - 50px)`;
+	}
 
 
 }

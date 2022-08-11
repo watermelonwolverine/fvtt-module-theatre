@@ -13,6 +13,9 @@ export default class TheatreSettings {
 
 	// default values
 	static THEATRE_IMAGE_SIZE_DEFAULT = 400;
+	static TEXT_DECAY_MIN = "textDecayMin";
+	static TEXT_DECAY_RATE = "textDecayRate";
+	static MOTD_NEW_INFO = "string";
 
 
 	static getNameLocalizationKey(name: string): string {
@@ -41,6 +44,22 @@ export default class TheatreSettings {
 
 	static getTheatreStyle(): string {
 		return this.get(TheatreSettings.THEATRE_STYLE);
+	}
+
+	static getNarratorHeight(): string {
+		return this.get(this.NARRATOR_HEIGHT);
+	}
+
+	static getTextDecayMin(): number{
+		return this.get<number>(this.TEXT_DECAY_MIN) * 1000;
+	}
+
+	static getTextDecayRate(): number{
+		return this.get<number>(this.TEXT_DECAY_RATE) * 1000;
+	}
+
+	static getMotdNewInfo(){
+		return this.get(this.MOTD_NEW_INFO);
 	}
 
 }

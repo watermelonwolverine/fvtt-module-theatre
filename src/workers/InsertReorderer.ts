@@ -1,14 +1,18 @@
 import TheatreSettings from "../extensions/settings.js";
 import Theatre from "../Theatre.js";
+import Stage from "../types/Stage.js";
 import TheatreStyle from "../types/TheatreStyle.js";
 import KHelpers from "./KHelpers.js";
 
 export default class InsertReorderer {
 
     context: Theatre;
+    stage: Stage;
 
-    constructor(context: Theatre){
+    constructor(context: Theatre,
+        stage: Stage) {
         this.context = context;
+        this.stage = stage;
     }
 
     reorderInserts() {
@@ -16,7 +20,7 @@ export default class InsertReorderer {
             return;
 
         let boxes = this.context._getTextBoxes();
-        let containerWidth = this.context.stage.theatreDock.offsetWidth;
+        let containerWidth = this.stage.theatreDock.offsetWidth;
         // Min 22px, max 32px, scale for all values inbetween
         let fontSize = Math.floor(Math.max((Math.min(containerWidth / boxes.length, 500) / 500) * 28, 18));
         if (Theatre.DEBUG) console.log("Reorder CALCUALTED FONT SIZE: ", fontSize);
@@ -25,7 +29,7 @@ export default class InsertReorderer {
 
             const textBox = <HTMLElement>textBox_;
             let theatreId = textBox.getAttribute("imgid");
-            let insert = this.context.stage.getInsertById(theatreId);
+            let insert = this.stage.getInsertById(theatreId);
 
             if (!insert) {
                 this.context._removeTextBoxFromTheatreBar(textBox);
@@ -47,21 +51,21 @@ export default class InsertReorderer {
             let leftPos = Math.round(
                 Number(offset.left || 0)
                 - Number(KHelpers.style(textBox)["left"].match(/\-*\d+\.*\d*/) || 0)
-                - Number(KHelpers.style(this.context.theatreBar).getPropertyValue("margin-left").match(/\-*\d+\.*\d*/) || 0)
+                - Number(KHelpers.style(this.stage.theatreBar).getPropertyValue("margin-left").match(/\-*\d+\.*\d*/) || 0)
             );
 
             //insert.dockContainer.width = textBox.offsetWidth; 
 
             if (insert.exitOrientation == "left") {
-                if (Theatre.DEBUG) console.log("LEFT (name: %s): ", insert.nameOrientation, leftPos, insert.name, this.context.theatreBar.offsetWidth / 2);
-                if (leftPos + (insert.dockContainer.width / 2) > this.context.theatreBar.offsetWidth / 2) {
+                if (Theatre.DEBUG) console.log("LEFT (name: %s): ", insert.nameOrientation, leftPos, insert.name, this.stage.theatreBar.offsetWidth / 2);
+                if (leftPos + (insert.dockContainer.width / 2) > this.stage.theatreBar.offsetWidth / 2) {
                     if (Theatre.DEBUG) console.log("swapping " + insert.name + " to right alignment from left");
                     insert.exitOrientation = "right";
                 }
             } else {
-                if (Theatre.DEBUG) console.log("RIGHT (name: %s): ", insert.nameOrientation, leftPos, insert.name, this.context.theatreBar.offsetWidth / 2);
+                if (Theatre.DEBUG) console.log("RIGHT (name: %s): ", insert.nameOrientation, leftPos, insert.name, this.stage.theatreBar.offsetWidth / 2);
                 //right
-                if (leftPos + (insert.dockContainer.width / 2) <= this.context.theatreBar.offsetWidth / 2) {
+                if (leftPos + (insert.dockContainer.width / 2) <= this.stage.theatreBar.offsetWidth / 2) {
                     if (Theatre.DEBUG) console.log("swapping " + insert.name + " to left alignment from right");
                     insert.exitOrientation = "left";
                 }
@@ -111,32 +115,32 @@ export default class InsertReorderer {
                 leftPos += textBox.offsetWidth - insert.portrait.width;
             }
             insert.typingBubble.y = insert.portrait.height -
-                (insert.optAlign == "top" ? 0 : this.context.theatreBar.offsetHeight) - insert.label.style.lineHeight + insert.typingBubble.height / 2;
+                (insert.optAlign == "top" ? 0 : this.stage.theatreBar.offsetHeight) - insert.label.style.lineHeight + insert.typingBubble.height / 2;
             // if the label height > font-size, it word wrapped wrap, so we need to bump up the height
             if (labelExceeds) {
                 let divisor = Math.round(insert.label.height / insert.label.style.lineHeight);
                 insert.label.y = insert.portrait.height -
-                    (insert.optAlign == "top" ? 0 : this.context.theatreBar.offsetHeight) - (insert.label.style.lineHeight * divisor);
+                    (insert.optAlign == "top" ? 0 : this.stage.theatreBar.offsetHeight) - (insert.label.style.lineHeight * divisor);
             } else {
                 // normal
                 insert.label.y = insert.portrait.height -
-                    (insert.optAlign == "top" ? 0 : this.context.theatreBar.offsetHeight) - insert.label.style.lineHeight;
+                    (insert.optAlign == "top" ? 0 : this.stage.theatreBar.offsetHeight) - insert.label.style.lineHeight;
             }
             insert.typingBubble.rotation = 0.1745;
-            insert.dockContainer.y = this.context.stage.theatreDock.offsetHeight
-                - (insert.optAlign == "top" ? this.context.theatreBar.offsetHeight : 0) - insert.portrait.height;
+            insert.dockContainer.y = this.stage.theatreDock.offsetHeight
+                - (insert.optAlign == "top" ? this.stage.theatreBar.offsetHeight : 0) - insert.portrait.height;
 
             // theatreStyle specific adjustments
-            switch (this.context.settings.theatreStyle) {
+            switch (TheatreSettings.getTheatreStyle()) {
                 case TheatreStyle.LIGHTBOX:
                     // to allow top-aligned portraits to work without a seam
                     insert.dockContainer.y += (insert.optAlign == "top" ? 8 : 0);
                     insert.label.y -= (insert.optAlign == "top" ? 8 : 0);
                     break;
                 case TheatreStyle.CLEARBOX:
-                    insert.dockContainer.y = this.context.stage.theatreDock.offsetHeight - insert.portrait.height;
-                    insert.label.y += (insert.optAlign == "top" ? 0 : this.context.theatreBar.offsetHeight)
-                    insert.typingBubble.y += (insert.optAlign == "top" ? 0 : this.context.theatreBar.offsetHeight);
+                    insert.dockContainer.y = this.stage.theatreDock.offsetHeight - insert.portrait.height;
+                    insert.label.y += (insert.optAlign == "top" ? 0 : this.stage.theatreBar.offsetHeight)
+                    insert.typingBubble.y += (insert.optAlign == "top" ? 0 : this.stage.theatreBar.offsetHeight);
                     break;
                 case TheatreStyle.MANGABUBBLE:
                     break;
@@ -187,7 +191,7 @@ export default class InsertReorderer {
                 //delay: 0.5,
                 pixi: { x: leftPos, alpha: 1 },
                 ease: Power4.easeOut,
-                onComplete: function(imgId, tweenId) {
+                onComplete: function (imgId, tweenId) {
                     // decrement the rendering accumulator
                     context._removeDockTween(imgId, this, tweenId);
                     // remove our own reference from the dockContainer tweens
@@ -198,7 +202,7 @@ export default class InsertReorderer {
             this.context._addDockTween(theatreId, tween, tweenId);
         }
         // sort the render order by left position order
-        this.context.stage.stageInserts.sort((a, b) => { return a.order - b.order });
+        this.stage.stageInserts.sort((a, b) => { return a.order - b.order });
 
     }
 }

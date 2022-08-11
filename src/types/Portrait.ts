@@ -33,7 +33,7 @@ export default class Portrait {
         portraitContainer.width = portWidth
         portraitContainer.height = portHeight
 
-        dockContainer.y = stage.theatreDock.offsetHeight - (insert.optAlign == "top" ? this.context.theatreBar.offsetHeight : 0) - portHeight;
+        dockContainer.y = stage.theatreDock.offsetHeight - (insert.optAlign == "top" ? stage.theatreBar.offsetHeight : 0) - portHeight;
 
         // save and stage our sprite
 
@@ -48,10 +48,10 @@ export default class Portrait {
         insert.label.style.wordWrapWidth = portWidth;
 
         insert.label.y =
-            portHeight - (insert.optAlign == "top" ? 0 : this.context.theatreBar.offsetHeight) - insert.label.style.lineHeight - 20;
+            portHeight - (insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight) - insert.label.style.lineHeight - 20;
 
         insert.typingBubble.y =
-            portHeight - (insert.optAlign == "top" ? 0 : this.context.theatreBar.offsetHeight) - insert.label.style.lineHeight + insert.typingBubble.height / 2;
+            portHeight - (insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight) - insert.label.style.lineHeight + insert.typingBubble.height / 2;
 
 
         switch (TheatreSettings.getTheatreStyle()) {
@@ -62,8 +62,8 @@ export default class Portrait {
                 break;
             case TheatreStyle.CLEARBOX:
                 dockContainer.y = stage.theatreDock.offsetHeight - portHeight;
-                insert.label.y += (insert.optAlign == "top" ? 0 : this.context.theatreBar.offsetHeight);
-                insert.typingBubble.y += (insert.optAlign == "top" ? 0 : this.context.theatreBar.offsetHeight);
+                insert.label.y += (insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight);
+                insert.typingBubble.y += (insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight);
                 break;
             case TheatreStyle.MANGABUBBLE:
                 break;
