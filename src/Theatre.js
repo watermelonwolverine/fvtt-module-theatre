@@ -119,7 +119,7 @@ export default class Theatre {
 		// socket 
 		this._initSocket();
 		// global listeners
-		window.addEventListener("resize", this.handleWindowResize);
+		window.addEventListener("resize", ev => this.handleWindowResize(ev));
 		// request a resync if needed
 		this._sendResyncRequest("any");
 	}
@@ -201,7 +201,6 @@ export default class Theatre {
 		 */
 		let chatControls = document.getElementById("chat-controls");
 		let controlButtons = chatControls.getElementsByClassName("control-buttons")[0];
-		let chatForm = document.getElementById("chat-form");
 		let chatMessage = document.getElementById("chat-message");
 
 		this.theatreControls = document.createElement("div");
@@ -329,7 +328,7 @@ export default class Theatre {
 		/**
 		 * Tooltip
 		 */
-		this.theatreEmoteMenu.addEventListener("mousemove", this.handleEmoteMenuMouseMove);
+		this.theatreEmoteMenu.addEventListener("mousemove", ev => this.handleEmoteMenuMouseMove(ev));
 	}
 
 	/**
@@ -1883,7 +1882,6 @@ export default class Theatre {
 	 * @params tween (Object TweenMax) : The TweenMax object of the tween to be added.
 	 * @params tweenId (String) : The tweenId for this tween to be added.
 	 *
-	 * @private
 	 */
 	_addDockTween(imgId, tween, tweenId) {
 		let insert = this.getInsertById(imgId);
@@ -2779,8 +2777,6 @@ export default class Theatre {
 	 *
 	 * @param textBox (HTMLElement : div) : the textBox to add to the theatreBar,
 	 *									  MUST correspond to an insert. 
-	 *
-	 * @private
 	 */
 	_removeTextBoxFromTheatreBar(textBox) {
 		let textBoxes = this._getTextBoxes();
@@ -4477,19 +4473,19 @@ export default class Theatre {
 	 */
 	handleWindowResize(ev) {
 		let sideBar = document.getElementById("sidebar");
-		Theatre.instance.theatreBar.style.width = (ui.sidebar._collapsed ? "100%" : `calc(100% - ${sideBar.offsetWidth + 2}px)`);
-		Theatre.instance.theatreNarrator.style.width = (ui.sidebar._collapsed ? "100%" : `calc(100% - ${sideBar.offsetWidth + 2}px)`);
+		this.theatreBar.style.width = (ui.sidebar._collapsed ? "100%" : `calc(100% - ${sideBar.offsetWidth + 2}px)`);
+		this.theatreNarrator.style.width = (ui.sidebar._collapsed ? "100%" : `calc(100% - ${sideBar.offsetWidth + 2}px)`);
 		let primeBar = document.getElementById("theatre-prime-bar");
 		let secondBar = document.getElementById("theatre-second-bar");
-		if (Theatre.instance._getTextBoxes().length == 2) {
-			let dualWidth = Math.min(Math.floor(Theatre.instance.theatreBar.offsetWidth / 2), 650);
+		if (this._getTextBoxes().length == 2) {
+			let dualWidth = Math.min(Math.floor(this.theatreBar.offsetWidth / 2), 650);
 			primeBar.style.width = dualWidth + "px";
 			secondBar.style.width = dualWidth + "px";
 			secondBar.style.left = `calc(100% - ${dualWidth}px)`;
 		}
 		// emote menu
-		if (Theatre.instance.theatreEmoteMenu)
-			Theatre.instance.theatreEmoteMenu.style.top = `${Theatre.instance.theatreControls.offsetTop - 410}px`
+		if (this.theatreEmoteMenu)
+			this.theatreEmoteMenu.style.top = `${this.theatreControls.offsetTop - 410}px`
 
 		const app = this.stage.pixiCTX;
 		const theatre_dock = this.stage.theatreDock;
@@ -4504,15 +4500,15 @@ export default class Theatre {
 		app.renderer.view.height = dockHeight;
 		app.renderer.resize(dockWidth, dockHeight);
 		//app.render(); 
-		if (!Theatre.instance.rendering)
-			Theatre.instance._renderTheatre(performance.now());
+		if (!this.rendering)
+			this._renderTheatre(performance.now());
 
-		if (Theatre.instance.reorderTOId)
-			window.clearTimeout(Theatre.instance.reorderTOId)
+		if (this.reorderTOId)
+			window.clearTimeout(this.reorderTOId)
 
-		Theatre.instance.reorderTOId = window.setTimeout(() => {
+		this.reorderTOId = window.setTimeout(() => {
 			Theatre.reorderInserts();
-			Theatre.instance.reorderTOId = null;
+			this.reorderTOId = null;
 		}, 250);
 
 	}
@@ -4525,12 +4521,12 @@ export default class Theatre {
 	 * @param ev (Event) : The Event that triggered the mouse move.
 	 */
 	handleEmoteMenuMouseMove(ev) {
-		Theatre.instance.theatreToolTip.style.top =
-			`${(ev.clientY || ev.pageY) - Theatre.instance.theatreToolTip.offsetHeight - 20}px`;
-		Theatre.instance.theatreToolTip.style.left =
+		this.theatreToolTip.style.top =
+			`${(ev.clientY || ev.pageY) - this.theatreToolTip.offsetHeight - 20}px`;
+		this.theatreToolTip.style.left =
 			`${Math.min(
-				(ev.clientX || ev.pageX) - Theatre.instance.theatreToolTip.offsetWidth / 2,
-				this.stage.theatreDock.offsetWidth - Theatre.instance.theatreToolTip.offsetWidth)}px`;
+				(ev.clientX || ev.pageX) - this.theatreToolTip.offsetWidth / 2,
+				this.stage.theatreDock.offsetWidth - this.theatreToolTip.offsetWidth)}px`;
 	}
 
 	/**
@@ -4949,7 +4945,7 @@ export default class Theatre {
 	static reorderInserts() {
 		if (!Theatre.instance) return;
 		let boxes = Theatre.instance._getTextBoxes();
-		let containerWidth = this.stage.theatreDock.offsetWidth;
+		let containerWidth = Theatre.instance.stage.theatreDock.offsetWidth;
 		// Min 22px, max 32px, scale for all values inbetween
 		let fontSize = Math.floor(Math.max((Math.min(containerWidth / boxes.length, 500) / 500) * 28, 18));
 		if (Theatre.DEBUG) console.log("Reorder CALCUALTED FONT SIZE: ", fontSize);
@@ -5799,12 +5795,11 @@ export default class Theatre {
 	 * @params id (string) : The theatreId to remove from the stage.
 	 */
 	_removeFromStage(theatreId) {
-		const staged = Theatre.instance.stage.actors[theatreId];
+		const staged = this.stage.actors[theatreId];
 		if (staged) {
 			if (staged.navElement) {
-				Theatre.instance.theatreNavBar.removeChild(staged.navElement);
+				this.theatreNavBar.removeChild(staged.navElement);
 			}
-
 			this.stage.removeActorFromStage(theatreId)
 		}
 	}
