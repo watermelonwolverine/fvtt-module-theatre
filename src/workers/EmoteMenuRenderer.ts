@@ -44,7 +44,7 @@ export default class EmoteMenuRenderer {
         emotes: EmoteDictionary,
         textStandingAnimationDefinitions: TextStandingAnimationDefinitionDictionary) {
 
-        let insert = this.context.getInsertById(this.context.speakingAs);
+        let insert = this.context.stage.getInsertById(this.context.speakingAs);
 
         if (Theatre.DEBUG) console.log("emote window template rendered");
         this.context.theatreEmoteMenu.style.top = `${this.context.theatreControls.offsetTop - 410}px`;
@@ -154,7 +154,7 @@ export default class EmoteMenuRenderer {
 
 
     sizeSelectChanged(ev: UIEvent) {
-        let insert = this.context.getInsertById(this.context.speakingAs);
+        let insert = this.context.stage.getInsertById(this.context.speakingAs);
         let icon = <HTMLElement>(<HTMLElement>ev.currentTarget).children[0];
         let value = 2;
         if (insert)

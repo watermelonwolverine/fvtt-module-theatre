@@ -523,7 +523,7 @@ export default class Theatre {
 	_sendTypingEvent() {
 		if (Theatre.DEBUG) console.log("Sending Typing Event")
 
-		let insert = this.getInsertById(this.speakingAs);
+		let insert = this.stage.getInsertById(this.speakingAs);
 		let insertEmote = this._getEmoteFromInsert(insert);
 		let insertTextFlyin =
 			(insert ? this._getTextFlyinFromInsert(insert) : (this.speakingAs == Theatre.NARRATOR ? this.theatreNarrator.getAttribute("textflyin") : "typewriter"));
@@ -822,7 +822,7 @@ export default class Theatre {
 					// finally apply positioning for 3n total run speed
 					window.setTimeout(() => {
 						for (let dat of data.insertdata) {
-							insert = this.getInsertById(dat.insertid);
+							insert = this.stage.getInsertById(dat.insertid);
 							//console.log("attempting to apply position to ",insert,dat.insertid,dat); 
 							if (insert) {
 								if (Theatre.DEBUG) console.log("insert active post resync add, appying position");
@@ -916,7 +916,7 @@ export default class Theatre {
 				break;
 			case "positionupdate":
 				if (Theatre.DEBUG) console.log("positionupdate: tid:%s", data.insertid);
-				insert = this.getInsertById(data.insertid);
+				insert = this.stage.getInsertById(data.insertid);
 				if (insert) {
 					// apply mirror state
 					if (Theatre.DEBUG) console.log("mirroring desired: %s , current mirror %s", data.position.mirror, insert.mirrored);
@@ -970,7 +970,7 @@ export default class Theatre {
 				break;
 			case "addtexture":
 				if (Theatre.DEBUG) console.log("texturereplace:", data);
-				insert = this.getInsertById(data.insertid);
+				insert = this.stage.getInsertById(data.insertid);
 				actorId = data.insertid.replace("theatre-", "");
 				params = this._getInsertParamsFromActorId(actorId);
 				if (!params) return;
@@ -1013,7 +1013,7 @@ export default class Theatre {
 				break;
 			case "addalltextures":
 				if (Theatre.DEBUG) console.log("textureallreplace:", data);
-				insert = this.getInsertById(data.insertid);
+				insert = this.stage.getInsertById(data.insertid);
 				actorId = data.insertid.replace("theatre-", "");
 				params = this._getInsertParamsFromActorId(actorId);
 				if (!params) return;
@@ -1072,7 +1072,7 @@ export default class Theatre {
 				this.decayTextBoxById(data.insertid, true);
 				break;
 			case "renderinsert":
-				insert = this.getInsertById(data.insertid);
+				insert = this.stage.getInsertById(data.insertid);
 				if (insert)
 					this.renderInsertById(data.insertid);
 				break;
@@ -1238,7 +1238,7 @@ export default class Theatre {
 			this.userEmotes[userId] = {};
 
 		let userEmoting = this.userEmotes[userId];
-		let insert = this.getInsertById(theatreId);
+		let insert = this.stage.getInsertById(theatreId);
 
 		switch (subType) {
 			case "textfont":
@@ -1354,7 +1354,7 @@ export default class Theatre {
 
 		// clear old speakingId if it still exists
 		if (theatreId != userTyping.theatreId) {
-			let insert = this.getInsertById(userTyping.theatreId);
+			let insert = this.stage.getInsertById(userTyping.theatreId);
 			// if not destroyed already
 			if (insert && insert.portrait) {
 				// kill tweens
@@ -1402,7 +1402,7 @@ export default class Theatre {
 		}
 
 		if (theatreId) {
-			let insert = this.getInsertById(theatreId);
+			let insert = this.stage.getInsertById(theatreId);
 			// if not destroyed already
 			if (insert && insert.portrait && !insert.tweens["typingWiggle"]) {
 				// start tweens
@@ -1505,7 +1505,7 @@ export default class Theatre {
 			return;
 
 		if (this.usersTyping[userId].theatreId) {
-			let insert = this.getInsertById(this.usersTyping[userId].theatreId);
+			let insert = this.stage.getInsertById(this.usersTyping[userId].theatreId);
 			// if not destroyed already
 			if (insert) {
 				// kill tweens
@@ -1693,7 +1693,7 @@ export default class Theatre {
 	 * @params id (String) : The theatreId of the insert to render.
 	 */
 	renderInsertById(id) {
-		let insert = this.getInsertById(id);
+		let insert = this.stage.getInsertById(id);
 		let actorId = id.replace("theatre-", "");
 		let resName = "icons/myster-man.png";
 		let params = this._getInsertParamsFromActorId(actorId);
@@ -1886,7 +1886,7 @@ export default class Theatre {
 	 *
 	 */
 	_addDockTween(imgId, tween, tweenId) {
-		let insert = this.getInsertById(imgId);
+		let insert = this.stage.getInsertById(imgId);
 		if (!insert || !insert.dockContainer) {
 			// if dockContainer is destroyed, destroy the tween we were trying to add
 			console.log("Invalid Tween for %s", imgId);
@@ -1929,7 +1929,7 @@ export default class Theatre {
 	_removeDockTween(imgId, tween, tweenId) {
 		if (tween) tween.kill();
 
-		let insert = this.getInsertById(imgId);
+		let insert = this.stage.getInsertById(imgId);
 		if (insert) {
 			// if the tweenId doesn't exist, do nothing more
 			if (!insert.tweens[tweenId])
@@ -1963,7 +1963,7 @@ export default class Theatre {
 	 *
 	 */
 	_destroyPortraitDock(imgId) {
-		let insert = this.getInsertById(imgId)
+		let insert = this.stage.getInsertById(imgId)
 		if (insert && insert.dockContainer) {
 			// kill and release all tweens
 			for (let tweenId in insert.tweens)
@@ -2155,7 +2155,7 @@ export default class Theatre {
 		// also replace their resources.
 		// ** NOTE this may have desync issues **
 
-		let insert = this.getInsertById(imgId);
+		let insert = this.stage.getInsertById(imgId);
 		// If no insert/container, this is fine
 		let actorId = imgId.replace("theatre-", "");
 		let actorParams = this._getInsertParamsFromActorId(actorId);
@@ -2224,7 +2224,7 @@ export default class Theatre {
 		// also replace their resources.
 		// ** NOTE this may have desync issues **
 
-		let insert = this.getInsertById(imgId);
+		let insert = this.stage.getInsertById(imgId);
 		// If no insert/container, this is fine
 		let actorId = imgId.replace("theatre-", "");
 		let actorParams = this._getInsertParamsFromActorId(actorId);
@@ -2277,7 +2277,7 @@ export default class Theatre {
 	 * @private
 	 */
 	_clearPortraitContainer(imgId) {
-		let insert = this.getInsertById(imgId);
+		let insert = this.stage.getInsertById(imgId);
 		if (!insert || !insert.dockContainer || !insert.portrait) return;
 
 		// preserve position without portrait offset
@@ -2511,7 +2511,7 @@ export default class Theatre {
 	 * @params remote (Boolean) : Wither this is being invoked remotely or locally. 
 	 */
 	setEmoteForInsertById(ename, id, remote) {
-		let insert = this.getInsertById(id);
+		let insert = this.stage.getInsertById(id);
 
 		this._setEmoteForInsert(ename, insert, remote);
 	}
@@ -2523,7 +2523,7 @@ export default class Theatre {
 	 * @params remote (Boolean) : Wither this is being invoked remotely or locally. 
 	 */
 	setEmoteForInsertByName(ename, name, remote) {
-		let insert = this.getInsertByName(name);
+		let insert = this.stage.getInsertByName(name);
 
 		this._setEmoteForInsert(ename, insert, remote);
 	}
@@ -2724,7 +2724,7 @@ export default class Theatre {
 		} else if (textBoxes.length == 1) {
 			// single dock
 			// 1. slide in second container, and add new textBox to it
-			let insert = this.getInsertById(textBox.getAttribute("imgId"));
+			let insert = this.stage.getInsertById(textBox.getAttribute("imgId"));
 			if (insert) {
 				//insert.meta.fromPrime = true;
 				insert.nameOrientation = "right";
@@ -2747,7 +2747,7 @@ export default class Theatre {
 			// the 'prime' dock, and add them to the prime dock (should be one)
 			// 3. expand the prime dock to fit the max bar width
 			for (let sbb of secondBar.children) {
-				let insert = this.getInsertById(sbb.getAttribute("imgId"));
+				let insert = this.stage.getInsertById(sbb.getAttribute("imgId"));
 				if (insert) {
 					//insert.meta.fromSecond = true;
 					insert.nameOrientation = "left";
@@ -2807,7 +2807,7 @@ export default class Theatre {
 			// then add the textBoxes in the 'secondary' dock to the primary.
 			for (let sbb of secondBar.children) {
 				if (sbb.getAttribute("imgId") != textBox.getAttribute("imgId")) {
-					let insert = this.getInsertById(sbb.getAttribute("imgId"));
+					let insert = this.stage.getInsertById(sbb.getAttribute("imgId"));
 					if (insert) {
 						//insert.meta.fromSecond = true;
 						insert.nameOrientation = "left";
@@ -2827,7 +2827,7 @@ export default class Theatre {
 			// 1. create the dual docks 
 			for (let idx = primeBar.children.length - 1; idx >= 0; --idx) {
 				if (primeBar.children[idx].getAttribute("imgId") != textBox.getAttribute("imgId")) {
-					let insert = this.getInsertById(primeBar.children[idx].getAttribute("imgId"));
+					let insert = this.stage.getInsertById(primeBar.children[idx].getAttribute("imgId"));
 					if (insert) {
 						//insert.meta.fromPrime = true;
 						insert.nameOrientation = "right";
@@ -2863,7 +2863,7 @@ export default class Theatre {
 	 * @params remote (Boolean) : Boolean indicating if this is being invoked remotely, or locally. 
 	 */
 	injectLeftPortrait(imgPath, portName, imgId, optAlign, emotions, remote) {
-		if (this.getInsertById(imgId)) {
+		if (this.stage.getInsertById(imgId)) {
 			console.log('ID "%s" already exists! Refusing to inject %s', imgId, portName);
 			return;
 		}
@@ -2908,7 +2908,7 @@ export default class Theatre {
 	 * @params remote (Boolean) : Boolean indicating if this is being invoked remotely, or locally. 
 	 */
 	injectRightPortrait(imgPath, portName, imgId, optAlign, emotions, remote) {
-		if (this.getInsertById(imgId)) {
+		if (this.stage.getInsertById(imgId)) {
 			console.log('ID "%s" already exists! Refusing to inject %s', imgId, portName);
 			return;
 		}
@@ -3186,58 +3186,6 @@ export default class Theatre {
 	}
 
 	/**
-	 * Get insert dock by ID
-	 *
-	 * @params id (String) : The theatreId of an insert we want.
-	 *
-	 * @return (Object) : The Object representing the insert, or undefined.
-	 */
-	getInsertById(id) {
-		for (let idx = this.stage.portraitDocks.length - 1; idx >= 0; --idx)
-			if (this.stage.portraitDocks[idx].imgId == id) {
-				if (this.stage.portraitDocks[idx].dockContainer)
-					return this.stage.portraitDocks[idx];
-				else {
-					this.stage.portraitDocks.splice(idx, 1);
-					return undefined;
-				}
-			}
-	}
-
-	/**
-	 * Get insert dock by Name
-	 *
-	 * @params name (String) : The name of an insert we want.
-	 *
-	 * @return (Object) : The Object representing the insert, or undefined.
-	 */
-	getInsertByName(name) {
-		for (let idx = this.stage.portraitDocks.length - 1; idx >= 0; --idx)
-			if (this.stage.portraitDocks[idx].name == name) {
-				if (this.stage.portraitDocks[idx].dockContainer)
-					return this.stage.portraitDocks[idx];
-				else {
-					this.stage.portraitDocks.splice(idx, 1);
-					return undefined;
-				}
-			}
-	}
-
-	/**
-	 * Get the portrait sprite given the insert
-	 *
-	 * @params insert (Object) : The Object representing the insert.
-	 *
-	 * @return (Object PIXISprite) : The PIXISprite portrait of the insert. 
-	 *
-	 * @private
-	 */
-	_getPortraitSpriteFromInsert(insert) {
-		if (!insert || !insert.dockContainer || !insert.potrrait) return null;
-		return insert.portrait;
-	}
-
-	/**
 	 * Get the portrait container given the insert
 	 *
 	 * @params insert (Object) : The Object representing the insert.
@@ -3282,7 +3230,7 @@ export default class Theatre {
 	 *	User is speaking as, else undefined. 
 	 */
 	getSpeakingInsert() {
-		let insert = this.getInsertById(this.speakingAs);
+		let insert = this.stage.getInsertById(this.speakingAs);
 		return insert;
 	}
 
@@ -3293,7 +3241,7 @@ export default class Theatre {
 	 *	User is speaking as, else undefined. 
 	 */
 	getSpeakingLabel() {
-		let insert = this.getInsertById(this.speakingAs);
+		let insert = this.stage.getInsertById(this.speakingAs);
 		return this._getLabelFromInsert(insert);
 	}
 
@@ -3304,7 +3252,7 @@ export default class Theatre {
 	 *	of the insert the User is speaking as, else undefined. 
 	 */
 	getSpeakingPortraitContainer() {
-		let insert = this.getInsertById(this.speakingAs);
+		let insert = this.stage.getInsertById(this.speakingAs);
 		return this._getPortraitContainerFromInsert(insert);
 	}
 
@@ -3737,7 +3685,7 @@ export default class Theatre {
 	 * @params remote (Boolean) : Wither this is being invoked remotely, or locally. 
 	 */
 	mirrorInsertById(id, remote) {
-		let insert = this.getInsertById(id);
+		let insert = this.stage.getInsertById(id);
 		if (!insert) return;
 
 		this._mirrorInsert(insert, remote);
@@ -3750,7 +3698,7 @@ export default class Theatre {
 	 * @params remote (Boolean) : Wither this is being invoked remotely, or locally. 
 	 */
 	mirrorInsertByName(name, remote) {
-		let insert = this.getInsertByName(name);
+		let insert = this.stage.getInsertByName(name);
 		if (!insert) return;
 
 		this._mirrorInsert(insert, remote);
@@ -3763,7 +3711,7 @@ export default class Theatre {
 	 * return (Boolean) : True if the insert is mirrored, false otherwise.
 	 */
 	isInsertMirrored(id) {
-		let insert = this.getInsertByName(id);
+		let insert = this.stage.getInsertByName(id);
 		return insert.mirrored;
 	}
 
@@ -3833,7 +3781,7 @@ export default class Theatre {
 	 * @optional @param {boolean} : Wither this is being invoked remotely, or locally. 
 	 */
 	resetInsertById(id, remote = undefined) {
-		let insert = this.getInsertById(id);
+		let insert = this.stage.getInsertById(id);
 
 		this._resetPortraitPosition(insert, remote);
 	}
@@ -3845,7 +3793,7 @@ export default class Theatre {
 	 * @params remote (Boolean) : Wither this is being invoked remotely, or locally. 
 	 */
 	resetInsertByName(name, remote) {
-		let insert = this.getInsertByName(name);
+		let insert = this.stage.getInsertByName(name);
 
 		this._resetPortraitPosition(insert, remote);
 	}
@@ -4085,13 +4033,13 @@ export default class Theatre {
 		// If it's already active, and we're GM, then we want to transition to 'god mode'
 		// voice, thus we simply un-activate our character, and assume GM voice again
 		// (the default, if no insert selected)
-		let insert = this.getInsertById(id);
+		let insert = this.stage.getInsertById(id);
 		let textBox = this.getTextBoxById(id);
 		let label = (insert ? insert.label : null);
 
 		// remove old speaking as, shift it
 		let oldSpeakingItem = this.getNavItemById(this.speakingAs);
-		let oldSpeakingInsert = this.getInsertById(this.speakingAs);
+		let oldSpeakingInsert = this.stage.getInsertById(this.speakingAs);
 		let oldSpeakingLabel = (oldSpeakingInsert ? oldSpeakingInsert.label : null);
 		if (oldSpeakingItem)
 			KHelpers.removeClass(oldSpeakingItem, "theatre-control-nav-bar-item-speakingas");
@@ -4180,7 +4128,7 @@ export default class Theatre {
 			TweenMax.to(Theatre.instance.theatreNavBar, .4, { scrollTo: { x: navItem.offsetLeft, offsetX: Theatre.instance.theatreNavBar.offsetWidth / 2 } })
 
 			window.setTimeout(() => {
-				insert = this.getInsertById(id);
+				insert = this.stage.getInsertById(id);
 				// if our insert hasn't been destroyed
 				if (insert && !!insert.dockContainer && this.speakingAs == id) {
 					label = this.label;
@@ -4227,7 +4175,7 @@ export default class Theatre {
 	 * @params remote (Boolean) : Wither this is being invoked remotely, or locally. 
 	 */
 	decayTextBoxById(theatreId, remote) {
-		let insert = this.getInsertById(theatreId);
+		let insert = this.stage.getInsertById(theatreId);
 		let textBox = this._getTextBoxById(theatreId);
 		if (!textBox || !insert) return;
 
@@ -4374,7 +4322,7 @@ export default class Theatre {
 			if (game.user.isGM) {
 				let btnNarrator = Theatre.instance.theatreControls.getElementsByClassName("theatre-icon-narrator")[0].parentNode;
 				let oldSpeakingItem = Theatre.instance.getNavItemById(Theatre.instance.speakingAs);
-				let oldSpeakingInsert = Theatre.instance.getInsertById(Theatre.instance.speakingAs);
+				let oldSpeakingInsert = Theatre.instance.stage.getInsertById(Theatre.instance.speakingAs);
 				let oldSpeakingLabel = Theatre.instance._getLabelFromInsert(oldSpeakingInsert);
 
 				KHelpers.addClass(btnNarrator, "theatre-control-nav-bar-item-speakingas");
@@ -4493,7 +4441,7 @@ export default class Theatre {
 			this.theatreEmoteMenu.style.top = `${this.theatreControls.offsetTop - 410}px`
 
 
-	this.stage.handleWindowResize()
+		this.stage.handleWindowResize()
 		//app.render(); 
 		if (!this.rendering)
 			this._renderTheatre(performance.now());
@@ -5562,7 +5510,7 @@ export default class Theatre {
 		navItem.setAttribute("optalign", optAlign);
 
 		// if the theatreId is present, then set our navItem as active!
-		if (this.getInsertById(theatreId))
+		if (this.stage.getInsertById(theatreId))
 			KHelpers.addClass(navItem, "theatre-control-nav-bar-item-active");
 
 		navItem.addEventListener("mouseup", ev => this.handleNavItemMouseUp(ev));

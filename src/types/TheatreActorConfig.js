@@ -274,7 +274,7 @@ export default class TheatreActorConfig extends FormApplication {
 
 		// check all image resources, if they differ the actor's, we need to replace the texture, and then tell all other clients to do so as well!
 		//let inserts = formData.filter((e,k) => {return k.endsWith("insert") || k.endsWith("baseinsert")}); 
-		let insert = Theatre.instance.getInsertById(theatreId);
+		let insert = Theatre.instance.stage.getInsertById(theatreId);
 		let container = (insert ? insert.dockContainer : null);
 		let app = Theatre.instance.pixiCTX;
 		let insertEmote = Theatre.instance._getEmoteFromInsert(insert);

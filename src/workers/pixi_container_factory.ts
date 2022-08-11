@@ -54,7 +54,7 @@ export default class _TheatrePixiContainerFactory {
         app.stage.addChild(dockContainer);
 
         // track the dockContainer
-        if (this.context.getInsertById(imgId)) {
+        if (this.context.stage.getInsertById(imgId)) {
             // this.context dockContainer should be destroyed
             console.log("PRE-EXISTING PIXI CONTAINER FOR %s ", imgId);
             this.context._destroyPortraitDock(imgId);

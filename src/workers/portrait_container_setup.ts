@@ -38,7 +38,7 @@ export default class _TheatrePortraitContainerSetupWorker {
         resName: string,
         resources: Resources,
         reorder: boolean): void {
-        let insert = this.context.getInsertById(imgId);
+        let insert = this.context.stage.getInsertById(imgId);
 
         const stage = this.context.stage;
 

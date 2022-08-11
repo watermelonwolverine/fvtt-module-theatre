@@ -25,7 +25,7 @@ export default class InsertReorderer {
 
             const textBox = <HTMLElement>textBox_;
             let theatreId = textBox.getAttribute("imgid");
-            let insert = this.context.getInsertById(theatreId);
+            let insert = this.context.stage.getInsertById(theatreId);
 
             if (!insert) {
                 this.context._removeTextBoxFromTheatreBar(textBox);

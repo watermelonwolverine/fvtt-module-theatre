@@ -115,6 +115,36 @@ export default class Stage {
             remote);
     }
 
+    getInsertByName(name: string): PortraitDock {
+        return this.getInsertBy(dock => dock.name == name);
+    }
+
+    getInsertById(theatreId: string): PortraitDock {
+        return this.getInsertBy(dock => dock.imgId == theatreId);
+    }
+
+    getInsertBy(filter: (dock: PortraitDock) => boolean): PortraitDock {
+
+        for (let idx = this.portraitDocks.length - 1; idx >= 0; --idx) {
+
+            const portraitDock = this.portraitDocks[idx];
+
+            // WMW: I don't know why this is there, I just found it roughly like so..
+            if (!this.portraitDocks[idx].dockContainer) {
+                this.portraitDocks.splice(idx, 1);
+                console.error(`Illegal Portrait Dock state for ${portraitDock.imgId}`)
+                continue;
+            }
+
+            const itHit = filter(portraitDock);
+
+            if (itHit)
+                return portraitDock;
+        }
+
+        return undefined;
+    }
+
     removeActorFromStage(theatreActorId: string) {
         this.removeInsertById(theatreActorId);
         this.actors.delete(theatreActorId);

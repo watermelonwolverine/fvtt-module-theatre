@@ -154,7 +154,7 @@ Hooks.on("preCreateChatMessage", function (chatMessage) {
 		Theatre.instance.usersTyping[chatMessage.data.user]
 	) {
 		let theatreId = Theatre.instance.usersTyping[chatMessage.data.user].theatreId;
-		let insert = Theatre.instance.getInsertById(theatreId);
+		let insert = Theatre.instance.stage.getInsertById(theatreId);
 		let actorId = theatreId.replace("theatre-", "");
 		let actor = game.actors.get(actorId) || null;
 		if (Theatre.DEBUG) console.log("speakingAs %s", theatreId);
@@ -278,7 +278,7 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 		return;
 
 	let textBox = Theatre.instance.getTextBoxById(theatreId);
-	let insert = Theatre.instance.getInsertById(theatreId);
+	let insert = Theatre.instance.stage.getInsertById(theatreId);
 	let charSpans = [];
 	let textContent = chatData.content;
 
@@ -333,7 +333,7 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 				yoyo: true,
 				onComplete: function (ctx, imgId, tweenId) {
 					// decrement the rendering accumulator
-					let insert = Theatre.instance.getInsertById(imgId);
+					let insert = Theatre.instance.stage.getInsertById(imgId);
 					if (insert) {
 						this.targets()[0].scale.x = insert.mirrored ? -1 : 1;
 						this.targets()[0].scale.y = 1;
@@ -433,7 +433,7 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 		if (insert && Theatre.instance.settings.autoDecay) {
 			insert.decayTOId = window.setTimeout(
 				imgId => {
-					let insert = Theatre.instance.getInsertById(imgId);
+					let insert = Theatre.instance.stage.getInsertById(imgId);
 					if (insert) Theatre.instance.decayTextBoxById(imgId, true);
 				},
 				Math.max(
@@ -804,7 +804,7 @@ Hooks.on("renderPause", () => {
  * If an actor changes, update the stage accordingly
  */
 Hooks.on("updateActor", (actor, data) => {
-	const insert = Theatre.instance.getInsertById(`theatre-${actor.id}`);
+	const insert = Theatre.instance.stage.getInsertById(`theatre-${actor.id}`);
 	if (!insert) return;
 
 	insert.label.text = ActorExtensions.getDisplayName(actor.id);

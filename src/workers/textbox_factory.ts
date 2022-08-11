@@ -73,7 +73,7 @@ export default class _TextBoxFactory {
                 }
                 // calculate bouding box
                 let boundingBox: { [key: string]: number } = {};
-                let insert = this.context.getInsertById(id);
+                let insert = this.context.stage.getInsertById(id);
 
                 // permission check
                 if (!this.context.isActorOwner(game.user.id, insert.imgId)) {

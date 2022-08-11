@@ -1,4 +1,5 @@
 export default class PortraitDock{
+    /** Id of the image, usually theatre-<actorId> */
     imgId: string;
     dockContainer: PIXI.Container;
     name: string;
