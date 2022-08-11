@@ -1,3 +1,4 @@
+import TheatreSettings from "../extensions/settings";
 import Theatre from "../Theatre.js";
 import TheatreStyle from "../types/TheatreStyle.js";
 import KHelpers from "./KHelpers.js";
@@ -195,7 +196,7 @@ export default class TextFlyinAnimationsFactory {
         let textBox: HTMLElement = null;
 
         if (charSpans[0]) {
-            switch (Theatre.instance.settings.theatreStyle) {
+            switch (TheatreSettings.getTheatreStyle()) {
                 case TheatreStyle.LIGHTBOX:
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-light", 5);
                     if (!textBox)
@@ -275,7 +276,7 @@ export default class TextFlyinAnimationsFactory {
 
         let textBox: HTMLElement = null;
         if (charSpans[0]) {
-            switch (Theatre.instance.settings.theatreStyle) {
+            switch (TheatreSettings.getTheatreStyle()) {
                 case TheatreStyle.LIGHTBOX:
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-light", 5);
                     if (!textBox)
@@ -333,7 +334,7 @@ export default class TextFlyinAnimationsFactory {
 
         let textBox: HTMLElement = null;
         if (charSpans[0]) {
-            switch (Theatre.instance.settings.theatreStyle) {
+            switch (TheatreSettings.getTheatreStyle()) {
                 case TheatreStyle.LIGHTBOX:
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-light", 5);
                     if (!textBox)
@@ -390,7 +391,7 @@ export default class TextFlyinAnimationsFactory {
 
         let textBox = null;
         if (charSpans[0]) {
-            switch (Theatre.instance.settings.theatreStyle) {
+            switch (TheatreSettings.getTheatreStyle()) {
                 case TheatreStyle.LIGHTBOX:
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-light", 5);
                     if (!textBox)

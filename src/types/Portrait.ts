@@ -76,6 +76,11 @@ export default class Portrait {
 
     getPortraitDimensions(): { width: number, height: number } {
 
+        const texture = this.insert.portrait.texture;
+
+        if(!texture)
+            console.error("OOF");
+
         const portWidth = this.insert.portrait.texture.width;
         const portHeight = this.insert.portrait.texture.height;
 
@@ -90,7 +95,6 @@ export default class Portrait {
                     heightStr.substring(0, heightStr.length - 1)
                 ) / 100;
 
-                ui.notifications.info(`${this.stage.pixiApplication.renderer.height}`);
                 height = relativeHeight * this.stage.pixiApplication.renderer.height;
             }
             else {
@@ -102,10 +106,8 @@ export default class Portrait {
             height = parseInt(heightStr);
         }
 
-        this.stage.pixiApplication.renderer.height;
-
         return {
-            width: portWidth * height / portHeight,
+            width: height * portWidth / portHeight,
             height: height
         };
 

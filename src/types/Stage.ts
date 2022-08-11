@@ -103,7 +103,7 @@ export default class Stage {
 
     removeInsertById(
         theatreId: string,
-        remote?: boolean) {
+        remote?: boolean): void {
 
         const toRemoveInsert = this.getInsertBy(insert => insert.imgId == theatreId && !insert.deleting);
 
@@ -113,16 +113,12 @@ export default class Stage {
 
         const toRemoveTextBox: HTMLElement = this.getTextBoxes().find(textBoxFilter);
 
+        if (!toRemoveInsert || !toRemoveTextBox)
+            return; // no-op
+
         toRemoveInsert.deleting = true;
 
-        if (toRemoveInsert && !toRemoveTextBox ||
-            !toRemoveInsert && toRemoveTextBox)
-            console.error("Illegal Program State")
-
-        if (!toRemoveInsert || !toRemoveTextBox)
-            return null;
-
-        return Theatre.instance._removeInsert(
+        Theatre.instance._removeInsert(
             toRemoveInsert,
             toRemoveTextBox,
             remote);
