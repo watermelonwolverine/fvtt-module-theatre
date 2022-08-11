@@ -65,7 +65,7 @@ Hooks.on("getActorSheetHeaderButtons", (app, buttons) => {
 
 		}
 
-		const removeLabelSheetHeader = game.settings.get(TheatreSettings.NAMESPACE, TheatreSettings.REMOVE_LABEL_SHEET_HEADER);
+		const removeLabelSheetHeader = TheatreSettings.getRemoteLabelSheetHeader();
 		let label = Theatre.instance.stage.isActorStaged(app.object.data) ? "Theatre.UI.Config.RemoveFromStage" : "Theatre.UI.Config.AddToStage";
 		label = removeLabelSheetHeader ? "" : label;
 
@@ -119,7 +119,7 @@ Hooks.on("sidebarCollapse", function (a, collapsed) {
 		window.clearTimeout(Theatre.instance.reorderTOId);
 
 	Theatre.instance.reorderTOId = window.setTimeout(() => {
-		Theatre.reorderInserts();
+		Theatre.instance.insertReorderer.reorderInserts();
 		Theatre.instance.reorderTOId = null;
 	}, 250);
 });

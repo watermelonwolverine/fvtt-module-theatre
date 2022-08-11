@@ -33,6 +33,7 @@ import TheatreStyle from './types/TheatreStyle.js';
 import getTheatreId from "./workers/Tools.js";
 import EmotionDefinition from "./types/EmotionDefinition.js";
 import EmoteMenuRenderer from './workers/EmoteMenuRenderer.js';
+import InsertReorderer from './workers/InsertReorderer.js';
 
 export default class Theatre {
 
@@ -108,6 +109,7 @@ export default class Theatre {
 			this.settings.motdNewInfo = game.settings.get("theatre", "motdNewInfo") || 1;
 
 			this.emoteMenuRenderer = new EmoteMenuRenderer(this);
+			this.insertReorderer = new InsertReorderer(this);
 
 		}
 		return Theatre.instance;
@@ -973,7 +975,7 @@ export default class Theatre {
 				params = this._getInsertParamsFromActorId(actorId);
 				if (!params) return;
 
-				app = this.stage.pixiCTX;
+				app = this.stage.pixiApplication;
 				insertEmote = this._getEmoteFromInsert(insert);
 				render = false;
 
@@ -1016,7 +1018,7 @@ export default class Theatre {
 				params = this._getInsertParamsFromActorId(actorId);
 				if (!params) return;
 
-				app = this.stage.pixiCTX;
+				app = this.stage.pixiApplication;
 				insertEmote = this._getEmoteFromInsert(insert);
 				render = false;
 
@@ -1853,13 +1855,13 @@ export default class Theatre {
 	 */
 	_renderTheatre(time) {
 		// let the ticker update all its objects
-		this.stage.pixiCTX.ticker.update(time);
+		this.stage.pixiApplication.ticker.update(time);
 		// this.stage.pixiCTX.renderer.clear(); // PIXI.v6 does not respect transparency for clear
 		for (let insert of this.stage.portraitDocks) {
 			if (insert.dockContainer) {
 				if (Theatre.DEBUG) this.updateTheatreDebugInfo(insert);
 				// PIXI.v6 The renderer should not clear the canvas on rendering
-				this.stage.pixiCTX.renderer.render(insert.dockContainer, { clear: false });
+				this.stage.pixiApplication.renderer.render(insert.dockContainer, { clear: false });
 			}
 			else {
 				console.log("INSERT HAS NO CONTAINER! _renderTheatre : HOT-EJECTING it! ", insert);
@@ -1923,7 +1925,6 @@ export default class Theatre {
 	 * @params tween (Object TweenMax) : The TweenMax object of the tween to be removed.
 	 * @params tweenId (String) : The tweenId of the tween to be removed. 
 	 *
-	 * @private
 	 */
 	_removeDockTween(imgId, tween, tweenId) {
 		if (tween) tween.kill();
@@ -2877,7 +2878,7 @@ export default class Theatre {
 		if (navItem)
 			KHelpers.addClass(navItem, "theatre-control-nav-bar-item-active");
 
-		let dock = this.workers.pixi_container_factory.createPortraitPIXIContainer(
+		this.workers.pixi_container_factory.createPortraitPIXIContainer(
 			imgPath,
 			portName,
 			imgId,
@@ -2922,7 +2923,14 @@ export default class Theatre {
 		if (navItem)
 			KHelpers.addClass(navItem, "theatre-control-nav-bar-item-active");
 
-		let dock = this.workers.pixi_container_factory.createPortraitPIXIContainer(imgPath, portName, imgId, optAlign, emotions, false);
+		this.workers.pixi_container_factory.createPortraitPIXIContainer(
+			imgPath,
+			portName,
+			imgId,
+			optAlign,
+			emotions,
+			false);
+
 		let textBox = this.workers.textbox_factory.create_textbox(portName, imgId);
 
 		this._addTextBoxToTheatreBar(textBox);
@@ -3094,7 +3102,7 @@ export default class Theatre {
 				window.clearTimeout(this.reorderTOId)
 
 			this.reorderTOId = window.setTimeout(() => {
-				Theatre.reorderInserts();
+				this.insertReorderer.reorderInserts();
 				this.reorderTOId = null;
 			}, 750);
 
@@ -3455,7 +3463,7 @@ export default class Theatre {
 			window.clearTimeout(this.reorderTOId);
 
 		this.reorderTOId = window.setTimeout(() => {
-			Theatre.reorderInserts();
+			this.insertReorderer.reorderInserts();
 			this.reorderTOId = null;
 		}, 250);
 
@@ -3565,7 +3573,7 @@ export default class Theatre {
 			window.clearTimeout(this.reorderTOId);
 
 		this.reorderTOId = window.setTimeout(() => {
-			Theatre.reorderInserts();
+			this.insertReorderer.reorderInserts();
 			this.reorderTOId = null;
 		}, 250);
 
@@ -3683,7 +3691,6 @@ export default class Theatre {
 	 * @params isLeft (Boolean) : Wither we're pushing left or right. 
 	 * @params remote (Boolean) : Wither this is being invoked remotely, or locally. 
 	 *
-	 * @private
 	 */
 	_pushInsert(insert, textBox, isLeft, remote) {
 		let textBoxes = this._getTextBoxes();
@@ -3712,16 +3719,7 @@ export default class Theatre {
 			KHelpers.insertAfter(textBox, lastTextBox);
 		}
 
-		/*
-		if (this.reorderTOId)
-			window.clearTimeout(this.reorderTOId); 
-
-		this.reorderTOId = window.setTimeout(()=>{
-			Theatre.reorderInserts(); 
-			this.reorderTOId = null; 
-		},500); 
-		*/
-		Theatre.reorderInserts();
+		this.insertReorderer.reorderInserts();
 
 		// Push to socket our event
 		if (!remote) {
@@ -4494,18 +4492,8 @@ export default class Theatre {
 		if (this.theatreEmoteMenu)
 			this.theatreEmoteMenu.style.top = `${this.theatreControls.offsetTop - 410}px`
 
-		const app = this.stage.pixiCTX;
-		const theatre_dock = this.stage.theatreDock;
 
-		let dockWidth = theatre_dock.offsetWidth;
-		let dockHeight = theatre_dock.offsetHeight;
-		theatre_dock.setAttribute("width", dockWidth);
-		theatre_dock.setAttribute("height", dockHeight);
-		app.width = dockWidth;
-		app.height = dockHeight;
-		app.renderer.view.width = dockWidth;
-		app.renderer.view.height = dockHeight;
-		app.renderer.resize(dockWidth, dockHeight);
+	this.stage.handleWindowResize()
 		//app.render(); 
 		if (!this.rendering)
 			this._renderTheatre(performance.now());
@@ -4514,7 +4502,7 @@ export default class Theatre {
 			window.clearTimeout(this.reorderTOId)
 
 		this.reorderTOId = window.setTimeout(() => {
-			Theatre.reorderInserts();
+			this.insertReorderer.reorderInserts();
 			this.reorderTOId = null;
 		}, 250);
 
@@ -4937,204 +4925,6 @@ export default class Theatre {
 		}
 
 	}
-
-	/**
-	 * ============================================================
-	 *
-	 * Theatre statics
-	 *
-	 * ============================================================
-	 */
-
-	/**
-	 * Reorder theatre inserts in the dockContainer to align with where their
-	 * text-box's position is on the bar such that the insert is always over
-	 * the corresponding text-box.
-	 *
-	 */
-	static reorderInserts() {
-		if (!Theatre.instance) return;
-		let boxes = Theatre.instance._getTextBoxes();
-		let containerWidth = Theatre.instance.stage.theatreDock.offsetWidth;
-		// Min 22px, max 32px, scale for all values inbetween
-		let fontSize = Math.floor(Math.max((Math.min(containerWidth / boxes.length, 500) / 500) * 28, 18));
-		if (Theatre.DEBUG) console.log("Reorder CALCUALTED FONT SIZE: ", fontSize);
-
-		for (let textBox of boxes) {
-			let theatreId = textBox.getAttribute("imgid");
-			let insert = Theatre.instance.getInsertById(theatreId);
-
-			if (!insert) {
-				Theatre.instance._removeTextBoxFromTheatreBar(textBox);
-				continue;
-			}
-			// if somehow the containers are not setup, skip and hope the next re-order has them ready
-
-			if (!insert.portrait || !insert.label) {
-				if (Theatre.DEBUG) console.log("WARN: %s : %s was not ready!", insert.name, insert.imgId);
-				continue;
-			}
-			// if the insert/textBox pair is in the process of being removed.
-			if (textBox.getAttribute("deleting"))
-				continue;
-
-			//console.log("repositioning %s :",theatreId,insert); 
-			let offset = KHelpers.offset(textBox);
-			//left calc
-			let leftPos = Math.round(
-				Number(offset.left || 0)
-				- Number(KHelpers.style(textBox)["left"].match(/\-*\d+\.*\d*/) || 0)
-				- Number(KHelpers.style(Theatre.instance.theatreBar)["margin-left"].match(/\-*\d+\.*\d*/) || 0)
-			);
-
-			//insert.dockContainer.width = textBox.offsetWidth; 
-
-			if (insert.exitOrientation == "left") {
-				if (Theatre.DEBUG) console.log("LEFT (name: %s): ", insert.nameOrientation, leftPos, insert.name, Theatre.instance.theatreBar.offsetWidth / 2);
-				if (leftPos + (insert.dockContainer.width / 2) > Theatre.instance.theatreBar.offsetWidth / 2) {
-					if (Theatre.DEBUG) console.log("swapping " + insert.name + " to right alignment from left");
-					insert.exitOrientation = "right";
-				}
-			} else {
-				if (Theatre.DEBUG) console.log("RIGHT (name: %s): ", insert.nameOrientation, leftPos, insert.name, Theatre.instance.theatreBar.offsetWidth / 2);
-				//right
-				if (leftPos + (insert.dockContainer.width / 2) <= Theatre.instance.theatreBar.offsetWidth / 2) {
-					if (Theatre.DEBUG) console.log("swapping " + insert.name + " to left alignment from right");
-					insert.exitOrientation = "left";
-				}
-			}
-			// pre-split measurement
-			insert.label.style.fontSize = TheatreSettings.get("nameFontSize");
-			insert.label.style.lineHeight = TheatreSettings.get("nameFontSize") * 1.5;
-			insert.label.style.wordWrap = false;
-			insert.label.style.wordWrapWidth = insert.portrait.width;
-			let labelExceeds = (insert.label.width + 20 + insert.label.style.fontSize) > textBox.offsetWidth;
-			let preLabelWidth = insert.label.width;
-			// split measurement
-			insert.label.style.wordWrap = true;
-			insert.label.style.wordWrapWidth = textBox.offsetWidth;
-			// shrink if label exceeds
-			if (labelExceeds) {
-				// apply title font size
-				let titleFontSize = Math.floor(Math.max((Math.min(containerWidth / boxes.length, 600) / 600) * 44, 28));
-				insert.label.style.fontSize = titleFontSize;
-				insert.label.style.lineHeight = titleFontSize * 1.5;
-			}
-
-			// Scale the name bar length and orient the portait
-
-			if (insert.nameOrientation == "left") {
-				insert.label.x = 20;
-				insert.typingBubble.anchor.set(0.5);
-				insert.typingBubble.x = Math.min(preLabelWidth + 20 + insert.typingBubble.width / 2, textBox.offsetWidth - insert.typingBubble.width / 2);
-
-			} else {
-				if (labelExceeds) {
-					insert.label.x = insert.portrait.width - insert.label.width - 20;
-					if (insert.label.width - 20 > insert.portrait.width)
-						insert.typingBubble.x = Math.min(insert.portrait.width - insert.label.width - insert.typingBubble.texture.width / 2 - 20, insert.typingBubble.width / 2);
-					else
-						insert.typingBubble.x = Math.max(insert.portrait.width - insert.label.width - insert.typingBubble.texture.width / 2 - 20, insert.typingBubble.width / 2);
-				} else {
-					insert.label.x = insert.portrait.width - preLabelWidth - 20;
-					if (preLabelWidth - 20 > insert.portrait.width)
-						insert.typingBubble.x = Math.min(insert.portrait.width - preLabelWidth - insert.typingBubble.texture.width / 2 - 20, insert.typingBubble.width / 2);
-					else
-						insert.typingBubble.x = Math.max(insert.portrait.width - preLabelWidth - insert.typingBubble.texture.width / 2 - 20, insert.typingBubble.width / 2);
-				}
-
-				insert.typingBubble.anchor.set(0.5);
-
-				leftPos += textBox.offsetWidth - insert.portrait.width;
-			}
-			insert.typingBubble.y = insert.portrait.height -
-				(insert.optAlign == "top" ? 0 : Theatre.instance.theatreBar.offsetHeight) - insert.label.style.lineHeight + insert.typingBubble.height / 2;
-			// if the label height > font-size, it word wrapped wrap, so we need to bump up the height
-			if (labelExceeds) {
-				let divisor = Math.round(insert.label.height / insert.label.style.lineHeight);
-				insert.label.y = insert.portrait.height -
-					(insert.optAlign == "top" ? 0 : Theatre.instance.theatreBar.offsetHeight) - (insert.label.style.lineHeight * divisor);
-			} else {
-				// normal
-				insert.label.y = insert.portrait.height -
-					(insert.optAlign == "top" ? 0 : Theatre.instance.theatreBar.offsetHeight) - insert.label.style.lineHeight;
-			}
-			insert.typingBubble.rotation = 0.1745;
-			insert.dockContainer.y = Theatre.instance.stage.theatreDock.offsetHeight
-				- (insert.optAlign == "top" ? Theatre.instance.theatreBar.offsetHeight : 0) - insert.portrait.height;
-
-			// theatreStyle specific adjustments
-			switch (Theatre.instance.settings.theatreStyle) {
-				case TheatreStyle.LIGHTBOX:
-					// to allow top-aligned portraits to work without a seam
-					insert.dockContainer.y += (insert.optAlign == "top" ? 8 : 0);
-					insert.label.y -= (insert.optAlign == "top" ? 8 : 0);
-					break;
-				case TheatreStyle.CLEARBOX:
-					insert.dockContainer.y = Theatre.instance.stage.theatreDock.offsetHeight - insert.portrait.height;
-					insert.label.y += (insert.optAlign == "top" ? 0 : Theatre.instance.theatreBar.offsetHeight)
-					insert.typingBubble.y += (insert.optAlign == "top" ? 0 : Theatre.instance.theatreBar.offsetHeight);
-					break;
-				case TheatreStyle.MANGABUBBLE:
-					break;
-				case TheatreStyle.TEXTBOX:
-					break;
-				default:
-					break;
-			}
-
-			// Based on the number of active inserts, space, and user /desired/ font size, we'll set the font size
-			let insertFontSize = fontSize;
-			textBox.setAttribute('osize', insertFontSize);
-			switch (Number(insert.textSize)) {
-				case 3:
-					insertFontSize *= 1.5
-					break;
-				case 1:
-					insertFontSize *= 0.5
-					break;
-				default:
-					break;
-			}
-			textBox.style["font-size"] = `${insertFontSize}px`;
-
-			// now apply it to all children and sub child heights if the height is different
-			// note that we only care about growing, not shrinking to conserve a bit.
-			if (textBox.children[0]
-				&& textBox.children[0].tagName.toLowerCase() != "hr"
-				&& textBox.children[0].offsetHeight != insertFontSize) {
-				for (let c of textBox.children) {
-					if (c.tagName.toLowerCase() == "hr")
-						continue;
-					for (let sc of c.children)
-						sc.style.height = `${insertFontSize}px`;
-					c.style.height = `${insertFontSize}px`;
-				}
-			}
-			// bookmark leftPos as order for sorting
-			insert.order = leftPos;
-			insert.renderOrder = leftPos;
-
-			let tweenId = "containerSlide";
-			let tween = TweenMax.to(insert.dockContainer, 1, {
-				//delay: 0.5,
-				pixi: { x: leftPos, alpha: 1 },
-				ease: Power4.easeOut,
-				onComplete: function (ctx, imgId, tweenId) {
-					// decrement the rendering accumulator
-					ctx._removeDockTween(imgId, this, tweenId);
-					// remove our own reference from the dockContainer tweens
-				},
-				onCompleteParams: [Theatre.instance, insert.imgId, tweenId]
-			});
-			Theatre.instance._addDockTween(theatreId, tween, tweenId);
-		}
-		// sort the render order by left position order
-		Theatre.instance.stage.portraitDocks.sort((a, b) => { return a.order - b.order });
-
-	}
-
-
 
 	/**
 	 * Set wither or not to display or hide theatre debug information. 
@@ -5701,7 +5491,7 @@ export default class Theatre {
 	 */
 	onAddToNavBar(ev, actorSheet) {
 
-		const removeLabelSheetHeader = TheatreSettings.get(TheatreSettings.REMOVE_LABEL_SHEET_HEADER);
+		const removeLabelSheetHeader = TheatreSettings.getRemoteLabelSheetHeader();
 
 		if (Theatre.DEBUG) console.log("Click Event on Add to NavBar!!", actorSheet, actorSheet.actor, actorSheet.position);
 		const actor = actorSheet.object.data;

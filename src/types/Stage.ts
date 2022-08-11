@@ -11,7 +11,7 @@ export default class Stage {
 
     portraitDocks: PortraitDock[];
     theatreDock: HTMLCanvasElement;
-    pixiCTX: PIXI.Application;
+    pixiApplication: PIXI.Application;
 
     constructor() {
         this.actors = new Map();
@@ -31,29 +31,27 @@ export default class Stage {
         // no need to load in any resources as that will be done on a per-diem bases
         // by each container portrait
 
-        let app = new PIXI.Application({
+        this.pixiApplication = new PIXI.Application({
             transparent: true,
             antialias: true,
             width: document.body.offsetWidth
         });
 
-        let canvas = app.view;
+        this.theatreDock = this.pixiApplication.view;
 
-        if (!canvas) {
+        if (!this.theatreDock) {
             ui.notifications.error(game.i18n.localize("Theatre.UI.Notification.Fatal"));
             throw "FAILED TO INITILIZE DOCK CANVAS!";
         }
 
-        this.theatreDock = canvas;
-        this.pixiCTX = app;
 
         this.theatreDock.id = "theatre-dock";
         KHelpers.addClass(this.theatreDock, "theatre-dock");
         KHelpers.addClass(this.theatreDock, "no-scrollbar");
 
         // turn off ticker
-        app.ticker.autoStart = false;
-        app.ticker.stop();
+        this.pixiApplication.ticker.autoStart = false;
+        this.pixiApplication.ticker.stop();
 
         return canvas;
     }
@@ -131,5 +129,22 @@ export default class Stage {
             return false;
 
         return this.actors.has(getTheatreId(actor));
+    }
+
+    handleWindowResize() {
+
+
+        let dockWidth = this.theatreDock.offsetWidth;
+        let dockHeight = this.theatreDock.offsetHeight;
+
+        this.theatreDock.setAttribute("width", dockWidth.toString());
+        this.theatreDock.setAttribute("height", dockHeight.toString());
+
+        this.pixiApplication.renderer.view.width = dockWidth;
+        this.pixiApplication.renderer.view.height = dockHeight;
+
+        this.pixiApplication.renderer.resize(dockWidth, dockHeight);
+
+        // TODO update size of portraits, now that they support relative heights
     }
 }

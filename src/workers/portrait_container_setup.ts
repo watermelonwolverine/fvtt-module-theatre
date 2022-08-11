@@ -5,6 +5,7 @@ import ActorExtensions from "../extensions/ActorExtensions.js";
 import _TheatreWorkers from "./workers.js";
 import TheatreSettings from "../extensions/settings.js";
 import TheatreStyle from "../types/TheatreStyle.js";
+import Stage from "../types/Stage.js";
 
 export default class _TheatrePortraitContainerSetupWorker {
 
@@ -39,19 +40,20 @@ export default class _TheatrePortraitContainerSetupWorker {
         reorder: boolean): void {
         let insert = this.context.getInsertById(imgId);
 
+        const stage = this.context.stage;
 
 
         if (!insert || !insert.dockContainer) {
             console.error("ERROR PIXI Container was destroyed before setup could execute for %s", imgId);
             ui.notifications.error(`${game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P1")} ${imgId} ${game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P2")} ${resName}`);
-            this.context.stage.removeInsertById(imgId);
+            stage.removeInsertById(imgId);
             return;
         }
 
         if (!resources[resName] || !resources[resName].texture) {
             console.error("ERROR could not load texture %s", resName, resources);
             ui.notifications.error(`${game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P1")} ${imgId} ${game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P2")} ${resName}`);
-            this.context.stage.removeInsertById(imgId);
+            stage.removeInsertById(imgId);
             return;
         }
 
@@ -59,23 +61,23 @@ export default class _TheatrePortraitContainerSetupWorker {
         let portraitContainer = insert.portraitContainer;
 
         let sprite = new PIXI.Sprite(resources[resName].texture);
-        let portWidth = resources[resName].texture.width;
-        let portHeight = resources[resName].texture.height;
-        let maxHeight = TheatreSettings.get<number>(TheatreSettings.THEATRE_IMAGE_SIZE);
-        if (portHeight > maxHeight) {
-            portWidth *= maxHeight / portHeight;
-            portHeight = maxHeight;
-        }
+
+        const portraitDimensions = this.getPortraitHeight(
+            stage,
+            resources[resName]);
+
+        const portWidth = portraitDimensions.width;
+        const portHeight = portraitDimensions.height;
 
         // adjust dockContainer + portraitContainer dimensions to fit the image
-        dockContainer.width = portWidth;
-        dockContainer.height = portHeight;
-        portraitContainer.width = portWidth;
-        portraitContainer.height = portHeight;
+        dockContainer.width = portWidth
+        dockContainer.height = portHeight
+        portraitContainer.width = portWidth
+        portraitContainer.height = portHeight
 
         // set the initial dockContainer position + state
         //dockContainer.x = 0;
-        dockContainer.y = this.context.stage.theatreDock.offsetHeight - (optAlign == "top" ? this.context.theatreBar.offsetHeight : 0) - portHeight;
+        dockContainer.y = stage.theatreDock.offsetHeight - (optAlign == "top" ? this.context.theatreBar.offsetHeight : 0) - portHeight;
 
         // save and stage our sprite
         insert.portrait = sprite;
@@ -152,7 +154,7 @@ export default class _TheatrePortraitContainerSetupWorker {
                 insert.label.y -= (insert.optAlign == "top" ? 8 : 0);
                 break;
             case TheatreStyle.CLEARBOX:
-                dockContainer.y = this.context.stage.theatreDock.offsetHeight - portHeight;
+                dockContainer.y = stage.theatreDock.offsetHeight - portHeight;
                 insert.label.y += (optAlign == "top" ? 0 : this.context.theatreBar.offsetHeight);
                 insert.typingBubble.y += (optAlign == "top" ? 0 : this.context.theatreBar.offsetHeight);
                 break;
@@ -257,7 +259,7 @@ export default class _TheatrePortraitContainerSetupWorker {
 
                 window.clearTimeout(this.context.reorderTOId)
                 this.context.reorderTOId = window.setTimeout(() => {
-                    Theatre.reorderInserts();
+                    this.context.insertReorderer.reorderInserts();
                     this.context.reorderTOId = null;
                 }, 500);
             }, 100);
@@ -265,9 +267,48 @@ export default class _TheatrePortraitContainerSetupWorker {
             dockContainer.alpha = 1;
         }
 
-        //app.render(); 
         if (!this.context.rendering)
             this.context._renderTheatre(performance.now());
+    }
+
+    getPortraitHeight(
+        stage: Stage,
+        resource: PIXI.LoaderResource): { width: number, height: number } {
+
+
+        const portWidth = resource.texture.width;
+        const portHeight = resource.texture.height;
+
+        const heightStr = TheatreSettings.getTheatreImageSize();
+
+        let height: number;
+
+        if (isNaN(heightStr as unknown as number)) {
+            if (heightStr.endsWith("%")) {
+
+                const relativeHeight = parseInt(
+                    heightStr.substring(0, heightStr.length - 1)
+                ) / 100;
+
+                ui.notifications.info(`${stage.pixiApplication.renderer.height}`);
+                height = relativeHeight * stage.pixiApplication.renderer.height;
+            }
+            else {
+                ui.notifications.error(`Illegal value for: ${TheatreSettings.getNameLocalizationKey(TheatreSettings.THEATRE_IMAGE_SIZE)}`);
+                height = TheatreSettings.THEATRE_IMAGE_SIZE_DEFAULT;
+            }
+        }
+        else {
+            height = parseInt(heightStr);
+        }
+
+        stage.pixiApplication.renderer.height;
+
+        return {
+            width: portWidth * height / portHeight,
+            height: height
+        };
+
     }
 
 }

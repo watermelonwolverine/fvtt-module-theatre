@@ -15,7 +15,7 @@ export default class PortraitDock{
     exitOrientation: "left" | "right";
     nameOrientation: "left" | "right";
     mirrored: boolean;
-    optAlign: unknown;
+    optAlign: string;
     tweens: unknown;
     order: number;
     renderOrder: number;

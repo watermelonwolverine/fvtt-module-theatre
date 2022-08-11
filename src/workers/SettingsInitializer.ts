@@ -4,19 +4,7 @@ import TheatreStyle from "../types/TheatreStyle.js";
 
 export default class TheatreSettingsInitializer {
 
-    /**
-         * @private
-         */
-    static getNameLocalizationKey(name: string): string {
-        return "Theatre.UI.Settings" + "." + name;
-    }
 
-    /**
-     * @private
-     */
-    static getHintLocalizationKey(name: string): string {
-        return this.getNameLocalizationKey(name) + "Hint";
-    }
 
     /**
      * @private
@@ -29,8 +17,8 @@ export default class TheatreSettingsInitializer {
     ): void {
 
         if (data.config) {
-            data.name = this.getNameLocalizationKey(key);
-            data.hint = this.getHintLocalizationKey(key);
+            data.name = TheatreSettings.getNameLocalizationKey(key);
+            data.hint = TheatreSettings.getHintLocalizationKey(key);
         }
 
         game.settings.register<string, string, T>(TheatreSettings.NAMESPACE, key, data);
@@ -72,8 +60,8 @@ export default class TheatreSettingsInitializer {
         this.register(TheatreSettings.THEATRE_IMAGE_SIZE, {
             scope: "client",
             config: true,
-            default: 400,
-            type: Number,
+            default: TheatreSettings.THEATRE_IMAGE_SIZE_DEFAULT.toString(),
+            type: String,
         });
 
         this.register<string>(TheatreSettings.NARRATOR_HEIGHT, {

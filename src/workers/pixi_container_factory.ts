@@ -50,7 +50,7 @@ export default class _TheatrePixiContainerFactory {
         portraitContainer.x = 0;
         portraitContainer.y = 0;
 
-        let app = this.context.stage.pixiCTX;
+        let app = this.context.stage.pixiApplication;
         app.stage.addChild(dockContainer);
 
         // track the dockContainer
