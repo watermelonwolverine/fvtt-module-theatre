@@ -19,7 +19,7 @@ export default class InsertReorderer {
         if (!this.context)
             return;
 
-        let boxes = this.context._getTextBoxes();
+        let boxes = this.stage.getTextBoxes();
         let containerWidth = this.stage.theatreDock.offsetWidth;
         // Min 22px, max 32px, scale for all values inbetween
         let fontSize = Math.floor(Math.max((Math.min(containerWidth / boxes.length, 500) / 500) * 28, 18));

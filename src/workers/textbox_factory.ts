@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import TheatreSettings from "../extensions/settings.js";
 import Theatre from "../Theatre.js";
 import TheatreStyle from "../types/TheatreStyle.js";
 import KHelpers from "./KHelpers.js"
@@ -22,7 +23,7 @@ export default class _TextBoxFactory {
 
         const textBox = document.createElement("div");
         // textBox class + style depends on our display mode
-        switch (this.context.settings.theatreStyle) {
+        switch (TheatreSettings.getTheatreStyle()) {
             case TheatreStyle.LIGHTBOX:
                 KHelpers.addClass(textBox, "theatre-text-box-light");
                 break;

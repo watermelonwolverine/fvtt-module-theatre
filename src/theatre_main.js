@@ -89,8 +89,8 @@ Hooks.on("sidebarCollapse", function (a, collapsed) {
 
 	if (Theatre.DEBUG) console.log("collapse? : ", a, collapsed);
 	let sideBar = document.getElementById("sidebar");
-	let primeBar = document.getElementById("theatre-prime-bar");
-	let secondBar = document.getElementById("theatre-second-bar");
+	let primeBar = Theatre.instance.stage.primeBar;
+	let secondBar = Theatre.instance.stage.secondBar;
 
 	if (collapsed) {
 		// set width to 100%
@@ -102,7 +102,7 @@ Hooks.on("sidebarCollapse", function (a, collapsed) {
 			2}px)`;
 		Theatre.instance.theatreNarrator.style.width = `calc(100% - ${sideBar.offsetWidth +
 			2}px)`;
-		if (Theatre.instance._getTextBoxes().length == 2) {
+		if (Theatre.instance.stage.getTextBoxes().length == 2) {
 			let dualWidth = Math.min(
 				Math.floor(Theatre.instance.stage.theatreBar.offsetWidth / 2),
 				650

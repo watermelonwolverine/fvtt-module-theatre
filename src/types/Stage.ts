@@ -14,9 +14,14 @@ export default class Stage {
      */
     actors: Map<string, TheatreActor>;
     stageInserts: StageInsert[];
-    theatreDock: HTMLCanvasElement;
-    pixiApplication: PIXI.Application;
-    theatreBar: HTMLDivElement;
+
+    // after init
+    theatreDock?: HTMLCanvasElement;
+    pixiApplication?: PIXI.Application;
+    theatreBar?: HTMLDivElement;
+    primeBar?: HTMLDivElement;
+    secondBar?: HTMLDivElement;
+
 
     constructor() {
         this.actors = new Map();
@@ -25,25 +30,25 @@ export default class Stage {
     }
 
 
-    init(){
+    init() {
 
         this.theatreBar = document.createElement("div");
         this.theatreBar.id = "theatre-bar";
         KHelpers.addClass(this.theatreBar, "theatre-bar");
 
-        let barContainerPrime = document.createElement("div");
-		let barContainerSecond = document.createElement("div");
+        this.primeBar = document.createElement("div");
+        this.secondBar = document.createElement("div");
 
-		barContainerPrime.id = "theatre-prime-bar";
-		barContainerSecond.id = "theatre-second-bar";
+        this.primeBar.id = "theatre-prime-bar";
+        this.secondBar.id = "theatre-second-bar";
 
-		KHelpers.addClass(barContainerPrime, "theatre-bar-left");
-		KHelpers.addClass(barContainerSecond, "theatre-bar-right");
+        KHelpers.addClass(this.primeBar, "theatre-bar-left");
+        KHelpers.addClass(this.secondBar, "theatre-bar-right");
 
-		this.theatreBar.appendChild(barContainerPrime);
-		this.theatreBar.appendChild(barContainerSecond);
+        this.theatreBar.appendChild(this.primeBar);
+        this.theatreBar.appendChild(this.secondBar);
     }
-    
+
     /**
      * Create the initial dock canvas, future 'portraits'
      * will be PIXI containers whom are sized to the portraits
@@ -106,7 +111,7 @@ export default class Stage {
             (textBox: HTMLElement) =>
                 textBox.getAttribute("imgId") == theatreId && !textBox.getAttribute("deleting");
 
-        const toRemoveTextBox: HTMLElement = Theatre.instance._getTextBoxes().filter(textBoxFilter);
+        const toRemoveTextBox: HTMLElement = this.getTextBoxes().find(textBoxFilter);
 
         toRemoveInsert.deleting = true;
 
@@ -203,5 +208,22 @@ export default class Stage {
         for (const insert of this.stageInserts) {
             new Portrait(this, insert).updatePortraitDimensions();
         }
+    }
+
+
+    getTextBoxes(): HTMLElement[] {
+        let textBoxes = [];
+        for (let container of this.theatreBar.children)
+            for (let textBox of container.children)
+                textBoxes.push(<HTMLElement>textBox);
+        return textBoxes;
+    }
+
+    getTextBoxById(theatreId: string): HTMLElement {
+        return this.getTextBoxes().find(e => { return e.getAttribute("imgId") == theatreId });
+    }
+
+    getTextBoxByName(name: string) {
+        return this.getTextBoxes().find(e => { return e.getAttribute("name") == name });
     }
 }

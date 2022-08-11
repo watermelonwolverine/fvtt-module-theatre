@@ -39,10 +39,10 @@ export default class _TheatrePortraitContainerSetupWorker {
         resName: string,
         resources: Resources,
         reorder: boolean): void {
-        let insert = this.context.stage.getInsertById(imgId);
+        
 
         const stage = this.context.stage;
-
+        const insert = stage.getInsertById(imgId);
 
         if (!insert || !insert.dockContainer) {
             console.error("ERROR PIXI Container was destroyed before setup could execute for %s", imgId);
@@ -141,7 +141,7 @@ export default class _TheatrePortraitContainerSetupWorker {
             dockContainer.alpha = 0;
 
             window.setTimeout(() => {
-                let tb = <HTMLElement>this.context._getTextBoxById(imgId);
+                let tb = stage.getTextBoxById(imgId);
                 if (tb) tb.style.opacity = "1";
 
                 window.clearTimeout(this.context.reorderTOId)

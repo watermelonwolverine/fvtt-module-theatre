@@ -318,50 +318,28 @@ export default class Theatre {
 	configTheatreStyle(theatreStyle) {
 
 		if (Theatre.DEBUG) console.log("SWITCHING THEATRE BAR MODE : %s from %s", theatreStyle, this.currentTheatreStyle);
-		let oldStyle = this.currentTheatreStyle;
 
-		let primeBar = document.getElementById("theatre-prime-bar");
-		let secondBar = document.getElementById("theatre-second-bar");
-		let textBoxes = this._getTextBoxes();
 
-		// clear old style
-		switch (oldStyle || TheatreStyle.TEXTBOX) {
-			case TheatreStyle.LIGHTBOX:
-				KHelpers.removeClass(primeBar, "theatre-bar-left");
-				KHelpers.removeClass(secondBar, "theatre-bar-right");
-				KHelpers.removeClass(primeBar, "theatre-bar-lightleft");
-				KHelpers.removeClass(secondBar, "theatre-bar-lightright");
-				for (let tb of textBoxes) {
-					KHelpers.removeClass(tb, "theatre-text-box-light");
-					KHelpers.removeClass(tb, "theatre-text-box");
-				}
-				break;
-			case TheatreStyle.CLEARBOX:
-				KHelpers.removeClass(primeBar, "theatre-bar-left");
-				KHelpers.removeClass(secondBar, "theatre-bar-right");
-				KHelpers.removeClass(primeBar, "theatre-bar-clearleft");
-				KHelpers.removeClass(secondBar, "theatre-bar-clearright");
-				for (let tb of textBoxes) {
-					KHelpers.removeClass(tb, "theatre-text-box-clear");
-					KHelpers.removeClass(tb, "theatre-text-box");
-				}
-				break;
-			case TheatreStyle.MANGABUBBLE:
-				KHelpers.removeClass(primeBar, "theatre-bar-left");
-				KHelpers.removeClass(secondBar, "theatre-bar-right");
-				for (let tb of textBoxes) {
-					KHelpers.removeClass(tb, "theatre-text-box");
-				}
-				// PLACEHOLDER FOR FUTURE
-				break;
-			case TheatreStyle.TEXTBOX:
-			default:
-				KHelpers.removeClass(primeBar, "theatre-bar-left");
-				KHelpers.removeClass(secondBar, "theatre-bar-right");
-				for (let tb of textBoxes)
-					KHelpers.removeClass(tb, "theatre-text-box");
-				break;
-		}
+		this._removeCurrentTheatreStyle();
+
+		this._addNewTheatreStyle(theatreStyle);
+
+		this.currentTheatreStyle = theatreStyle;
+
+		// re-render all inserts
+		for (let insert of this.stage.stageInserts)
+			this.renderInsertById(insert.imgId);
+
+		// apply resize adjustments (ev is unused)
+		this.handleWindowResize(null);
+	}
+
+	_addNewTheatreStyle(theatreStyle) {
+
+
+		let primeBar = this.stage.primeBar;
+		let secondBar = this.stage.secondBar;
+		let textBoxes = this.stage.getTextBoxes();
 
 		// apply new style
 		switch (theatreStyle) {
@@ -403,15 +381,52 @@ export default class Theatre {
 					KHelpers.addClass(tb, "theatre-text-box");
 				break;
 		}
+	}
 
-		this.currentTheatreStyle = theatreStyle;
+	_removeCurrentTheatreStyle() {
 
-		// re-render all inserts
-		for (let insert of this.stage.stageInserts)
-			this.renderInsertById(insert.imgId);
+		let primeBar = this.stage.primeBar;
+		let secondBar = this.stage.secondBar;
+		let textBoxes = this.stage.getTextBoxes();
 
-		// apply resize adjustments (ev is unused)
-		this.handleWindowResize(null);
+		// clear old style
+		switch (this.currentTheatreStyle || TheatreStyle.TEXTBOX) {
+			case TheatreStyle.LIGHTBOX:
+				KHelpers.removeClass(primeBar, "theatre-bar-left");
+				KHelpers.removeClass(secondBar, "theatre-bar-right");
+				KHelpers.removeClass(primeBar, "theatre-bar-lightleft");
+				KHelpers.removeClass(secondBar, "theatre-bar-lightright");
+				for (let tb of textBoxes) {
+					KHelpers.removeClass(tb, "theatre-text-box-light");
+					KHelpers.removeClass(tb, "theatre-text-box");
+				}
+				break;
+			case TheatreStyle.CLEARBOX:
+				KHelpers.removeClass(primeBar, "theatre-bar-left");
+				KHelpers.removeClass(secondBar, "theatre-bar-right");
+				KHelpers.removeClass(primeBar, "theatre-bar-clearleft");
+				KHelpers.removeClass(secondBar, "theatre-bar-clearright");
+				for (let tb of textBoxes) {
+					KHelpers.removeClass(tb, "theatre-text-box-clear");
+					KHelpers.removeClass(tb, "theatre-text-box");
+				}
+				break;
+			case TheatreStyle.MANGABUBBLE:
+				KHelpers.removeClass(primeBar, "theatre-bar-left");
+				KHelpers.removeClass(secondBar, "theatre-bar-right");
+				for (let tb of textBoxes) {
+					KHelpers.removeClass(tb, "theatre-text-box");
+				}
+				// PLACEHOLDER FOR FUTURE
+				break;
+			case TheatreStyle.TEXTBOX:
+			default:
+				KHelpers.removeClass(primeBar, "theatre-bar-left");
+				KHelpers.removeClass(secondBar, "theatre-bar-right");
+				for (let tb of textBoxes)
+					KHelpers.removeClass(tb, "theatre-text-box");
+				break;
+		}
 	}
 
 	/**
@@ -2638,45 +2653,7 @@ export default class Theatre {
 
 	}
 
-	/**
-	 * Scour the theatreBar for all text boxes
-	 *
-	 * @return {Array[HTMLElement]} : An array of HTMLElements which are the textboxes
-	 *
-	 */
-	_getTextBoxes() {
-		let textBoxes = [];
-		for (let container of this.stage.theatreBar.children)
-			for (let textBox of container.children)
-				textBoxes.push(textBox);
-		return textBoxes;
-	}
 
-	/**
-	 * Get the text box given the theatreId
-	 *
-	 * @params id (String) : The theatreId of the insert/textbox
-	 *
-	 * @return (HTMLELement) : The HTMLElement which is the textbox, or undefined if it
-	 *						  does not exist. 
-	 *
-	 */
-	_getTextBoxById(id) {
-		return this._getTextBoxes().find(e => { return e.getAttribute("imgId") == id });
-	}
-
-	/**
-	 * Get the text box given the label name
-	 *
-	 * @params id (String) : The label name of the insert/textbox
-	 *
-	 * @return (HTMLELement) : The HTMLElement which is the textbox, or undefined if it
-	 *						  does not exist. 
-	 *
-	 */
-	_getTextBoxByName(name) {
-		return this._getTextBoxes().find(e => { return e.getAttribute("name") == name });
-	}
 
 	/**
 	 * Add a textBox to the theatreBar
@@ -2687,9 +2664,9 @@ export default class Theatre {
 	 *
 	 */
 	_addTextBoxToTheatreBar(textBox, isLeft) {
-		let textBoxes = this._getTextBoxes();
-		let primeBar = document.getElementById("theatre-prime-bar");
-		let secondBar = document.getElementById("theatre-second-bar");
+		let textBoxes = this.stage.getTextBoxes();
+		let primeBar = this.stage.primeBar;
+		let secondBar = this.stage.secondBar;
 
 		if (textBoxes.length == 0) {
 			// no dock
@@ -2759,9 +2736,9 @@ export default class Theatre {
 	 *									  MUST correspond to an insert. 
 	 */
 	_removeTextBoxFromTheatreBar(textBox) {
-		let textBoxes = this._getTextBoxes();
-		let primeBar = document.getElementById("theatre-prime-bar");
-		let secondBar = document.getElementById("theatre-second-bar");
+		let textBoxes = this.stage.getTextBoxes();
+		let primeBar = this.stage.primeBar;
+		let secondBar = this.stage.secondBar;
 
 		if (textBoxes.length == 0) {
 			// no dock
@@ -2945,7 +2922,7 @@ export default class Theatre {
 			}
 		}
 		if (!id) return;
-		for (let textBox of this._getTextBoxes()) {
+		for (let textBox of this.stage.getTextBoxes()) {
 			if (textBox.getAttribute("imgId") == id && !textBox.getAttribute("deleting")) {
 				//textBox.parentNode.removeChild(textBox); 
 				textBox.setAttribute("deleting", true);
@@ -3140,7 +3117,7 @@ export default class Theatre {
 		// Narrator is a special case
 		if (id == Theatre.NARRATOR)
 			return this.theatreNarrator.getElementsByClassName("theatre-narrator-content")[0];
-		for (let textBox of this._getTextBoxes()) {
+		for (let textBox of this.stage.getTextBoxes()) {
 			if (textBox.getAttribute("imgId") == id) {
 				return textBox;
 			}
@@ -3157,7 +3134,7 @@ export default class Theatre {
 	getTextBoxByName(name) {
 		if (name == Theatre.NARRATOR)
 			return this.theatreNarrator.getElementsByClassName("theatre-narrator-content")[0];
-		for (let textBox of this._getTextBoxes()) {
+		for (let textBox of this.stage.getTextBoxes()) {
 			if (textBox.getAttribute("name") == name) {
 				return textBox;
 			}
@@ -3242,7 +3219,7 @@ export default class Theatre {
 	 *	speaking as, else undefined. 
 	 */
 	getSpeakingTextBox() {
-		return this._getTextBoxById(this.speakingAs);
+		return this.stage.getTextBoxById(this.speakingAs);
 	}
 
 
@@ -3267,7 +3244,7 @@ export default class Theatre {
 				insert2 = insert;
 			if (!!insert1 && !!insert2) break;
 		}
-		for (let textBox of this._getTextBoxes()) {
+		for (let textBox of this.stage.getTextBoxes()) {
 			if (textBox.getAttribute("imgId") == id1 && !textBox1)
 				textBox1 = textBox;
 			else if (textBox.getAttribute("imgId") == id2 && !textBox2)
@@ -3303,7 +3280,7 @@ export default class Theatre {
 				insert2 = insert;
 			if (!!insert1 && !!insert2) break;
 		}
-		for (let textBox of this._getTextBoxes()) {
+		for (let textBox of this.stage.getTextBoxes()) {
 			if (textBox.getAttribute("name") == name1 && !textBox1)
 				textBox1 = textBox;
 			else if (textBox.getAttribute("name") == name2 && !textBox2)
@@ -3347,8 +3324,8 @@ export default class Theatre {
 
 		// check the dual dock case
 		if (this._isTextBoxInPrimeBar(textBox1) && this._isTextBoxInSecondBar(textBox2)) {
-			let primeBar = document.getElementById("theatre-prime-bar");
-			let secondBar = document.getElementById("theatre-second-bar");
+			let primeBar = this.stage.primeBar;
+			let secondBar = this.stage.secondBar;
 			insert1.nameOrientation = "right";
 			insert1.exitOrientation = "right";
 			insert2.nameOrientation = "left";
@@ -3357,8 +3334,8 @@ export default class Theatre {
 			primeBar.appendChild(textBox2);
 			secondBar.appendChild(textBox1);
 		} else if (this._isTextBoxInPrimeBar(textBox2) && this._isTextBoxInSecondBar(textBox1)) {
-			let primeBar = document.getElementById("theatre-prime-bar");
-			let secondBar = document.getElementById("theatre-second-bar");
+			let primeBar = this.stage.primeBar;
+			let secondBar = this.stage.secondBar;
 			insert1.nameOrientation = "left";
 			insert1.exitOrientation = "left";
 			insert2.nameOrientation = "right";
@@ -3424,7 +3401,7 @@ export default class Theatre {
 				insert2 = insert;
 			if (!!insert1 && !!insert2) break;
 		}
-		for (let textBox of this._getTextBoxes()) {
+		for (let textBox of this.stage.getTextBoxes()) {
 			if (textBox.getAttribute("imgId") == id1 && !textBox1)
 				textBox1 = textBox;
 			else if (textBox.getAttribute("imgId") == id2 && !textBox2)
@@ -3469,8 +3446,8 @@ export default class Theatre {
 
 		// check the dual dock case
 		if (this._isTextBoxInPrimeBar(textBox1) && this._isTextBoxInSecondBar(textBox2)) {
-			let primeBar = document.getElementById("theatre-prime-bar");
-			let secondBar = document.getElementById("theatre-second-bar");
+			let primeBar = this.stage.primeBar;
+			let secondBar = this.stage.secondBar;
 			insert1.nameOrientation = "right";
 			insert1.exitOrientation = "right";
 			insert2.nameOrientation = "left";
@@ -3479,8 +3456,8 @@ export default class Theatre {
 			primeBar.appendChild(textBox2);
 			secondBar.appendChild(textBox1);
 		} else if (this._isTextBoxInPrimeBar(textBox2) && this._isTextBoxInSecondBar(textBox1)) {
-			let primeBar = document.getElementById("theatre-prime-bar");
-			let secondBar = document.getElementById("theatre-second-bar");
+			let primeBar = this.stage.primeBar;
+			let secondBar = this.stage.secondBar;
 			insert1.nameOrientation = "left";
 			insert1.exitOrientation = "left";
 			insert2.nameOrientation = "right";
@@ -3524,7 +3501,7 @@ export default class Theatre {
 	 * @private
 	 */
 	_isTextBoxInPrimeBar(textBox) {
-		let primeBar = document.getElementById("theatre-prime-bar");
+		let primeBar = this.stage.primeBar;
 		let id = textBox.getAttribute("imgId");
 		for (let btb of primeBar.children) {
 			if (btb.getAttribute("imgId") == id)
@@ -3543,7 +3520,7 @@ export default class Theatre {
 	 * @private
 	 */
 	_isTextBoxInSecondBar(textBox) {
-		let secondBar = document.getElementById("theatre-second-bar");
+		let secondBar = this.stage.secondBar;
 		let id = textBox.getAttribute("imgId");
 		for (let btb of secondBar.children) {
 			if (btb.getAttribute("imgId") == id)
@@ -3570,7 +3547,7 @@ export default class Theatre {
 				break;
 			}
 		}
-		for (let textBox of this._getTextBoxes()) {
+		for (let textBox of this.stage.getTextBoxes()) {
 			if (textBox.getAttribute("imgId") == id) {
 				targTextBox = textBox;
 				break;
@@ -3599,7 +3576,7 @@ export default class Theatre {
 				break;
 			}
 		}
-		for (let textBox of this._getTextBoxes()) {
+		for (let textBox of this.stage.getTextBoxes()) {
 			if (textBox.getAttribute("name") == name) {
 				targTextBox = textBox;
 				break;
@@ -3620,7 +3597,7 @@ export default class Theatre {
 	 *
 	 */
 	_pushInsert(insert, textBox, isLeft, remote) {
-		let textBoxes = this._getTextBoxes();
+		let textBoxes = this.stage.getTextBoxes();
 		let firstInsert = this.stage.stageInserts[0];
 		let lastInsert = this.stage.stageInserts[this.stage.stageInserts.length - 1];
 		let firstTextBox = textBoxes[0];
@@ -4155,7 +4132,7 @@ export default class Theatre {
 	 */
 	decayTextBoxById(theatreId, remote) {
 		let insert = this.stage.getInsertById(theatreId);
-		let textBox = this._getTextBoxById(theatreId);
+		let textBox = this.stage.getTextBoxById(theatreId);
 		if (!textBox || !insert) return;
 
 		if (!remote && !this.isActorOwner(game.user.id, theatreId)) {
@@ -4407,9 +4384,9 @@ export default class Theatre {
 		let sideBar = document.getElementById("sidebar");
 		this.stage.theatreBar.style.width = (ui.sidebar._collapsed ? "100%" : `calc(100% - ${sideBar.offsetWidth + 2}px)`);
 		this.theatreNarrator.style.width = (ui.sidebar._collapsed ? "100%" : `calc(100% - ${sideBar.offsetWidth + 2}px)`);
-		let primeBar = document.getElementById("theatre-prime-bar");
-		let secondBar = document.getElementById("theatre-second-bar");
-		if (this._getTextBoxes().length == 2) {
+		let primeBar = this.stage.primeBar;
+		let secondBar = this.stage.secondBar;
+		if (this.stage.getTextBoxes().length == 2) {
 			let dualWidth = Math.min(Math.floor(this.stage.theatreBar.offsetWidth / 2), 650);
 			primeBar.style.width = dualWidth + "px";
 			secondBar.style.width = dualWidth + "px";
@@ -4644,8 +4621,8 @@ export default class Theatre {
 	updateSuppression(suppress) {
 		Theatre.instance.isSuppressed = suppress;
 
-		let primeBar = document.getElementById("theatre-prime-bar");
-		let secondBar = document.getElementById("theatre-second-bar");
+		let primeBar = this.stage.primeBar;
+		let secondBar = this.stage.secondBar;
 		let opacity = null
 
 		if (Theatre.instance.isSuppressed) {
