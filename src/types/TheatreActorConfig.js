@@ -415,7 +415,7 @@ export default class TheatreActorConfig extends FormApplication {
 			}
 
 			if (theatreId == Theatre.instance.speakingAs);
-			Theatre.instance.renderEmoteMenu();
+			Theatre.instance.emoteMenuRenderer.render();
 			if (insertDirty)
 				Theatre.instance._sendSceneEvent("renderinsert", { insertid: theatreId });
 

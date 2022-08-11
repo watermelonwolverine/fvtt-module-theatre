@@ -26,14 +26,13 @@ import _TheatreWorkers from './workers/workers.js';
 import KHelpers from "./workers/KHelpers.js";
 import ActorExtensions from './extensions/ActorExtensions.js';
 import TheatreActorConfig from './types/TheatreActorConfig.js';
-import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory.js"
-import TextStandingAnimationsFactory from './workers/standing_animations_factory.js';
 import TheatreActor from './types/TheatreActor.js';
 import Stage from './types/Stage.js';
 import TheatreSettingsInitializer from './workers/SettingsInitializer.js';
 import TheatreStyle from './types/TheatreStyle.js';
-import getTheatreId from "../workers/Tools.js";
+import getTheatreId from "./workers/Tools.js";
 import EmotionDefinition from "./types/EmotionDefinition.js";
+import EmoteMenuRenderer from './workers/EmoteMenuRenderer.js';
 
 export default class Theatre {
 
@@ -108,6 +107,7 @@ export default class Theatre {
 			this.settings.decayRate = (game.settings.get("theatre", "textDecayRate") || 1) * 1000;
 			this.settings.motdNewInfo = game.settings.get("theatre", "motdNewInfo") || 1;
 
+			this.emoteMenuRenderer = new EmoteMenuRenderer(this);
 
 		}
 		return Theatre.instance;
@@ -965,7 +965,7 @@ export default class Theatre {
 				this.setUserEmote(senderId, data.insertid, "textsize", textSize, true);
 				this.setUserEmote(senderId, data.insertid, "textcolor", textColor, true);
 				if (data.insertid == this.speakingAs)
-					this.renderEmoteMenu();
+					this.emoteMenuRenderer.render();
 				break;
 			case "addtexture":
 				if (Theatre.DEBUG) console.log("texturereplace:", data);
@@ -974,7 +974,7 @@ export default class Theatre {
 				params = this._getInsertParamsFromActorId(actorId);
 				if (!params) return;
 
-				app = this.pixiCTX;
+				app = this.stage.pixiCTX;
 				insertEmote = this._getEmoteFromInsert(insert);
 				render = false;
 
@@ -1004,7 +1004,7 @@ export default class Theatre {
 						this._repositionInsertElements(insert);
 
 						if (data.insertid == this.speakingAs);
-						this.renderEmoteMenu();
+						this.emoteMenuRenderer.render();
 						if (!this.rendering)
 							this._renderTheatre(performance.now());
 					}
@@ -1017,7 +1017,7 @@ export default class Theatre {
 				params = this._getInsertParamsFromActorId(actorId);
 				if (!params) return;
 
-				app = this.pixiCTX;
+				app = this.stage.pixiCTX;
 				insertEmote = this._getEmoteFromInsert(insert);
 				render = false;
 
@@ -1051,7 +1051,7 @@ export default class Theatre {
 						this._repositionInsertElements(insert);
 
 						if (data.insertid == this.speakingAs);
-						this.renderEmoteMenu();
+						this.emoteMenuRenderer.render();
 						if (!this.rendering)
 							this._renderTheatre(performance.now());
 					}
@@ -1113,7 +1113,7 @@ export default class Theatre {
 		this.setUserEmote(userId, data.insertid, "textcolor", textColor, true);
 		// if the insertid is our speaking id, update our emote menu
 		if (data.insertid == this.speakingAs)
-			this.renderEmoteMenu();
+			this.emoteMenuRenderer.render();
 	}
 
 
@@ -1854,13 +1854,13 @@ export default class Theatre {
 	 */
 	_renderTheatre(time) {
 		// let the ticker update all its objects
-		this.pixiCTX.ticker.update(time);
-		// this.pixiCTX.renderer.clear(); // PIXI.v6 does not respect transparency for clear
+		this.stage.pixiCTX.ticker.update(time);
+		// this.stage.pixiCTX.renderer.clear(); // PIXI.v6 does not respect transparency for clear
 		for (let insert of this.stage.portraitDocks) {
 			if (insert.dockContainer) {
 				if (Theatre.DEBUG) this.updateTheatreDebugInfo(insert);
 				// PIXI.v6 The renderer should not clear the canvas on rendering
-				this.pixiCTX.renderer.render(insert.dockContainer, { clear: false });
+				this.stage.pixiCTX.renderer.render(insert.dockContainer, { clear: false });
 			}
 			else {
 				console.log("INSERT HAS NO CONTAINER! _renderTheatre : HOT-EJECTING it! ", insert);
@@ -1964,7 +1964,6 @@ export default class Theatre {
 	 *
 	 */
 	_destroyPortraitDock(imgId) {
-		let app = this.pixiCTX;
 		let insert = this.getInsertById(imgId)
 		if (insert && insert.dockContainer) {
 			// kill and release all tweens
@@ -2158,9 +2157,7 @@ export default class Theatre {
 		// ** NOTE this may have desync issues **
 
 		let insert = this.getInsertById(imgId);
-		let container = (insert ? insert.dockContainer : null);
 		// If no insert/container, this is fine
-		let app = this.pixiCTX;
 		let actorId = imgId.replace("theatre-", "");
 		let actorParams = this._getInsertParamsFromActorId(actorId);
 		// no actor is also fine if this is some kind of rigging resource
@@ -2229,9 +2226,7 @@ export default class Theatre {
 		// ** NOTE this may have desync issues **
 
 		let insert = this.getInsertById(imgId);
-		let container = (insert ? insert.dockContainer : null);
 		// If no insert/container, this is fine
-		let app = this.pixiCTX;
 		let actorId = imgId.replace("theatre-", "");
 		let actorParams = this._getInsertParamsFromActorId(actorId);
 		// no actor is also fine if this is some kind of rigging resource
@@ -2569,8 +2564,6 @@ export default class Theatre {
 		if (remote || !this.isDelayEmote)
 			if (aEmote == ename || (ename == null && aEmote == null)) return;
 
-		// if emote insert exists
-		let app = this.pixiCTX;
 		if (!!ename
 			&& emotes[ename]
 			&& emotes[ename].insert
@@ -3058,7 +3051,7 @@ export default class Theatre {
 			// clear label
 			// clear speakingAs
 			this.speakingAs = null;
-			this.renderEmoteMenu();
+			this.emoteMenuRenderer.render();
 		}
 		// kill any animations of textBox
 		for (let c of toRemoveTextBox.children) {
@@ -4222,7 +4215,7 @@ export default class Theatre {
 		this._sendTypingEvent();
 		this.setUserTyping(game.user.id, this.speakingAs);
 		// re-render the emote menu (expensive)
-		this.renderEmoteMenu();
+		this.emoteMenuRenderer.render();
 	}
 
 	/**
@@ -4425,7 +4418,7 @@ export default class Theatre {
 				if (!remote)
 					Theatre.instance._sendSceneEvent("narrator", { active: true });
 				// re-render the emote menu (expensive)
-				Theatre.instance.renderEmoteMenu();
+				Theatre.instance.emoteMenuRenderer.render();
 			}
 		} else {
 			// remove it
@@ -4461,7 +4454,7 @@ export default class Theatre {
 				if (!remote)
 					Theatre.instance._sendSceneEvent("narrator", { active: false });
 				// re-render the emote menu (expensive)
-				Theatre.instance.renderEmoteMenu();
+				Theatre.instance.emoteMenuRenderer.render();
 			}
 		}
 
@@ -4483,7 +4476,6 @@ export default class Theatre {
 	 * @param ev (Event) : Event that triggered this handler
 	 */
 	handleWindowResize(ev) {
-		//Theatre.instance.theatreDock.style.width = `calc(100% - ${document.getElementById("sidebar").offsetWidth+2}px)`;
 		let sideBar = document.getElementById("sidebar");
 		Theatre.instance.theatreBar.style.width = (ui.sidebar._collapsed ? "100%" : `calc(100% - ${sideBar.offsetWidth + 2}px)`);
 		Theatre.instance.theatreNarrator.style.width = (ui.sidebar._collapsed ? "100%" : `calc(100% - ${sideBar.offsetWidth + 2}px)`);
@@ -4498,16 +4490,14 @@ export default class Theatre {
 		// emote menu
 		if (Theatre.instance.theatreEmoteMenu)
 			Theatre.instance.theatreEmoteMenu.style.top = `${Theatre.instance.theatreControls.offsetTop - 410}px`
-		/*
-		Theatre.instance.theatreToolTip.style.top = `${Theatre.instance.theatreControls.offsetTop-Theatre.instance.theatreToolTip.offsetHeight}px`
-		Theatre.instance.theatreToolTip.style.left = `${sideBar.offsetLeft - Theatre.instance.theatreToolTip.offsetWidth}px`
-		*/
 
-		let app = Theatre.instance.pixiCTX;
-		let dockWidth = Theatre.instance.theatreDock.offsetWidth;
-		let dockHeight = Theatre.instance.theatreDock.offsetHeight;
-		Theatre.instance.theatreDock.setAttribute("width", dockWidth);
-		Theatre.instance.theatreDock.setAttribute("height", dockHeight);
+		const app = this.stage.pixiCTX;
+		const theatre_dock = this.stage.theatreDock;
+
+		let dockWidth = theatre_dock.offsetWidth;
+		let dockHeight = theatre_dock.offsetHeight;
+		theatre_dock.setAttribute("width", dockWidth);
+		theatre_dock.setAttribute("height", dockHeight);
 		app.width = dockWidth;
 		app.height = dockHeight;
 		app.renderer.view.width = dockWidth;
@@ -4540,7 +4530,7 @@ export default class Theatre {
 		Theatre.instance.theatreToolTip.style.left =
 			`${Math.min(
 				(ev.clientX || ev.pageX) - Theatre.instance.theatreToolTip.offsetWidth / 2,
-				Theatre.instance.theatreDock.offsetWidth - Theatre.instance.theatreToolTip.offsetWidth)}px`;
+				this.stage.theatreDock.offsetWidth - Theatre.instance.theatreToolTip.offsetWidth)}px`;
 	}
 
 	/**
@@ -4555,7 +4545,7 @@ export default class Theatre {
 			Theatre.instance.theatreEmoteMenu.style.display = "none";
 			KHelpers.removeClass(ev.currentTarget, "theatre-control-btn-down");
 		} else {
-			Theatre.instance.renderEmoteMenu();
+			Theatre.instance.emoteMenuRenderer.render();
 			Theatre.instance.theatreEmoteMenu.style.display = "flex";
 			KHelpers.addClass(ev.currentTarget, "theatre-control-btn-down");
 		}
@@ -4754,7 +4744,7 @@ export default class Theatre {
 			secondBar.style["pointer-events"] = "all";
 		}
 
-		Theatre.instance.theatreDock.style.opacity = opacity;
+		this.stage.theatreDock.style.opacity = opacity;
 		Theatre.instance.theatreBar.style.opacity = opacity;
 		Theatre.instance.theatreNarrator.style.opacity = opacity;
 
@@ -4959,7 +4949,7 @@ export default class Theatre {
 	static reorderInserts() {
 		if (!Theatre.instance) return;
 		let boxes = Theatre.instance._getTextBoxes();
-		let containerWidth = Theatre.instance.theatreDock.offsetWidth;
+		let containerWidth = this.stage.theatreDock.offsetWidth;
 		// Min 22px, max 32px, scale for all values inbetween
 		let fontSize = Math.floor(Math.max((Math.min(containerWidth / boxes.length, 500) / 500) * 28, 18));
 		if (Theatre.DEBUG) console.log("Reorder CALCUALTED FONT SIZE: ", fontSize);
@@ -5064,7 +5054,7 @@ export default class Theatre {
 					(insert.optAlign == "top" ? 0 : Theatre.instance.theatreBar.offsetHeight) - insert.label.style.lineHeight;
 			}
 			insert.typingBubble.rotation = 0.1745;
-			insert.dockContainer.y = Theatre.instance.theatreDock.offsetHeight
+			insert.dockContainer.y = Theatre.instance.stage.theatreDock.offsetHeight
 				- (insert.optAlign == "top" ? Theatre.instance.theatreBar.offsetHeight : 0) - insert.portrait.height;
 
 			// theatreStyle specific adjustments
@@ -5075,7 +5065,7 @@ export default class Theatre {
 					insert.label.y -= (insert.optAlign == "top" ? 8 : 0);
 					break;
 				case TheatreStyle.CLEARBOX:
-					insert.dockContainer.y = Theatre.instance.theatreDock.offsetHeight - insert.portrait.height;
+					insert.dockContainer.y = Theatre.instance.stage.theatreDock.offsetHeight - insert.portrait.height;
 					insert.label.y += (insert.optAlign == "top" ? 0 : Theatre.instance.theatreBar.offsetHeight)
 					insert.typingBubble.y += (insert.optAlign == "top" ? 0 : Theatre.instance.theatreBar.offsetHeight);
 					break;

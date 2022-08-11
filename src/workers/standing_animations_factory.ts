@@ -8,6 +8,7 @@ export type TextStandingAnimationDefinition = {
     label: string;
 }
 
+export type TextStandingAnimationDefinitionDictionary = { [key: string]: TextStandingAnimationDefinition }
 
 export default class TextStandingAnimationsFactory {
 
@@ -33,9 +34,9 @@ export default class TextStandingAnimationsFactory {
         TextStandingAnimationsFactory.INSANE
     ]
 
-    static getDefinitions(): { [key: string]: TextStandingAnimationsFactory } {
+    static getDefinitions(): TextStandingAnimationDefinitionDictionary {
 
-        const result: { [key: string]: TextStandingAnimationsFactory } = {};
+        const result: { [key: string]: TextStandingAnimationDefinition } = {};
 
         for (const name of this.ALL_ANIMATIONS) {
             result[name] = {
