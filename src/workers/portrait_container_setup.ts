@@ -4,6 +4,7 @@ import Theatre from "../Theatre.js";
 import ActorExtensions from "../extensions/ActorExtensions.js";
 import _TheatreWorkers from "./workers.js";
 import TheatreSettings from "../extensions/settings.js";
+import TheatreStyle from "../types/TheatreStyle.js";
 
 export default class _TheatrePortraitContainerSetupWorker {
 
@@ -35,7 +36,7 @@ export default class _TheatrePortraitContainerSetupWorker {
         optAlign: string,
         resName: string,
         resources: Resources,
-        reorder: boolean) : void {
+        reorder: boolean): void {
         let insert = this.context.getInsertById(imgId);
 
 
@@ -74,7 +75,7 @@ export default class _TheatrePortraitContainerSetupWorker {
 
         // set the initial dockContainer position + state
         //dockContainer.x = 0;
-        dockContainer.y = this.context.theatreDock.offsetHeight - (optAlign == "top" ? this.context.theatreBar.offsetHeight : 0) - portHeight;
+        dockContainer.y = this.context.stage.theatreDock.offsetHeight - (optAlign == "top" ? this.context.theatreBar.offsetHeight : 0) - portHeight;
 
         // save and stage our sprite
         insert.portrait = sprite;
@@ -145,19 +146,19 @@ export default class _TheatrePortraitContainerSetupWorker {
 
         // TheatreStyle specific adjustments
         switch (this.context.settings.theatreStyle) {
-            case "lightbox":
+            case TheatreStyle.LIGHTBOX:
                 // to allow top-aligned portraits to work without a seam
                 dockContainer.y += (optAlign == "top" ? 8 : 0);
                 insert.label.y -= (insert.optAlign == "top" ? 8 : 0);
                 break;
-            case "clearbox":
-                dockContainer.y = this.context.theatreDock.offsetHeight - portHeight;
+            case TheatreStyle.CLEARBOX:
+                dockContainer.y = this.context.stage.theatreDock.offsetHeight - portHeight;
                 insert.label.y += (optAlign == "top" ? 0 : this.context.theatreBar.offsetHeight);
                 insert.typingBubble.y += (optAlign == "top" ? 0 : this.context.theatreBar.offsetHeight);
                 break;
-            case "mangabubble":
+            case TheatreStyle.MANGABUBBLE:
                 break;
-            case "textbox":
+            case TheatreStyle.TEXTBOX:
                 break;
             default:
                 break;

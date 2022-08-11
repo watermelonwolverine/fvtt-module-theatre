@@ -31,6 +31,7 @@ import TextStandingAnimationsFactory from './workers/standing_animations_factory
 import TheatreActor from './types/TheatreActor.js';
 import Stage from './types/Stage.js';
 import TheatreSettingsInitializer from './workers/SettingsInitializer.js';
+import TheatreStyle from './types/TheatreStyle.js';
 
 export default class Theatre {
 
@@ -81,7 +82,6 @@ export default class Theatre {
 			this.userEmotes = {};
 			this.usersTyping = {};
 			this.userSettings = {};
-			this.pixiCTX = null;
 			this.pixiToolTipCTX = null;
 			this.lastTyping = 0;
 			this.resync = {
@@ -93,7 +93,7 @@ export default class Theatre {
 				autoDecay: true,
 				decayRate: 1000,
 				decayMin: 30000,
-				barStyle: "textbox",
+				barStyle: TheatreStyle.TEXTBOX,
 				narrHeight: "50%",
 				theatreStyle: undefined,
 			}
@@ -135,16 +135,16 @@ export default class Theatre {
 		let chatSidebar = document.getElementById("chat");
 
 		this.theatreGroup = document.createElement("div");
-		this.theatreDock = this._initTheatreDockCanvas();
+		this.stage.initTheatreDockCanvas();
 		this.theatreToolTip = this._initTheatreToolTip();
-		if (!this.theatreDock || !this.theatreToolTip) {
+		if (!this.theatreToolTip) {
 			console.error("Theatre encountered a FATAL error during initialization");
 			ui.notifications.error(game.i18n.localize("Theatre.UI.Notification.Fatal"));
 			return;
 		}
 
 		this.theatreGroup.id = "theatre-group";
-		this.theatreDock.id = "theatre-dock";
+
 		this.theatreToolTip.id = "theatre-tooltip";
 		this.theatreBar = document.createElement("div");
 		this.theatreBar.id = "theatre-bar";
@@ -167,8 +167,8 @@ export default class Theatre {
 		KHelpers.addClass(narratorContent, "theatre-narrator-content");
 		KHelpers.addClass(narratorContent, "no-scrollbar");
 		KHelpers.addClass(this.theatreGroup, "theatre-group");
-		KHelpers.addClass(this.theatreDock, "theatre-dock");
-		KHelpers.addClass(this.theatreDock, "no-scrollbar");
+
+
 		KHelpers.addClass(this.theatreBar, "theatre-bar");
 		KHelpers.addClass(this.theatreNarrator, "theatre-narrator");
 
@@ -178,7 +178,7 @@ export default class Theatre {
 		this.theatreBar.appendChild(barContainerPrime);
 		this.theatreBar.appendChild(barContainerSecond);
 
-		this.theatreGroup.appendChild(this.theatreDock);
+		this.theatreGroup.appendChild(this.stage.theatreDock);
 		this.theatreGroup.appendChild(this.theatreBar);
 		this.theatreGroup.appendChild(this.theatreNarrator);
 		this.theatreGroup.appendChild(this.theatreToolTip);
@@ -340,14 +340,10 @@ export default class Theatre {
 		let primeBar = document.getElementById("theatre-prime-bar");
 		let secondBar = document.getElementById("theatre-second-bar");
 		let textBoxes = this._getTextBoxes();
-		//
-		//let app = Theatre.instance.pixiCTX; 
-		let dockWidth = this.theatreDock.offsetWidth;
-		let dockHeight = this.theatreDock.offsetHeight;
 
 		// clear old style
-		switch (oldStyle || "textbox") {
-			case "lightbox":
+		switch (oldStyle || TheatreStyle.TEXTBOX) {
+			case TheatreStyle.LIGHTBOX:
 				KHelpers.removeClass(primeBar, "theatre-bar-left");
 				KHelpers.removeClass(secondBar, "theatre-bar-right");
 				KHelpers.removeClass(primeBar, "theatre-bar-lightleft");
@@ -357,7 +353,7 @@ export default class Theatre {
 					KHelpers.removeClass(tb, "theatre-text-box");
 				}
 				break;
-			case "clearbox":
+			case TheatreStyle.CLEARBOX:
 				KHelpers.removeClass(primeBar, "theatre-bar-left");
 				KHelpers.removeClass(secondBar, "theatre-bar-right");
 				KHelpers.removeClass(primeBar, "theatre-bar-clearleft");
@@ -367,7 +363,7 @@ export default class Theatre {
 					KHelpers.removeClass(tb, "theatre-text-box");
 				}
 				break;
-			case "mangabubble":
+			case TheatreStyle.MANGABUBBLE:
 				KHelpers.removeClass(primeBar, "theatre-bar-left");
 				KHelpers.removeClass(secondBar, "theatre-bar-right");
 				for (let tb of textBoxes) {
@@ -375,7 +371,7 @@ export default class Theatre {
 				}
 				// PLACEHOLDER FOR FUTURE
 				break;
-			case "textbox":
+			case TheatreStyle.TEXTBOX:
 			default:
 				KHelpers.removeClass(primeBar, "theatre-bar-left");
 				KHelpers.removeClass(secondBar, "theatre-bar-right");
@@ -386,10 +382,9 @@ export default class Theatre {
 
 		// apply new style
 		switch (theatreStyle) {
-			case "lightbox":
+			case TheatreStyle.LIGHTBOX:
 				KHelpers.addClass(primeBar, "theatre-bar-lightleft");
 				KHelpers.addClass(secondBar, "theatre-bar-lightright");
-				this.theatreDock.style.height = "100%";
 				this.theatreBar.style.top = "calc(100% - 170px)";
 				this.theatreBar.style.height = "170px";
 				this.theatreBar.style["border-radius"] = "5px 0px 0px 5px";
@@ -398,10 +393,9 @@ export default class Theatre {
 				for (let tb of textBoxes)
 					KHelpers.addClass(tb, "theatre-text-box-light");
 				break;
-			case "clearbox":
+			case TheatreStyle.CLEARBOX:
 				KHelpers.addClass(primeBar, "theatre-bar-clearleft");
 				KHelpers.addClass(secondBar, "theatre-bar-clearright");
-				this.theatreDock.style.height = "100%";
 				this.theatreBar.style.top = "calc(100% - 170px)";
 				this.theatreBar.style.height = "170px";
 				this.theatreBar.style["border-radius"] = "unset";
@@ -410,14 +404,13 @@ export default class Theatre {
 				for (let tb of textBoxes)
 					KHelpers.addClass(tb, "theatre-text-box-clear");
 				break;
-			case "mangabubble":
+			case TheatreStyle.MANGABUBBLE:
 				// PLACEHOLDER FOR FUTURE
 				break;
-			case "textbox":
+			case TheatreStyle.TEXTBOX:
 			default:
 				KHelpers.addClass(primeBar, "theatre-bar-left");
 				KHelpers.addClass(secondBar, "theatre-bar-right");
-				this.theatreDock.style.height = "99.5vh";
 				this.theatreBar.style.top = "calc(100% - 160px - 0.5vh)";
 				this.theatreBar.style.height = "160px";
 				this.theatreBar.style["border-radius"] = "unset";
@@ -1371,14 +1364,14 @@ export default class Theatre {
 
 				// style specific settings
 				switch (this.settings.theatreStyle) {
-					case "lightbox":
+					case TheatreStyle.LIGHTBOX:
 						break;
-					case "clearbox":
+					case TheatreStyle.CLEARBOX:
 						oy += (insert.optAlign == "top" ? 0 : this.theatreBar.offsetHeight);
 						break;
-					case "mangabubble":
+					case TheatreStyle.MANGABUBBLE:
 						break;
-					case "textbox":
+					case TheatreStyle.TEXTBOX:
 						break;
 					default:
 						break;
@@ -1449,13 +1442,13 @@ export default class Theatre {
 					(insert.optAlign == "top" ? 0 : this.theatreBar.offsetHeight) - insert.label.style.lineHeight * 0.75;
 				// style specific settings
 				switch (this.settings.theatreStyle) {
-					case "clearbox":
+					case TheatreStyle.CLEARBOX:
 						insert.typingBubble.y = insert.portrait.height;
 						oy += (insert.optAlign == "top" ? 0 : this.theatreBar.offsetHeight);
 						break;
-					case "mangabubble":
-					case "lightbox":
-					case "textbox":
+					case TheatreStyle.MANGABUBBLE:
+					case TheatreStyle.LIGHTBOX:
+					case TheatreStyle.TEXTBOX:
 					default:
 						insert.typingBubble.y = insert.portrait.height - (insert.optAlign == "top" ? 0 : this.theatreBar.offsetHeight);
 						break;
@@ -1521,14 +1514,14 @@ export default class Theatre {
 					(insert.optAlign == "top" ? 0 : this.theatreBar.offsetHeight);
 				// style specific settings
 				switch (this.settings.theatreStyle) {
-					case "lightbox":
+					case TheatreStyle.LIGHTBOX:
 						break;
-					case "clearbox":
+					case TheatreStyle.CLEARBOX:
 						oy += (insert.optAlign == "top" ? 0 : this.theatreBar.offsetHeight);
 						break;
-					case "mangabubble":
+					case TheatreStyle.MANGABUBBLE:
 						break;
-					case "textbox":
+					case TheatreStyle.TEXTBOX:
 						break;
 					default:
 						break;
@@ -1845,44 +1838,6 @@ export default class Theatre {
 	}
 
 	/**
-	 * Create the initial dock canvas, future 'portraits'
-	 * witll be PIXI containers whom are sized to the portraits
-	 * that they contain.
-	 *
-	 * @return (HTMLElement) : The canvas HTMLElement of the created PIXI Canvas,
-	 *						  or null if unsuccessful. 
-	 * @private
-	 */
-	_initTheatreDockCanvas() {
-		// get theatreDock, and an initialize the canvas
-		// no need to load in any resources as that will be done on a per-diem bases
-		// by each container portrait
-
-		let app = new PIXI.Application({
-			transparent: true,
-			antialias: true,
-			width: document.body.offsetWidth
-		});
-
-		let canvas = app.view;
-
-		if (!canvas) {
-			console.log("FAILED TO INITILIZE DOCK CANVAS!");
-			return null;
-		}
-
-		this.theatreDock = canvas;
-		this.pixiCTX = app;
-
-		// turn off ticker
-		app.ticker.autoStart = false;
-		app.ticker.stop();
-
-
-		return canvas;
-	}
-
-	/**
 	 * Our efficient render loop? We want to render only when there's a tween running, if
 	 * there's no animation handler running, we don't need to request an animation frame
 	 *
@@ -2151,24 +2106,24 @@ export default class Theatre {
 		}
 		insert.typingBubble.rotation = 0.1745;
 		insert.dockContainer.x = leftPos;
-		insert.dockContainer.y = this.theatreDock.offsetHeight
+		insert.dockContainer.y = this.stage.theatreDock.offsetHeight
 			- (insert.optAlign == "top" ? this.theatreBar.offsetHeight : 0) - insert.portrait.height;
 
 		// theatreStyle specific adjustments
 		switch (this.settings.theatreStyle) {
-			case "lightbox":
+			case TheatreStyle.LIGHTBOX:
 				// to allow top-aligned portraits to work without a seam
 				insert.dockContainer.y += (insert.optAlign == "top" ? 8 : 0);
 				insert.label.y -= (insert.optAlign == "top" ? 8 : 0);
 				break;
-			case "clearbox":
-				insert.dockContainer.y = this.theatreDock.offsetHeight - insert.portrait.height;
+			case TheatreStyle.CLEARBOX:
+				insert.dockContainer.y = this.stage.theatreDock.offsetHeight - insert.portrait.height;
 				insert.label.y += (insert.optAlign == "top" ? 0 : Theatre.instance.theatreBar.offsetHeight);
 				insert.typingBubble.y += (insert.optAlign == "top" ? 0 : Theatre.instance.offsetHeight);
 				break;
-			case "mangabubble":
+			case TheatreStyle.MANGABUBBLE:
 				break;
-			case "textbox":
+			case TheatreStyle.TEXTBOX:
 				break;
 			default:
 				break;
@@ -4347,12 +4302,12 @@ export default class Theatre {
 
 		// style specific settings
 		switch (this.settings.theatreStyle) {
-			case "clearbox":
+			case TheatreStyle.CLEARBOX:
 				textBox.style.cssText += `background: linear-gradient(transparent 0%, rgba(${red},${green},${blue},0.30) 40%, rgba(${red},${green},${blue},0.30) 60%, transparent 100%); box-shadow: 0px 5px 2px 1px rgba(${darkred}, ${darkgreen}, ${darkblue}, 0.30)`;
 				break;
-			case "mangabubble":
-			case "lightbox":
-			case "textbox":
+			case TheatreStyle.MANGABUBBLE:
+			case TheatreStyle.LIGHTBOX:
+			case TheatreStyle.TEXTBOX:
 			default:
 				textBox.style.cssText += `background: linear-gradient(transparent 0%, rgba(${red},${green},${blue},0.10) 40%, rgba(${red},${green},${blue},0.10) 60%, transparent 100%); box-shadow: 0px 5px 2px 1px rgba(${darkred}, ${darkgreen}, ${darkblue}, .2)`;
 				break;
@@ -5481,19 +5436,19 @@ export default class Theatre {
 
 			// theatreStyle specific adjustments
 			switch (Theatre.instance.settings.theatreStyle) {
-				case "lightbox":
+				case TheatreStyle.LIGHTBOX:
 					// to allow top-aligned portraits to work without a seam
 					insert.dockContainer.y += (insert.optAlign == "top" ? 8 : 0);
 					insert.label.y -= (insert.optAlign == "top" ? 8 : 0);
 					break;
-				case "clearbox":
+				case TheatreStyle.CLEARBOX:
 					insert.dockContainer.y = Theatre.instance.theatreDock.offsetHeight - insert.portrait.height;
 					insert.label.y += (insert.optAlign == "top" ? 0 : Theatre.instance.theatreBar.offsetHeight)
 					insert.typingBubble.y += (insert.optAlign == "top" ? 0 : Theatre.instance.theatreBar.offsetHeight);
 					break;
-				case "mangabubble":
+				case TheatreStyle.MANGABUBBLE:
 					break;
-				case "textbox":
+				case TheatreStyle.TEXTBOX:
 					break;
 				default:
 					break;

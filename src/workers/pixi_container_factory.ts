@@ -50,7 +50,7 @@ export default class _TheatrePixiContainerFactory {
         portraitContainer.x = 0;
         portraitContainer.y = 0;
 
-        let app = this.context.pixiCTX;
+        let app = this.context.stage.pixiCTX;
         app.stage.addChild(dockContainer);
 
         // track the dockContainer
@@ -131,7 +131,7 @@ export default class _TheatrePixiContainerFactory {
             if (Theatre.DEBUG) console.log("Sprites added to PIXI createPortraitPIXIContainer", resources);
             let portWidth = (ename && params.emotes[ename] && params.emotes[ename].insert) ?
                 resources[params.emotes[ename].insert].texture.width : resources[imgPath].texture.width;
-            let initX = isLeft ? (-1 * portWidth) : (this.context.theatreDock.offsetWidth + portWidth);
+            let initX = isLeft ? (-1 * portWidth) : (this.context.stage.theatreDock.offsetWidth + portWidth);
 
             if (!ename) {
                 // load in default portrait
@@ -141,7 +141,7 @@ export default class _TheatrePixiContainerFactory {
                 // load in the ename emote portrait instead if possible, else load the default
                 if (params.emotes[ename] && params.emotes[ename].insert) {
                     dockContainer.x = isLeft ?
-                        (-1 * portWidth) : (this.context.theatreDock.offsetWidth + portWidth);
+                        (-1 * portWidth) : (this.context.stage.theatreDock.offsetWidth + portWidth);
                     this.workers.portrait_container_setup_worker.setupPortraitContainer(imgId, optAlign, params.emotes[ename].insert, resources, true);
                 } else {
                     dockContainer.x = initX;

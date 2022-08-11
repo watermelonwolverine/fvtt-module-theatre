@@ -1,4 +1,5 @@
 import Theatre from "../Theatre.js";
+import TheatreStyle from "../types/TheatreStyle.js";
 import KHelpers from "./KHelpers.js";
 import { TextStandingAnimationFunction } from "./standing_animations_factory.js";
 
@@ -195,19 +196,19 @@ export default class TextFlyinAnimationsFactory {
 
         if (charSpans[0]) {
             switch (Theatre.instance.settings.theatreStyle) {
-                case "lightbox":
+                case TheatreStyle.LIGHTBOX:
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-light", 5);
                     if (!textBox)
                         textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
                     break;
-                case "clearbox":
+                case TheatreStyle.CLEARBOX:
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-clear", 5);
                     if (!textBox)
                         textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
                     break;
-                case "mangabubble":
+                case TheatreStyle.MANGABUBBLE:
                     break;
-                case "textbox":
+                case TheatreStyle.TEXTBOX:
                 default:
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
                     break;
@@ -275,19 +276,19 @@ export default class TextFlyinAnimationsFactory {
         let textBox: HTMLElement = null;
         if (charSpans[0]) {
             switch (Theatre.instance.settings.theatreStyle) {
-                case "lightbox":
+                case TheatreStyle.LIGHTBOX:
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-light", 5);
                     if (!textBox)
                         textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
                     break;
-                case "clearbox":
+                case TheatreStyle.CLEARBOX:
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-clear", 5);
                     if (!textBox)
                         textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
                     break;
-                case "mangabubble":
+                case TheatreStyle.MANGABUBBLE:
                     break;
-                case "textbox":
+                case TheatreStyle.TEXTBOX:
                 default:
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
                     break;
@@ -333,19 +334,19 @@ export default class TextFlyinAnimationsFactory {
         let textBox: HTMLElement = null;
         if (charSpans[0]) {
             switch (Theatre.instance.settings.theatreStyle) {
-                case "lightbox":
+                case TheatreStyle.LIGHTBOX:
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-light", 5);
                     if (!textBox)
                         textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
                     break;
-                case "clearbox":
+                case TheatreStyle.CLEARBOX:
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-clear", 5);
                     if (!textBox)
                         textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
                     break;
-                case "mangabubble":
+                case TheatreStyle.MANGABUBBLE:
                     break;
-                case "textbox":
+                case TheatreStyle.TEXTBOX:
                 default:
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
                     break;
@@ -390,19 +391,19 @@ export default class TextFlyinAnimationsFactory {
         let textBox = null;
         if (charSpans[0]) {
             switch (Theatre.instance.settings.theatreStyle) {
-                case "lightbox":
+                case TheatreStyle.LIGHTBOX:
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-light", 5);
                     if (!textBox)
                         textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
                     break;
-                case "clearbox":
+                case TheatreStyle.CLEARBOX:
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-clear", 5);
                     if (!textBox)
                         textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
                     break;
-                case "mangabubble":
+                case TheatreStyle.MANGABUBBLE:
                     break;
-                case "textbox":
+                case TheatreStyle.TEXTBOX:
                 default:
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
                     break;

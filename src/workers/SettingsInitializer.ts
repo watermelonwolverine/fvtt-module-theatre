@@ -1,5 +1,6 @@
 import TheatreSettings from "../extensions/settings.js";
 import Theatre from "../Theatre.js";
+import TheatreStyle from "../types/TheatreStyle.js";
 
 export default class TheatreSettingsInitializer {
 
@@ -53,16 +54,18 @@ export default class TheatreSettingsInitializer {
             onChange: () => { if (!game.user.isGM) debouncedReload(); },
         });
 
+        const choices: { [key: string]: string } = {}
+
+        choices[TheatreStyle.TEXTBOX] = "Theatre.UI.Settings.displayModeTextBox";
+        choices[TheatreStyle.LIGHTBOX] = "Theatre.UI.Settings.displayModeLightBox";
+        choices[TheatreStyle.CLEARBOX] = "Theatre.UI.Settings.displayModeClearBox";
+
         this.register<string>("theatreStyle", {
             scope: "world",
             config: true,
-            default: "textbox",
+            default: TheatreStyle.TEXTBOX,
             type: String,
-            choices: {
-                "textbox": "Theatre.UI.Settings.displayModeTextBox",
-                "lightbox": "Theatre.UI.Settings.displayModeLightBox",
-                "clearbox": "Theatre.UI.Settings.displayModeClearBox"
-            },
+            choices: choices,
             onChange: theatreStyle => Theatre.instance.configTheatreStyle(theatreStyle)
         });
 
