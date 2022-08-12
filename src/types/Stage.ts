@@ -199,10 +199,10 @@ export default class Stage {
 
         const imageSizeStr: string = TheatreSettings.getTheatreImageSize();
         if (!imageSizeStr.endsWith("%"))
-            return; // no-op
+            return; // absolute values were set, so no dynamic resizing needed
 
         for (const insert of this.stageInserts) {
-            new Portrait(this, insert).updatePortraitDimensions();
+            // TODO
         }
     }
 

@@ -14,66 +14,6 @@ export default class Portrait {
         this.insert = insert;
     }
 
-    updatePortraitDimensions() {
-
-        const dimensions = this.getPortraitDimensions();
-
-        const insert = this.insert;
-
-        const portWidth = dimensions.width;
-        const portHeight = dimensions.height;
-
-        const stage = this.stage;
-        const dockContainer = this.insert.dockContainer;
-        const portraitContainer = this.insert.portraitContainer;
-
-        // adjust dockContainer + portraitContainer dimensions to fit the image
-        dockContainer.width = portWidth
-        dockContainer.height = portHeight
-        portraitContainer.width = portWidth
-        portraitContainer.height = portHeight
-
-        dockContainer.y = stage.theatreDock.offsetHeight - (insert.optAlign == "top" ? stage.theatreBar.offsetHeight : 0) - portHeight;
-
-        // save and stage our sprite
-
-        insert.portrait.width = portWidth;
-        insert.portrait.height = portHeight;
-
-        portraitContainer.pivot.x = portWidth / 2;
-        portraitContainer.pivot.y = portHeight / 2;
-        portraitContainer.x = portraitContainer.x + portWidth / 2;
-        portraitContainer.y = portraitContainer.y + portHeight / 2;
-
-        insert.label.style.wordWrapWidth = portWidth;
-
-        insert.label.y =
-            portHeight - (insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight) - insert.label.style.lineHeight - 20;
-
-        insert.typingBubble.y =
-            portHeight - (insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight) - insert.label.style.lineHeight + insert.typingBubble.height / 2;
-
-
-        switch (TheatreSettings.getTheatreStyle()) {
-            case TheatreStyle.LIGHTBOX:
-                // to allow top-aligned portraits to work without a seam
-                dockContainer.y += (insert.optAlign == "top" ? 8 : 0);
-                insert.label.y -= (insert.optAlign == "top" ? 8 : 0);
-                break;
-            case TheatreStyle.CLEARBOX:
-                dockContainer.y = stage.theatreDock.offsetHeight - portHeight;
-                insert.label.y += (insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight);
-                insert.typingBubble.y += (insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight);
-                break;
-            case TheatreStyle.MANGABUBBLE:
-                break;
-            case TheatreStyle.TEXTBOX:
-                break;
-            default:
-                break;
-        }
-    }
-
     getPortraitDimensions(): { width: number, height: number } {
 
         const texture = this.insert.portrait.texture;

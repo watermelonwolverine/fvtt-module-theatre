@@ -39,7 +39,7 @@ export default class _TheatrePortraitContainerSetupWorker {
         resName: string,
         resources: Resources,
         reorder: boolean): void {
-        
+
 
         const stage = this.context.stage;
         const insert = stage.getInsertById(imgId);
@@ -61,23 +61,40 @@ export default class _TheatrePortraitContainerSetupWorker {
         let dockContainer = insert.dockContainer;
         let portraitContainer = insert.portraitContainer;
 
-        let sprite = new PIXI.Sprite(resources[resName].texture);
+        insert.portrait = new PIXI.Sprite(resources[resName].texture);
 
-        insert.portrait = sprite;
-        portraitContainer.addChild(sprite);
+        const portrait = new Portrait(stage,
+            insert);
+
+        const portraitDimensions = portrait.getPortraitDimensions();
+
+        const portWidth = portraitDimensions.width;
+        const portHeight = portraitDimensions.height;
+
+        // adjust dockContainer + portraitContainer dimensions to fit the image
+        dockContainer.width = portWidth
+        dockContainer.height = portHeight
+        portraitContainer.width = portWidth
+        portraitContainer.height = portHeight
+
         // set the initial dockContainer position + state
         //dockContainer.x = 0;
+        dockContainer.y = stage.theatreDock.offsetHeight - (optAlign == "top" ? stage.theatreBar.offsetHeight : 0) - portHeight;
 
-        // set sprite initial coordinates + state
-        sprite.x = 0;
-        sprite.y = 0;
+        insert.portrait.width = portWidth;
+        insert.portrait.height = portHeight;
+
+        portraitContainer.addChild(insert.portrait);
+        portraitContainer.pivot.x = portWidth / 2;
+        portraitContainer.pivot.y = portHeight / 2;
+        portraitContainer.x = portraitContainer.x + portWidth / 2;
+        portraitContainer.y = portraitContainer.y + portHeight / 2;
+        insert.portrait.x = 0;
+        insert.portrait.y = 0;
+
         // set mirror state if mirrored
         if (insert.mirrored) {
             portraitContainer.scale.x = -1;
-            /*
-            if (reorder)
-                portraitContainer.x = portWidth; 
-            */
         }
         // setup label if not setup
         if (!insert.label) {
@@ -96,7 +113,8 @@ export default class _TheatrePortraitContainerSetupWorker {
                 dropShadowBlur: 1,
                 dropShadowAngle: Math.PI / 6,
                 breakWords: true,
-                wordWrap: true
+                wordWrap: true,
+                wordWrapWidth: portWidth
             });
             let label = new PIXI.Text(insert.name, textStyle);
             // save and stage our label
@@ -106,6 +124,7 @@ export default class _TheatrePortraitContainerSetupWorker {
             // initital positioning
             insert.label.x = 20;
         }
+        insert.label.y = portHeight - (optAlign == "top" ? 0 : stage.theatreBar.offsetHeight) - insert.label.style.lineHeight - 20;
 
 
         // setup typing bubble
@@ -116,10 +135,32 @@ export default class _TheatrePortraitContainerSetupWorker {
             typingBubble.height = 55;
             typingBubble.theatreComponentName = "typingBubble";
             typingBubble.alpha = 0;
+            typingBubble.y = portHeight -
+                (optAlign == "top" ? 0 : stage.theatreBar.offsetHeight) - insert.label.style.lineHeight + typingBubble.height / 2;
 
 
             insert.typingBubble = typingBubble;
             dockContainer.addChild(typingBubble);
+        }
+
+        // TheatreStyle specific adjustments
+        switch (TheatreSettings.getTheatreStyle()) {
+            case TheatreStyle.LIGHTBOX:
+                // to allow top-aligned portraits to work without a seam
+                dockContainer.y += (optAlign == "top" ? 8 : 0);
+                insert.label.y -= (insert.optAlign == "top" ? 8 : 0);
+                break;
+            case TheatreStyle.CLEARBOX:
+                dockContainer.y = stage.theatreDock.offsetHeight - portHeight;
+                insert.label.y += (optAlign == "top" ? 0 : stage.theatreBar.offsetHeight);
+                insert.typingBubble.y += (optAlign == "top" ? 0 : stage.theatreBar.offsetHeight);
+                break;
+            case TheatreStyle.MANGABUBBLE:
+                break;
+            case TheatreStyle.TEXTBOX:
+                break;
+            default:
+                break;
         }
 
         // run rigging animations if we have have any
@@ -154,9 +195,6 @@ export default class _TheatrePortraitContainerSetupWorker {
             dockContainer.alpha = 1;
         }
 
-        new Portrait(
-            stage,
-            insert).updatePortraitDimensions();
 
         if (!this.context.rendering)
             this.context._renderTheatre(performance.now());
