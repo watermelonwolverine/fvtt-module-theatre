@@ -1,5 +1,8 @@
 {
     // Enter path to your local foundry installation, for example C:/Program Files/FoundryVTT
     // no trailing /
-    "FVTT": "<path-to-foundry-install-dir>" 
+    "local-foundry-install-dir": "<path-to-foundry-install-dir>",
+    //Enter path foundry data. The folder that contains Config, Data, Script, etc.. For example: "D:/foundrydata".
+    // No trailing /
+    "local-foundry-data-dir": "<path-to-foundrydata>"
 }

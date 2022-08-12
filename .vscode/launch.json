@@ -12,7 +12,7 @@
         "--remote-debugging-port=9223",
         "--app=http://localhost:30000"
       ],
-      "webRoot": "${config:FVTT}/resources/app/public",
+      "webRoot": "${config:local-foundry-install-dir}/resources/app/public",
       "pathMapping": {
         // Override the path for your own system or module ...
         "/modules/theatre/src": "${workspaceFolder}"

@@ -2,9 +2,7 @@ const gulp = require('gulp');
 const path = require('path');
 var fs = require('fs')
 const del = require('del');
-const sm = require('gulp-sourcemaps');
 const zip = require('gulp-zip');
-const tabify = require('gulp-tabify');
 const stringify = require('json-stringify-pretty-compact');
 const webpack = require('webpack-stream');
 const TerserPlugin = require("terser-webpack-plugin");
@@ -22,10 +20,10 @@ const GRAPHICS = 'app/graphics/';
 const METAFILES = ['LICENSE.txt', 'README.md', 'CHANGELOG.md'];
 
 var PACKAGE = JSON.parse(fs.readFileSync('package.json'));
-var DEV_ENV = JSON.parse(fs.readFileSync('devEnv.json'))
+var SETTINGS = JSON.parse(fs.readFileSync('./.vscode/settings.json'))
 
 function reloadPackage(cb) { PACKAGE = JSON.parse(fs.readFileSync('package.json')); cb(); }
-function DEV_DIST() { return DEV_ENV.devDir + '/Data/modules/' + PACKAGE.name + '/'; }
+function DEV_DIST() { return SETTINGS["local-foundry-data-dir"] + '/Data/modules/' + PACKAGE.name + '/'; }
 
 String.prototype.replaceAll = function (pattern, replace) { return this.split(pattern).join(replace); }
 function pdel(patterns, options) { return () => { return del(patterns, options); }; }
@@ -33,8 +31,7 @@ function plog(message) { return (cb) => { console.log(message); cb() }; }
 
 
 /**
- * Compile the source code into the distribution directory
- * @param {Boolean} keepSources Include the TypeScript SourceMaps
+ * Compile the source code into the given output directory
  */
 function buildSource(output = DIST) {
 	return () => {
@@ -67,7 +64,7 @@ function buildSource(output = DIST) {
 			},
 			output: {
 				filename: './theatre_main.js',
-				devtoolModuleFilenameTemplate: '[resource-path]'  // Removes the webpack:/// prefix
+				devtoolModuleFilenameTemplate: '[resource-path]'  // Super important, otherwise vscode debugger can't attach
 			}
 		}).pipe(gulp.dest(output + SOURCE));
 	}
@@ -157,15 +154,11 @@ exports.default = gulp.series(
 	)
 );
 
-function copyDevDistToLocalDist() {
-	return gulp.src(DEV_DIST() + SOURCE + GLOB).pipe(gulp.dest(DIST + SOURCE));
-};
-
 /**
  * Extends the default build task by copying the result to the Development Environment
  */
 exports.dev = gulp.series(
-	pdel([DIST + GLOB, DEV_DIST() + GLOB], { force: true })
+	pdel([DEV_DIST() + GLOB], { force: true })
 	, gulp.parallel(
 		buildSource(DEV_DIST())
 		, buildManifest(DEV_DIST())
@@ -176,7 +169,6 @@ exports.dev = gulp.series(
 		, outputPacks(DEV_DIST())
 		, outputGraphics(DEV_DIST())
 	)
-	, copyDevDistToLocalDist
 );
 /**
  * Performs a default build and then zips the result into a bundle
@@ -240,18 +232,17 @@ function devWatchFolder(folder) {
  * Sets up a file watch on the project to detect any file changes and automatically rebuild those components, and then copy them to the Development Environment.
  */
 exports.devWatch = function () {
-	const devDist = DEV_DIST();
 	exports.dev();
 
 	gulp.watch(
 		SOURCE + GLOB,
-		gulp.series(plog('deleting: ' + devDist + SOURCE + GLOB),
-			pdel([DEV_DIST() + SOURCE + GLOB, DIST + SOURCE + GLOB]),
-			buildSource(devDist), copyDevDistToLocalDist, plog('sources done.')));
+		gulp.series(plog('deleting: ' + DEV_DIST() + SOURCE + GLOB),
+			pdel([DEV_DIST() + SOURCE + GLOB]),
+			buildSource(DEV_DIST()),  plog('sources done.')));
 
 	gulp.watch(
 		[CSS + GLOB, SOURCE + GLOB, 'module.json', 'package.json'],
-		gulp.series(reloadPackage, buildManifest(devDist),
+		gulp.series(reloadPackage, buildManifest(DEV_DIST()),
 			plog('manifest done.')));
 
 	devWatchFolder(LANG);
@@ -262,6 +253,6 @@ exports.devWatch = function () {
 
 	gulp.watch(
 		METAFILES,
-		gulp.series(outputMetaFiles(devDist),
+		gulp.series(outputMetaFiles(DEV_DIST()),
 			plog('metas done.')));
 }
