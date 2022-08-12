@@ -11,6 +11,7 @@
     "rules": {},
     "ignorePatterns": [
         "/gulpfile.js",
+        "/webpack.config.js",
         "/dist/**/*.js"
     ],
     "globals": {

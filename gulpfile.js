@@ -9,6 +9,8 @@ const rename = require('gulp-rename');
 const minify = require('gulp-minify');
 const tabify = require('gulp-tabify');
 const stringify = require('json-stringify-pretty-compact');
+const webpack = require('webpack-stream');
+const TerserPlugin = require("terser-webpack-plugin");
 
 const GLOB = '**/*';
 const DIST = 'dist/';
@@ -37,24 +39,48 @@ function plog(message) { return (cb) => { console.log(message); cb() }; }
  * Compile the source code into the distribution directory
  * @param {Boolean} keepSources Include the TypeScript SourceMaps
  */
-function buildSource(keepSources, minifySources = false, output = null) {
+function buildSource(output = null) {
 	return () => {
-		var stream = gulp.src(SOURCE + GLOB);
-		if (keepSources) stream = stream.pipe(sm.init())
-		stream = stream.pipe(ts.createProject("tsconfig.json")())
-		if (keepSources) stream = stream.pipe(sm.write())
-		if (minifySources) stream = stream.pipe(minify({
-			ext: { min: '.js' },
-			mangle: false,
-			noSource: true
-		}));
-		else stream = stream.pipe(tabify(4, false));
-		return stream.pipe(gulp.dest((output || DIST) + SOURCE));
+		return gulp.src('src/theatre_main.js')
+			.pipe(
+				webpack({
+					mode: "development",
+					target: 'web',
+					devtool: "inline-source-map",
+					entry: './src/theatre_main.js',
+					module: {
+						rules: [
+							{
+								test: /\.ts?$/,
+								use: 'ts-loader'
+							},
+						],
+					},
+					optimization: {
+						minimize: false,
+						minimizer: [
+							new TerserPlugin({
+								terserOptions: {
+									format: {
+										comments: false,
+									},
+								},
+								extractComments: false,
+							}),
+						],
+					},
+					resolve: {
+						extensions: ['.ts', '.js'],
+					}
+				})
+			)
+			.pipe(gulp.dest((output || DIST) + SOURCE));
 	}
 }
-exports.step_buildSourceDev = buildSource(true);
-exports.step_buildSource = buildSource(false);
-exports.step_buildSourceMin = buildSource(false, true);
+
+exports.step_buildSourceDev = buildSource();
+exports.step_buildSource = buildSource();
+exports.step_buildSourceMin = buildSource();
 
 /**
  * Builds the module manifest based on the package, sources, and css.
@@ -62,13 +88,11 @@ exports.step_buildSourceMin = buildSource(false, true);
 function buildManifest(output = null) {
 	const files = []; // Collector for all the file paths
 	return (cb) => gulp.src(PACKAGE.main) // collect the source files
-		.pipe(rename({ extname: '.js' })) // rename their extensions to `.js`
 		.pipe(gulp.src(CSS + GLOB)) // grab all the CSS files
 		.on('data', file => files.push(path.relative(file.cwd, file.path))) // Collect all the file paths
 		.on('end', () => { // output the filepaths to the module.json
 			if (files.length == 0)
 				throw Error('No files found in ' + SOURCE + GLOB + " or " + CSS + GLOB);
-			const js = files.filter(e => e.endsWith('js')); // split the CSS and JS files
 			const css = files.filter(e => e.endsWith('css'));
 			fs.readFile('module.json', (err, data) => {
 				const module = data.toString() // Inject the data into the module.json
@@ -76,7 +100,7 @@ function buildManifest(output = null) {
 					.replaceAll('{{title}}', PACKAGE.title)
 					.replaceAll('{{version}}', PACKAGE.version)
 					.replaceAll('{{description}}', PACKAGE.description)
-					.replace('"{{sources}}"', stringify(js, null, '\t').replaceAll('\n', '\n\t'))
+					.replace('"{{sources}}"', '"src/theatre_main.js"')
 					.replace('"{{css}}"', stringify(css, null, '\t').replaceAll('\n', '\n\t'));
 				fs.writeFile((output || DIST) + 'module.json', module, cb); // save the module to the distribution directory
 			});
@@ -128,7 +152,7 @@ exports.devClean = pdel([DEV_DIST()]);
 exports.default = gulp.series(
 	pdel([DIST])
 	, gulp.parallel(
-		buildSource(true, false)
+		buildSource()
 		, buildManifest()
 		, outputLanguages()
 		, outputTemplates()
@@ -144,7 +168,7 @@ exports.default = gulp.series(
 exports.dev = gulp.series(
 	pdel([DEV_DIST() + GLOB], { force: true }),
 	gulp.parallel(
-		buildSource(true, false, DEV_DIST())
+		buildSource(DEV_DIST())
 		, buildManifest(DEV_DIST())
 		, outputLanguages(DEV_DIST())
 		, outputTemplates(DEV_DIST())
@@ -160,7 +184,7 @@ exports.dev = gulp.series(
 exports.zip = gulp.series(
 	pdel([DIST])
 	, gulp.parallel(
-		buildSource(false, false)
+		buildSource()
 		, buildManifest()
 		, outputLanguages()
 		, outputTemplates()
@@ -182,7 +206,7 @@ function watchFolder(folder) {
  */
 exports.watch = function () {
 	exports.default();
-	gulp.watch(SOURCE + GLOB, gulp.series(pdel(DIST + SOURCE), buildSource(true, false)));
+	gulp.watch(SOURCE + GLOB, gulp.series(pdel(DIST + SOURCE), buildSource()));
 	gulp.watch([CSS + GLOB, SOURCE + GLOB, 'module.json', 'package.json'], buildManifest());
 	watchFolder(LANG);
 	watchFolder(TEMPLATES);
@@ -202,7 +226,7 @@ function devWatchFolder(folder) {
 exports.devWatch = function () {
 	const devDist = DEV_DIST();
 	exports.dev();
-	gulp.watch(SOURCE + GLOB, gulp.series(plog('deleting: ' + devDist + SOURCE + GLOB), pdel(devDist + SOURCE + GLOB, { force: true }), buildSource(true, false, devDist), plog('sources done.')));
+	gulp.watch(SOURCE + GLOB, gulp.series(plog('deleting: ' + devDist + SOURCE + GLOB), pdel(devDist + SOURCE + GLOB, { force: true }), buildSource(devDist), plog('sources done.')));
 	gulp.watch([CSS + GLOB, SOURCE + GLOB, 'module.json', 'package.json'], gulp.series(reloadPackage, buildManifest(devDist), plog('manifest done.')));
 	devWatchFolder(LANG);
 	devWatchFolder(TEMPLATES);

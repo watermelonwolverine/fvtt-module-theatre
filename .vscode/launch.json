@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "type": "chrome",
+        "request": "launch",
+        "name": "FoundryVTT",
+        "sourceMaps": true,
+        "preLaunchTask": "npm: devbuild",
+        "url": "http://localhost:30000",
+        "webRoot": "${workspaceFolder}",
+        "sourceMapPathOverrides": {
+          "webpack://modules/theatre/./*": "${workspaceFolder}/*"
+        }
+      }
+    ]
+  }
