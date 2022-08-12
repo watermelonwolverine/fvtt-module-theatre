@@ -1,4 +1,4 @@
-import { RiggingResource } from "./resources_types.js";
+import { RiggingResource } from "./resources_types";
 
 
 export default class DefaultRiggingResources {

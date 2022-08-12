@@ -21,19 +21,19 @@
  *
  */
 
-import TheatreSettings from './extensions/settings.js';
-import _TheatreWorkers from './workers/workers.js';
-import KHelpers from "./workers/KHelpers.js";
-import ActorExtensions from './extensions/ActorExtensions.js';
-import TheatreActorConfig from './types/TheatreActorConfig.js';
-import TheatreActor from './types/TheatreActor.js';
-import Stage from './types/Stage.js';
-import TheatreSettingsInitializer from './workers/SettingsInitializer.js';
-import TheatreStyle from './types/TheatreStyle.js';
-import getTheatreId from "./workers/Tools.js";
-import EmotionDefinition from "./types/EmotionDefinition.js";
-import EmoteMenuRenderer from './workers/EmoteMenuRenderer.js';
-import InsertReorderer from './workers/InsertReorderer.js';
+import TheatreSettings from './extensions/settings';
+import _TheatreWorkers from './workers/workers';
+import KHelpers from "./workers/KHelpers";
+import ActorExtensions from './extensions/ActorExtensions';
+import TheatreActorConfig from './types/TheatreActorConfig';
+import TheatreActor from './types/TheatreActor';
+import Stage from './types/Stage';
+import TheatreSettingsInitializer from './workers/SettingsInitializer';
+import TheatreStyle from './types/TheatreStyle';
+import getTheatreId from "./workers/Tools";
+import EmotionDefinition from "./types/EmotionDefinition";
+import EmoteMenuRenderer from './workers/EmoteMenuRenderer';
+import InsertReorderer from './workers/InsertReorderer';
 
 export default class Theatre {
 

@@ -1,7 +1,7 @@
-import TheatreSettings from "../extensions/settings.js";
-import Stage from "./Stage.js";
+import TheatreSettings from "../extensions/settings";
+import Stage from "./Stage";
 import StageInsert from "./StageInsert";
-import TheatreStyle from "./TheatreStyle.js";
+import TheatreStyle from "./TheatreStyle";
 
 export default class Portrait {
 

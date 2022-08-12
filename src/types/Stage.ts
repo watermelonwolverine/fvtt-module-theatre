@@ -1,11 +1,11 @@
-import TheatreSettings from "../extensions/settings.js";
-import Theatre from "../Theatre.js";
-import KHelpers from "../workers/KHelpers.js";
-import getTheatreId from "../workers/Tools.js";
-import Portrait from "./Portrait.js";
+import TheatreSettings from "../extensions/settings";
+import Theatre from "../Theatre";
+import KHelpers from "../workers/KHelpers";
+import getTheatreId from "../workers/Tools";
+import Portrait from "./Portrait";
 import StageInsert from "./StageInsert.js"
 import TheatreActor from "./TheatreActor.js"
-import TheatreStyle from "./TheatreStyle.js";
+import TheatreStyle from "./TheatreStyle";
 
 export default class Stage {
 

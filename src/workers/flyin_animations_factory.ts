@@ -1,8 +1,8 @@
 import TheatreSettings from "../extensions/settings";
-import Theatre from "../Theatre.js";
-import TheatreStyle from "../types/TheatreStyle.js";
-import KHelpers from "./KHelpers.js";
-import { TextStandingAnimationFunction } from "./standing_animations_factory.js";
+import Theatre from "../Theatre";
+import TheatreStyle from "../types/TheatreStyle";
+import KHelpers from "./KHelpers";
+import { TextStandingAnimationFunction } from "./standing_animations_factory";
 
 export type Context = any;
 

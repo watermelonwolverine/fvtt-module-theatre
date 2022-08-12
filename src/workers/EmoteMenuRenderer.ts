@@ -1,10 +1,10 @@
-import ActorExtensions from "../extensions/ActorExtensions.js";
-import { EmoteDictionary } from "../resources/resources_types.js";
-import Theatre from "../Theatre.js";
-import StageInsert from "../types/StageInsert.js";
-import TextFlyinAnimationsFactory from "./flyin_animations_factory.js";
-import KHelpers from "./KHelpers.js";
-import TextStandingAnimationsFactory, { TextStandingAnimationDefinitionDictionary } from "./standing_animations_factory.js";
+import ActorExtensions from "../extensions/ActorExtensions";
+import { EmoteDictionary } from "../resources/resources_types";
+import Theatre from "../Theatre";
+import StageInsert from "../types/StageInsert";
+import TextFlyinAnimationsFactory from "./flyin_animations_factory";
+import KHelpers from "./KHelpers";
+import TextStandingAnimationsFactory, { TextStandingAnimationDefinitionDictionary } from "./standing_animations_factory";
 
 export default class EmoteMenuRenderer {
     context: Theatre;

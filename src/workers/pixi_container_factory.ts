@@ -1,11 +1,11 @@
 /* eslint-disable no-unused-vars */
-import EmotionDefinition from "../types/EmotionDefinition.js";
-import Resources from "../extensions/foundry_extensions.js";
-import Params from "../types/Params.js";
-import { RiggingResource } from "../resources/resources_types.js";
-import Theatre from "../Theatre.js";
-import ActorExtensions from "../extensions/ActorExtensions.js";
-import _TheatreWorkers from "./workers.js";
+import EmotionDefinition from "../types/EmotionDefinition";
+import Resources from "../extensions/foundry_extensions";
+import Params from "../types/Params";
+import { RiggingResource } from "../resources/resources_types";
+import Theatre from "../Theatre";
+import ActorExtensions from "../extensions/ActorExtensions";
+import _TheatreWorkers from "./workers";
 
 
 export default class _TheatrePixiContainerFactory {

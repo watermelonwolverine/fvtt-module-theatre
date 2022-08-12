@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-import _TheatrePixiContainerFactory from "./pixi_container_factory.js";
-import _TheatrePortraitContainerSetupWorker from "./portrait_container_setup.js";
-import _TextBoxFactory from "./textbox_factory.js";
-import Theatre from "../Theatre.js";
+import _TheatrePixiContainerFactory from "./pixi_container_factory";
+import _TheatrePortraitContainerSetupWorker from "./portrait_container_setup";
+import _TextBoxFactory from "./textbox_factory";
+import Theatre from "../Theatre";
 
 export default class _TheatreWorkers {
     pixi_container_factory: _TheatrePixiContainerFactory;

@@ -1,6 +1,6 @@
-import TheatreSettings from "../extensions/settings.js";
-import Theatre from "../Theatre.js";
-import TheatreStyle from "../types/TheatreStyle.js";
+import TheatreSettings from "../extensions/settings";
+import Theatre from "../Theatre";
+import TheatreStyle from "../types/TheatreStyle";
 
 export default class TheatreSettingsInitializer {
 

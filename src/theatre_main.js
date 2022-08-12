@@ -20,12 +20,12 @@
  *
  */
 
-import Theatre from "./Theatre.js";
-import KHelpers from "./workers/KHelpers.js";
-import TheatreSettings from "./extensions/settings.js"
-import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory.js";
-import TextStandingAnimationsFactory from "./workers/standing_animations_factory.js";
-import ActorExtensions from "./extensions/ActorExtensions.js";
+import Theatre from "./Theatre";
+import KHelpers from "./workers/KHelpers";
+import TheatreSettings from "./extensions/settings";
+import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory";
+import TextStandingAnimationsFactory from "./workers/standing_animations_factory";
+import ActorExtensions from "./extensions/ActorExtensions";
 
 /**
  * Concat helper

@@ -1,8 +1,8 @@
-import TheatreSettings from "../extensions/settings.js";
-import Theatre from "../Theatre.js";
-import Stage from "../types/Stage.js";
-import TheatreStyle from "../types/TheatreStyle.js";
-import KHelpers from "./KHelpers.js";
+import TheatreSettings from "../extensions/settings";
+import Theatre from "../Theatre";
+import Stage from "../types/Stage";
+import TheatreStyle from "../types/TheatreStyle";
+import KHelpers from "./KHelpers";
 
 export default class InsertReorderer {
 

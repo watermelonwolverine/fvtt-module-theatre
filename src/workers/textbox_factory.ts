@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
-import TheatreSettings from "../extensions/settings.js";
-import Theatre from "../Theatre.js";
-import TheatreStyle from "../types/TheatreStyle.js";
-import KHelpers from "./KHelpers.js"
-import _TheatreWorkers from "./workers.js";
+import TheatreSettings from "../extensions/settings";
+import Theatre from "../Theatre";
+import TheatreStyle from "../types/TheatreStyle";
+import KHelpers from "./KHelpers";
+import _TheatreWorkers from "./workers";
 
 export default class _TextBoxFactory {
 
