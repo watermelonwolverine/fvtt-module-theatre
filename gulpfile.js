@@ -11,6 +11,7 @@ const tabify = require('gulp-tabify');
 const stringify = require('json-stringify-pretty-compact');
 const webpack = require('webpack-stream');
 const TerserPlugin = require("terser-webpack-plugin");
+const filter = require('gulp-filter');
 
 const GLOB = '**/*';
 const DIST = 'dist/';
@@ -28,7 +29,7 @@ var PACKAGE = JSON.parse(fs.readFileSync('package.json'));
 var DEV_ENV = JSON.parse(fs.readFileSync('devEnv.json'))
 
 function reloadPackage(cb) { PACKAGE = JSON.parse(fs.readFileSync('package.json')); cb(); }
-function DEV_DIST() { return path.join(DEV_ENV.devDir, PACKAGE.name) + '/'; }
+function DEV_DIST() { return DEV_ENV.devDir + PACKAGE.name + '/'; }
 
 String.prototype.replaceAll = function (pattern, replace) { return this.split(pattern).join(replace); }
 function pdel(patterns, options) { return () => { return del(patterns, options); }; }
@@ -41,46 +42,42 @@ function plog(message) { return (cb) => { console.log(message); cb() }; }
  */
 function buildSource(output = null) {
 	return () => {
-		return gulp.src('src/theatre_main.js')
-			.pipe(
-				webpack({
-					mode: "development",
-					target: 'web',
-					devtool: "inline-source-map",
-					entry: './src/theatre_main.js',
-					module: {
-						rules: [
-							{
-								test: /\.ts?$/,
-								use: 'ts-loader'
-							},
-						],
-					},
-					optimization: {
-						minimize: false,
-						minimizer: [
-							new TerserPlugin({
-								terserOptions: {
-									format: {
-										comments: false,
-									},
-								},
-								extractComments: false,
-							}),
-						],
-					},
-					resolve: {
-						extensions: ['.ts', '.js'],
+
+		console.log("OUTPUT to " + output);
+		console.log("Use Source-Map " + process.argv.includes('--sm'));
+		console.log("Minimize " + process.argv.includes('--min'));
+
+		return webpack({
+			entry: './src/theatre_main.js',
+			mode: 'none',
+			devtool: process.argv.includes('--sm') ? 'source-map' : undefined,
+			module: {
+				rules: [{
+					test: /\.tsx?$/,
+					exclude: /node_modules/,
+					use: [{
+						loader: 'ts-loader',
+						options: { context: process.cwd() }
+					}]
+				}]
+			},
+			resolve: { extensions: ['.ts', '.tsx', '.js'] },
+			optimization: {
+				minimize: process.argv.includes('--min'),
+				minimizer: [new TerserPlugin({
+					terserOptions: {
+						keep_classnames: true,
+						keep_fnames: true
 					}
-				})
-			)
-			.pipe(gulp.dest((output || DIST) + SOURCE));
+				})]
+			},
+			output: { filename: 'theatre_main.js' }
+		}).pipe(gulp.dest((output || DIST) + SOURCE));
 	}
 }
 
-exports.step_buildSourceDev = buildSource();
-exports.step_buildSource = buildSource();
-exports.step_buildSourceMin = buildSource();
+exports.step_buildSourceDev = gulp.series(pdel(DEV_DIST() + SOURCE), buildSource(DEV_DIST()));
+exports.step_buildSource = gulp.series(pdel(DIST + SOURCE), buildSource());
 
 /**
  * Builds the module manifest based on the package, sources, and css.
@@ -162,12 +159,17 @@ exports.default = gulp.series(
 		, outputGraphics()
 	)
 );
+
+function copyDevDistToLocalDist() {
+	return gulp.src(DEV_DIST() + SOURCE + GLOB).pipe(gulp.dest(DIST + SOURCE));
+};
+
 /**
  * Extends the default build task by copying the result to the Development Environment
  */
 exports.dev = gulp.series(
-	pdel([DEV_DIST() + GLOB], { force: true }),
-	gulp.parallel(
+	pdel([DIST + GLOB, DEV_DIST() + GLOB], { force: true })
+	, gulp.parallel(
 		buildSource(DEV_DIST())
 		, buildManifest(DEV_DIST())
 		, outputLanguages(DEV_DIST())
@@ -177,6 +179,7 @@ exports.dev = gulp.series(
 		, outputPacks(DEV_DIST())
 		, outputGraphics(DEV_DIST())
 	)
+	, copyDevDistToLocalDist
 );
 /**
  * Performs a default build and then zips the result into a bundle
@@ -198,7 +201,10 @@ exports.zip = gulp.series(
 );
 
 function watchFolder(folder) {
-	gulp.watch(folder + GLOB, gulp.series(pdel(DIST + folder), outputFolder(folder)));
+	gulp.watch(
+		folder + GLOB,
+		gulp.series(pdel(DIST + folder),
+			outputFolder(folder)));
 }
 
 /**
@@ -206,18 +212,31 @@ function watchFolder(folder) {
  */
 exports.watch = function () {
 	exports.default();
-	gulp.watch(SOURCE + GLOB, gulp.series(pdel(DIST + SOURCE), buildSource()));
-	gulp.watch([CSS + GLOB, SOURCE + GLOB, 'module.json', 'package.json'], buildManifest());
+	gulp.watch(SOURCE + GLOB,
+		gulp.series(pdel(DIST + SOURCE),
+			buildSource()));
+
+	gulp.watch(
+		[CSS + GLOB, SOURCE + GLOB, 'module.json', 'package.json'],
+		buildManifest());
+
 	watchFolder(LANG);
 	watchFolder(TEMPLATES);
 	watchFolder(CSS);
 	watchFolder(PACKS);
 	watchFolder(GRAPHICS);
-	gulp.watch(METAFILES, outputMetaFiles());
+
+	gulp.watch(
+		METAFILES,
+		outputMetaFiles());
 }
 
 function devWatchFolder(folder) {
-	gulp.watch(folder + GLOB, gulp.series(pdel(devDist + folder + GLOB, { force: true }), outputFolder(devDist), plog(folder + ' done.')));
+	gulp.watch(
+		folder + GLOB,
+		gulp.series(pdel(DEV_DIST() + folder + GLOB, { force: true }),
+			outputFolder(DEV_DIST()),
+			plog(folder + ' done.')));
 }
 
 /**
@@ -226,12 +245,26 @@ function devWatchFolder(folder) {
 exports.devWatch = function () {
 	const devDist = DEV_DIST();
 	exports.dev();
-	gulp.watch(SOURCE + GLOB, gulp.series(plog('deleting: ' + devDist + SOURCE + GLOB), pdel(devDist + SOURCE + GLOB, { force: true }), buildSource(devDist), plog('sources done.')));
-	gulp.watch([CSS + GLOB, SOURCE + GLOB, 'module.json', 'package.json'], gulp.series(reloadPackage, buildManifest(devDist), plog('manifest done.')));
+
+	gulp.watch(
+		SOURCE + GLOB,
+		gulp.series(plog('deleting: ' + devDist + SOURCE + GLOB),
+			pdel([DEV_DIST() + SOURCE + GLOB, DIST + SOURCE + GLOB]),
+			buildSource(devDist), copyDevDistToLocalDist, plog('sources done.')));
+
+	gulp.watch(
+		[CSS + GLOB, SOURCE + GLOB, 'module.json', 'package.json'],
+		gulp.series(reloadPackage, buildManifest(devDist),
+			plog('manifest done.')));
+
 	devWatchFolder(LANG);
 	devWatchFolder(TEMPLATES);
 	devWatchFolder(CSS);
 	devWatchFolder(PACKS);
 	devWatchFolder(GRAPHICS);
-	gulp.watch(METAFILES, gulp.series(outputMetaFiles(devDist), plog('metas done.')));
+
+	gulp.watch(
+		METAFILES,
+		gulp.series(outputMetaFiles(devDist),
+			plog('metas done.')));
 }

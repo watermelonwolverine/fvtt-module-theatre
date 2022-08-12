@@ -1,17 +1,21 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "type": "chrome",
-        "request": "launch",
-        "name": "FoundryVTT",
-        "sourceMaps": true,
-        "preLaunchTask": "npm: devbuild",
-        "url": "http://localhost:30000",
-        "webRoot": "${workspaceFolder}",
-        "sourceMapPathOverrides": {
-          "webpack://modules/theatre/./*": "${workspaceFolder}/*"
-        }
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "FoundryVTT",
+      "sourceMaps": true,
+      "port": 9222,
+      "url": "http://localhost:30000/game",
+      "runtimeArgs": [
+        "--remote-debugging-port=9222",
+        "--app=http://localhost:30000"
+      ],
+      "webRoot": "${workspaceFolder}",
+      "sourceMapPathOverrides": {
+        "webpack:///./*": "${workspaceFolder}/*"
       }
-    ]
-  }
+    }
+  ]
+}
