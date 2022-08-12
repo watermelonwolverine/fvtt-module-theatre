@@ -1,5 +1,6 @@
 export default class TheatreSettings {
 
+
 	static NAMESPACE = "theatre";
 
 	// keys
@@ -16,6 +17,7 @@ export default class TheatreSettings {
 	static TEXT_DECAY_MIN = "textDecayMin";
 	static TEXT_DECAY_RATE = "textDecayRate";
 	static MOTD_NEW_INFO = "string";
+
 
 
 	static getNameLocalizationKey(name: string): string {
@@ -50,16 +52,20 @@ export default class TheatreSettings {
 		return this.get(this.NARRATOR_HEIGHT);
 	}
 
-	static getTextDecayMin(): number{
+	static getTextDecayMin(): number {
 		return this.get<number>(this.TEXT_DECAY_MIN) * 1000;
 	}
 
-	static getTextDecayRate(): number{
+	static getTextDecayRate(): number {
 		return this.get<number>(this.TEXT_DECAY_RATE) * 1000;
 	}
 
-	static getMotdNewInfo(){
+	static getMotdNewInfo() {
 		return this.get(this.MOTD_NEW_INFO);
+	}
+
+	static getTitleFont(): string {
+		return "Riffic";
 	}
 
 }

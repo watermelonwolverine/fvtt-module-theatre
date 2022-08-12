@@ -47,9 +47,9 @@ export default class _TextBoxFactory {
 
         this.context.applyFontFamily(textBox, this.context.textFont);
 
-        textBox.addEventListener("mousedown", this.handleTextBoxMouseDown);
-        textBox.addEventListener("mouseup", this.handleTextBoxMouseUp);
-        textBox.addEventListener("dblclick", this.handleTextBoxMouseDoubleClick);
+        textBox.addEventListener("mousedown", (ev) => this.handleTextBoxMouseDown(ev));
+        textBox.addEventListener("mouseup", (ev) => this.handleTextBoxMouseUp(ev));
+        textBox.addEventListener("dblclick", (ev) => this.handleTextBoxMouseDoubleClick(ev));
 
         return textBox;
     }

@@ -202,7 +202,8 @@ export default class Stage {
             return; // absolute values were set, so no dynamic resizing needed
 
         for (const insert of this.stageInserts) {
-            // TODO
+            const portrait = new Portrait(this, insert);
+            portrait.updatePortrait();
         }
     }
 

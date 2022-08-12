@@ -14,11 +14,46 @@ export default class Portrait {
         this.insert = insert;
     }
 
-    getPortraitDimensions(): { width: number, height: number } {
+    updatePortrait() {
+        const portraitDimensions = this.calculatePortraitDimensions();
+        this.updatePortraitDimensions()
+        this.updatePortraitPosition()
+        // set mirror state if mirrored
+        if (this.insert.mirrored) {
+            this.insert.portraitContainer.scale.x = -1;
+        }
+    }
+
+    updatePortraitDimensions(portraitDimensions = this.calculatePortraitDimensions()) {
+
+        const portWidth = portraitDimensions.width;
+        const portHeight = portraitDimensions.height;
+
+        // IMPORTANT: the order is important and can not be changed
+        this.insert.portrait.width = portWidth;
+        this.insert.portrait.height = portHeight;
+        this.insert.portraitContainer.width = portWidth
+        this.insert.portraitContainer.height = portHeight
+        this.insert.dockContainer.width = portWidth
+        this.insert.dockContainer.height = portHeight
+    }
+
+    updatePortraitPosition(portraitDimensions = this.calculatePortraitDimensions()) {
+        // IMPORTANT: the order is important and can not be changed
+        this.insert.portrait.x = 0;
+        this.insert.portrait.y = 0;
+        this.insert.portraitContainer.pivot.x = portraitDimensions.width / 2;
+        this.insert.portraitContainer.pivot.y = portraitDimensions.height / 2;
+        this.insert.portraitContainer.x = this.insert.portraitContainer.x + portraitDimensions.width / 2;
+        this.insert.portraitContainer.y = this.insert.portraitContainer.y + portraitDimensions.height / 2;
+        this.insert.dockContainer.y = this.stage.theatreDock.offsetHeight - (this.insert.optAlign == "top" ? this.stage.theatreBar.offsetHeight : 0) - portraitDimensions.height;
+    }
+
+    calculatePortraitDimensions(): { width: number, height: number } {
 
         const texture = this.insert.portrait.texture;
 
-        if(!texture)
+        if (!texture)
             console.error("OOF");
 
         const portWidth = this.insert.portrait.texture.width;

@@ -35,7 +35,7 @@ export default class _TheatrePortraitContainerSetupWorker {
      */
     setupPortraitContainer(
         imgId: string,
-        optAlign: string,
+        optAlign: string, // TODO remove
         resName: string,
         resources: Resources,
         reorder: boolean): void {
@@ -66,41 +66,21 @@ export default class _TheatrePortraitContainerSetupWorker {
         const portrait = new Portrait(stage,
             insert);
 
-        const portraitDimensions = portrait.getPortraitDimensions();
+        portraitContainer.addChild(insert.portrait);
+
+        portrait.updatePortraitDimensions();
+
+        const portraitDimensions = portrait.calculatePortraitDimensions();
 
         const portWidth = portraitDimensions.width;
         const portHeight = portraitDimensions.height;
 
-        // adjust dockContainer + portraitContainer dimensions to fit the image
-        dockContainer.width = portWidth
-        dockContainer.height = portHeight
-        portraitContainer.width = portWidth
-        portraitContainer.height = portHeight
 
-        // set the initial dockContainer position + state
-        //dockContainer.x = 0;
-        dockContainer.y = stage.theatreDock.offsetHeight - (optAlign == "top" ? stage.theatreBar.offsetHeight : 0) - portHeight;
-
-        insert.portrait.width = portWidth;
-        insert.portrait.height = portHeight;
-
-        portraitContainer.addChild(insert.portrait);
-        portraitContainer.pivot.x = portWidth / 2;
-        portraitContainer.pivot.y = portHeight / 2;
-        portraitContainer.x = portraitContainer.x + portWidth / 2;
-        portraitContainer.y = portraitContainer.y + portHeight / 2;
-        insert.portrait.x = 0;
-        insert.portrait.y = 0;
-
-        // set mirror state if mirrored
-        if (insert.mirrored) {
-            portraitContainer.scale.x = -1;
-        }
         // setup label if not setup
         if (!insert.label) {
             let textStyle = new PIXI.TextStyle({
                 align: "center",
-                fontFamily: Theatre.instance.titleFont,
+                fontFamily: TheatreSettings.getTitleFont(),
                 fontSize: 44,
                 lineHeight: 64,
                 //fontStyle: 'italic',
@@ -124,7 +104,7 @@ export default class _TheatrePortraitContainerSetupWorker {
             // initital positioning
             insert.label.x = 20;
         }
-        insert.label.y = portHeight - (optAlign == "top" ? 0 : stage.theatreBar.offsetHeight) - insert.label.style.lineHeight - 20;
+        insert.label.y = portHeight - (insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight) - insert.label.style.lineHeight - 20;
 
 
         // setup typing bubble
@@ -136,7 +116,7 @@ export default class _TheatrePortraitContainerSetupWorker {
             typingBubble.theatreComponentName = "typingBubble";
             typingBubble.alpha = 0;
             typingBubble.y = portHeight -
-                (optAlign == "top" ? 0 : stage.theatreBar.offsetHeight) - insert.label.style.lineHeight + typingBubble.height / 2;
+                (insert.optAlign  == "top" ? 0 : stage.theatreBar.offsetHeight) - insert.label.style.lineHeight + typingBubble.height / 2;
 
 
             insert.typingBubble = typingBubble;
@@ -147,13 +127,13 @@ export default class _TheatrePortraitContainerSetupWorker {
         switch (TheatreSettings.getTheatreStyle()) {
             case TheatreStyle.LIGHTBOX:
                 // to allow top-aligned portraits to work without a seam
-                dockContainer.y += (optAlign == "top" ? 8 : 0);
+                dockContainer.y += (insert.optAlign  == "top" ? 8 : 0);
                 insert.label.y -= (insert.optAlign == "top" ? 8 : 0);
                 break;
             case TheatreStyle.CLEARBOX:
                 dockContainer.y = stage.theatreDock.offsetHeight - portHeight;
-                insert.label.y += (optAlign == "top" ? 0 : stage.theatreBar.offsetHeight);
-                insert.typingBubble.y += (optAlign == "top" ? 0 : stage.theatreBar.offsetHeight);
+                insert.label.y += (insert.optAlign  == "top" ? 0 : stage.theatreBar.offsetHeight);
+                insert.typingBubble.y += (insert.optAlign  == "top" ? 0 : stage.theatreBar.offsetHeight);
                 break;
             case TheatreStyle.MANGABUBBLE:
                 break;

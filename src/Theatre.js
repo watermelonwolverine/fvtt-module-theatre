@@ -60,7 +60,6 @@ export default class Theatre {
 
 			// build theater variables
 			// font related
-			this.titleFont = "Riffic";
 			this.textFont = "SignikaBold";
 			this.fontWeight = "bold";
 			// position/order related

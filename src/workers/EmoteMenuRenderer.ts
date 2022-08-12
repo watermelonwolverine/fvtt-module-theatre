@@ -1,4 +1,5 @@
 import ActorExtensions from "../extensions/ActorExtensions";
+import TheatreSettings from "../extensions/settings";
 import { EmoteDictionary } from "../resources/resources_types";
 import Theatre from "../Theatre";
 import StageInsert from "../types/StageInsert";
@@ -96,7 +97,7 @@ export default class EmoteMenuRenderer {
         let headers = this.context.theatreEmoteMenu.getElementsByTagName('h2');
         let textAnims = this.context.theatreEmoteMenu.getElementsByClassName('textanim');
         for (let e of headers)
-            this.context.applyFontFamily(e, this.context.titleFont);
+            this.context.applyFontFamily(e, TheatreSettings.getTitleFont());
         for (let e of textAnims) {
             let font = fontSelect.value;
             this.context.applyFontFamily(e, font);
