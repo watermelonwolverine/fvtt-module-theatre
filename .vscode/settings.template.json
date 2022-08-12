@@ -1,0 +1,4 @@
+{
+    // Path to your local foundry installation, for example C:/Program Files/FoundryVTT
+    "FVTT": "<path-to-foundry-install-dir>" 
+}

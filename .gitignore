@@ -2,3 +2,4 @@
 /node_modules/
 /dist/
 /devEnv.json
+/.vscode/settings.json

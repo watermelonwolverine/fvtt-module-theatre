@@ -1,0 +1,4 @@
+{
+    //For example: D:/foundrydata/Data/modules/
+    "devDir": "<path-to-foundry-data-modules>"
+}

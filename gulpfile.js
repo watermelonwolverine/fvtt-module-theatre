@@ -44,7 +44,7 @@ function buildSource(output = DIST) {
 		return webpack({
 			entry: './src/theatre_main.js',
 			mode: 'none',
-			devtool: process.argv.includes('--sm') ? 'inline-source-map' : undefined,
+			devtool: process.argv.includes('--sm') ? 'source-map' : undefined,
 			module: {
 				rules: [{
 					test: /\.tsx?$/,
@@ -65,7 +65,10 @@ function buildSource(output = DIST) {
 					}
 				})]
 			},
-			output: { filename: 'theatre_main.js' }
+			output: {
+				filename: './theatre_main.js',
+				devtoolModuleFilenameTemplate: '[resource-path]'  // Removes the webpack:/// prefix
+			}
 		}).pipe(gulp.dest(output + SOURCE));
 	}
 }
