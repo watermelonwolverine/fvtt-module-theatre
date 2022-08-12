@@ -1,4 +1,5 @@
 {
-    //For example: D:/foundrydata/Data/modules/
-    "devDir": "<path-to-foundry-data-modules>"
+    //Enter path foundry data. The folder that contains Config, Data, Script, etc.. For example: "D:/foundrydata".
+    // No trailing /
+    "devDir": "<path-to-foundrydata>"
 }

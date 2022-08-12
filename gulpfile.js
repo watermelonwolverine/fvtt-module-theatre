@@ -25,7 +25,7 @@ var PACKAGE = JSON.parse(fs.readFileSync('package.json'));
 var DEV_ENV = JSON.parse(fs.readFileSync('devEnv.json'))
 
 function reloadPackage(cb) { PACKAGE = JSON.parse(fs.readFileSync('package.json')); cb(); }
-function DEV_DIST() { return DEV_ENV.devDir + PACKAGE.name + '/'; }
+function DEV_DIST() { return DEV_ENV.devDir + '/Data/modules/' + PACKAGE.name + '/'; }
 
 String.prototype.replaceAll = function (pattern, replace) { return this.split(pattern).join(replace); }
 function pdel(patterns, options) { return () => { return del(patterns, options); }; }
