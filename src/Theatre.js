@@ -915,9 +915,6 @@ export default class Theatre {
 					if (Theatre.DEBUG) console.log("mirroring desired: %s , current mirror %s", data.position.mirror, insert.mirrored);
 					if (Boolean(data.position.mirror) != insert.mirrored)
 						insert.mirrored = data.position.mirror;
-					// apply positioning data
-					//insert.portraitContainer.x = data.position.x; 
-					//insert.portraitContainer.y = data.position.y; 
 					let tweenId = "portraitMove";
 					let tween = TweenMax.to(insert.portraitContainer, 0.5, {
 						pixi: { scaleX: (data.position.mirror ? -1 : 1), x: data.position.x, y: data.position.y },
@@ -4688,10 +4685,7 @@ export default class Theatre {
 		if (dy < box.mintop) dy = box.mintop;
 
 		if (Theatre.DEBUG) console.log("WINDOW MOUSE UP FINAL x: " + x + " y: " + y + " ix: " + ix + " iy: " + iy + " dx: " + dx + " dy: " + dy + " ox: " + ox + " oy: " + oy);
-		//port.style.left = `${dx}px`; 
-		//port.style.top = `${dy}px`; 
-		//insert.portraitContainer.x = dx; 
-		//insert.portraitContainer.y = dy; 
+
 		if (!insert.dockContainer || !insert.portraitContainer) {
 			console.log("ERROR: insert dockContainer or portrait is INVALID");
 			window.removeEventListener("mouseup", Theatre.instance.handleWindowMouseUp);

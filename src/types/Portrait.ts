@@ -39,7 +39,6 @@ export default class Portrait {
     }
 
     updatePortraitPosition(portraitDimensions = this.calculatePortraitDimensions()) {
-        // IMPORTANT: the order is important and can not be changed
         this.insert.portrait.x = 0;
         this.insert.portrait.y = 0;
         this.insert.portraitContainer.pivot.x = portraitDimensions.width / 2;

@@ -46,9 +46,6 @@ export default class _TheatrePixiContainerFactory {
         let dockContainer = new PIXI.Container();
         let portraitContainer = new PIXI.Container();
         dockContainer.addChild(portraitContainer);
-        // initial positioning
-        portraitContainer.x = 0;
-        portraitContainer.y = 0;
 
         let app = this.context.stage.pixiApplication;
         app.stage.addChild(dockContainer);
