@@ -2,16 +2,12 @@ const gulp = require('gulp');
 const path = require('path');
 var fs = require('fs')
 const del = require('del');
-const ts = require('gulp-typescript');
 const sm = require('gulp-sourcemaps');
 const zip = require('gulp-zip');
-const rename = require('gulp-rename');
-const minify = require('gulp-minify');
 const tabify = require('gulp-tabify');
 const stringify = require('json-stringify-pretty-compact');
 const webpack = require('webpack-stream');
 const TerserPlugin = require("terser-webpack-plugin");
-const filter = require('gulp-filter');
 
 const GLOB = '**/*';
 const DIST = 'dist/';
@@ -40,17 +36,15 @@ function plog(message) { return (cb) => { console.log(message); cb() }; }
  * Compile the source code into the distribution directory
  * @param {Boolean} keepSources Include the TypeScript SourceMaps
  */
-function buildSource(output = null) {
+function buildSource(output = DIST) {
 	return () => {
 
 		console.log("OUTPUT to " + output);
-		console.log("Use Source-Map " + process.argv.includes('--sm'));
-		console.log("Minimize " + process.argv.includes('--min'));
 
 		return webpack({
 			entry: './src/theatre_main.js',
 			mode: 'none',
-			devtool: process.argv.includes('--sm') ? 'source-map' : undefined,
+			devtool: process.argv.includes('--sm') ? 'inline-source-map' : undefined,
 			module: {
 				rules: [{
 					test: /\.tsx?$/,
@@ -72,7 +66,7 @@ function buildSource(output = null) {
 				})]
 			},
 			output: { filename: 'theatre_main.js' }
-		}).pipe(gulp.dest((output || DIST) + SOURCE));
+		}).pipe(gulp.dest(output + SOURCE));
 	}
 }
 

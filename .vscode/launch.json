@@ -13,9 +13,14 @@
         "--app=http://localhost:30000"
       ],
       "webRoot": "${workspaceFolder}",
-      "sourceMapPathOverrides": {
-        "webpack:///./*": "${workspaceFolder}/*"
-      }
+			"sourceMapPathOverrides": {
+        "webpack:///./~/*": "${webRoot}/node_modules/*",      
+        "webpack:///./*":   "${webRoot}/*",                    
+        "webpack:///*":     "*",                               
+        "theatre/./~/*": "${webRoot}/node_modules/*",       
+        "theatre/./*":   "${webRoot}/*",                    
+        "theatre/*":     "*",       
+			}
     }
   ]
 }
