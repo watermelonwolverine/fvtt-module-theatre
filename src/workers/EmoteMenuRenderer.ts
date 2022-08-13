@@ -3,15 +3,19 @@ import TheatreSettings from "../extensions/settings";
 import { EmoteDictionary } from "../resources/resources_types";
 import Theatre from "../Theatre";
 import StageInsert from "../types/StageInsert";
+import ToolTipCanvas from "../types/ToolTipCanvas";
 import TextFlyinAnimationsFactory from "./flyin_animations_factory";
 import KHelpers from "./KHelpers";
 import TextStandingAnimationsFactory, { TextStandingAnimationDefinitionDictionary } from "./standing_animations_factory";
 
 export default class EmoteMenuRenderer {
     context: Theatre;
+    toolTipCanvas: ToolTipCanvas;
 
-    constructor(context: Theatre) {
+    constructor(context: Theatre,
+        toolTipCanvas: ToolTipCanvas) {
         this.context = context;
+        this.toolTipCanvas = toolTipCanvas;
     }
 
     /**
@@ -409,7 +413,7 @@ export default class EmoteMenuRenderer {
                 });
                 // bind mouseenter Listener
                 child.addEventListener("mouseenter", (ev) => {
-                    this.context.configureTheatreToolTip(this.context.speakingAs, (<HTMLElement>ev.currentTarget).getAttribute("name"));
+                    this.toolTipCanvas.configureTheatreToolTip(this.context.speakingAs, (<HTMLElement>ev.currentTarget).getAttribute("name"));
                 });
                 // check if this child is our configured 'emote'
                 let childEmote = child.getAttribute("name");
@@ -433,7 +437,7 @@ export default class EmoteMenuRenderer {
             }
             // bind mouseleave Listener
             emoteBtns[0].parentNode.addEventListener("mouseleave", (ev) => {
-                this.context.theatreToolTip.style.opacity = "0";
+                this.toolTipCanvas.holder.style.opacity = "0";
             });
         }
     }

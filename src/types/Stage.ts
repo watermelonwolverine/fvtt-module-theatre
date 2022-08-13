@@ -1,7 +1,7 @@
 import TheatreSettings from "../extensions/settings";
 import Theatre from "../Theatre";
 import KHelpers from "../workers/KHelpers";
-import getTheatreId from "../workers/Tools";
+import Tools from "../workers/Tools";
 import Portrait from "./Portrait";
 import StageInsert from "./StageInsert.js"
 import TheatreActor from "./TheatreActor.js"
@@ -124,13 +124,6 @@ export default class Stage {
             remote);
     }
 
-    /**
-     * @private
-     */
-    _getInsertToRemove() {
-
-    }
-
     getInsertByName(name: string): StageInsert {
         return this.getInsertBy(dock => dock.name == name);
     }
@@ -174,7 +167,7 @@ export default class Stage {
         if (!actor)
             return false;
 
-        return this.actors.has(getTheatreId(actor));
+        return this.actors.has(Tools.getTheatreId(actor));
     }
 
     handleWindowResize() {
@@ -201,10 +194,17 @@ export default class Stage {
         if (!imageSizeStr.endsWith("%"))
             return; // absolute values were set, so no dynamic resizing needed
 
+        this.updatePortraitSizes();
+    }
+
+    updatePortraitSizes() {
         for (const insert of this.stageInserts) {
             const portrait = new Portrait(this, insert);
-            portrait.updatePortrait();
+            portrait.updatePortraitDimensions();
         }
+
+        if (!Theatre.instance.rendering)
+            Theatre.instance._renderTheatre(performance.now());
     }
 
 

@@ -30,10 +30,11 @@ import TheatreActor from './types/TheatreActor';
 import Stage from './types/Stage';
 import TheatreSettingsInitializer from './workers/SettingsInitializer';
 import TheatreStyle from './types/TheatreStyle';
-import getTheatreId from "./workers/Tools";
+import Tools from "./workers/Tools";
 import EmotionDefinition from "./types/EmotionDefinition";
 import EmoteMenuRenderer from './workers/EmoteMenuRenderer';
 import InsertReorderer from './workers/InsertReorderer';
+import ToolTipCanvas from './types/ToolTipCanvas';
 
 export default class Theatre {
 
@@ -81,11 +82,12 @@ export default class Theatre {
 			this.speakingAs = null;
 			// Map of theatreId to TheatreActor
 			this.stage = new Stage();
+			this.toolTipCanvas = new ToolTipCanvas();
+
 			/** @type {Map<string,EmotionDefinition>}*/
 			this.userEmotes = new Map();
 			this.usersTyping = {};
 			this.userSettings = {};
-			this.pixiToolTipCTX = null;
 			this.lastTyping = 0;
 			this.resync = {
 				type: "any",
@@ -134,15 +136,9 @@ export default class Theatre {
 
 		this.theatreGroup = document.createElement("div");
 		this.stage.initTheatreDockCanvas();
-		this.theatreToolTip = this._initTheatreToolTip();
-		if (!this.theatreToolTip) {
-			console.error("Theatre encountered a FATAL error during initialization");
-			ui.notifications.error(game.i18n.localize("Theatre.UI.Notification.Fatal"));
-			return;
-		}
+		this.toolTipCanvas.initTheatreToolTipCanvas();
 
 		this.theatreGroup.id = "theatre-group";
-		this.theatreToolTip.id = "theatre-tooltip";
 
 		this.theatreNarrator = document.createElement("div");
 		this.theatreNarrator.id = "theatre-narrator";
@@ -163,7 +159,7 @@ export default class Theatre {
 		this.theatreGroup.appendChild(this.stage.theatreDock);
 		this.theatreGroup.appendChild(this.stage.theatreBar);
 		this.theatreGroup.appendChild(this.theatreNarrator);
-		this.theatreGroup.appendChild(this.theatreToolTip);
+		this.theatreGroup.appendChild(this.toolTipCanvas.holder);
 
 		body.appendChild(this.theatreGroup);
 		// set theatreStyle
@@ -306,7 +302,7 @@ export default class Theatre {
 		/**
 		 * Tooltip
 		 */
-		this.theatreEmoteMenu.addEventListener("mousemove", ev => this.handleEmoteMenuMouseMove(ev));
+		this.theatreEmoteMenu.addEventListener("mousemove", ev => this.toolTipCanvas.handleEmoteMenuMouseMove(ev));
 	}
 
 	/**
@@ -702,8 +698,6 @@ export default class Theatre {
 		}
 	}
 
-
-
 	/**
 	 * Process a resync event, and if valid, unload all inserts, prepare assets for inserts to inject,
 	 * and inject them. 
@@ -737,7 +731,7 @@ export default class Theatre {
 			for (let dat of data.insertdata) {
 				theatreId = dat.insertid;
 				actorId = theatreId.replace("theatre-", "");
-				params = this._getInsertParamsFromActorId(actorId);
+				params = Tools.getInsertParamsFromActorId(actorId);
 				if (!params) continue;
 
 				if (Theatre.DEBUG) console.log("params + emotions: ", params, dat.emotions);
@@ -886,7 +880,7 @@ export default class Theatre {
 			case "enterscene":
 				if (Theatre.DEBUG) console.log("enterscene: aid:%s", actorId);
 				actorId = data.insertid.replace("theatre-", "");
-				params = this._getInsertParamsFromActorId(actorId);
+				params = Tools.getInsertParamsFromActorId(actorId);
 				emotions = (data.emotions ? data.emotions : {
 					emote: null,
 					textFlying: null,
@@ -962,7 +956,7 @@ export default class Theatre {
 				if (Theatre.DEBUG) console.log("texturereplace:", data);
 				insert = this.stage.getInsertById(data.insertid);
 				actorId = data.insertid.replace("theatre-", "");
-				params = this._getInsertParamsFromActorId(actorId);
+				params = Tools.getInsertParamsFromActorId(actorId);
 				if (!params) return;
 
 				app = this.stage.pixiApplication;
@@ -1005,7 +999,7 @@ export default class Theatre {
 				if (Theatre.DEBUG) console.log("textureallreplace:", data);
 				insert = this.stage.getInsertById(data.insertid);
 				actorId = data.insertid.replace("theatre-", "");
-				params = this._getInsertParamsFromActorId(actorId);
+				params = Tools.getInsertParamsFromActorId(actorId);
 				if (!params) return;
 
 				app = this.stage.pixiApplication;
@@ -1546,55 +1540,6 @@ export default class Theatre {
 	}
 
 	/**
-	 * Pull insert theatre parameters from an actor if possible
-	 *
-	 * @param actorId (String) : The actor Id from which to pull theatre insert data from
-	 *
-	 * @return (Object) : An object containing the parameters of the insert given the actor Id
-	 *					 or null.
-	 */
-	_getInsertParamsFromActorId(actorId) {
-		let actor = game.actors.get(actorId);
-		if (!actor) {
-			console.log("ERROR, ACTOR %s DOES NOT EXIST!", actorId);
-			return null;
-		}
-		actor = actor.data;
-		//console.log("getting params from actor: ",actor); 
-
-		let theatreId = `theatre-${actor._id}`;
-		let portrait = (actor.img ? actor.img : "icons/mystery-man.png");
-		let optAlign = "top";
-		let name = ActorExtensions.getDisplayName(actor._id);
-		let emotes = {};
-		let settings = {};
-
-		// Use defaults incase the essential flag attributes are missing
-		if (actor.flags.theatre) {
-			if (actor.flags.theatre.name && actor.flags.theatre.name != "")
-				name = actor.flags.theatre.name;
-			if (actor.flags.theatre.baseinsert && actor.flags.theatre.baseinsert != "")
-				portrait = actor.flags.theatre.baseinsert;
-			if (actor.flags.theatre.optalign && actor.flags.theatre.optalign != "")
-				optAlign = actor.flags.theatre.optalign;
-			if (actor.flags.theatre.emotes)
-				emotes = actor.flags.theatre.emotes;
-			if (actor.flags.theatre.settings)
-				settings = actor.flags.theatre.settings;
-		}
-
-		return {
-			src: portrait,
-			name: name,
-			optalign: optAlign,
-			imgId: theatreId,
-			emotes: emotes,
-			settings: settings
-		};
-
-	}
-
-	/**
 	 * Determine if the default animations are disabled given a theatreId
 	 *
 	 * @param theatreId (String) : The theatreId who's theatre properties to
@@ -1686,7 +1631,7 @@ export default class Theatre {
 		let insert = this.stage.getInsertById(id);
 		let actorId = id.replace("theatre-", "");
 		let resName = "icons/myster-man.png";
-		let params = this._getInsertParamsFromActorId(actorId);
+		let params = Tools.getInsertParamsFromActorId(actorId);
 		if (!insert || !params) return;
 
 		if (insert.emote
@@ -1711,124 +1656,6 @@ export default class Theatre {
 
 		if (!this.rendering)
 			this._renderTheatre(performance.now());
-	}
-
-	/**
-	 * Initialize the tooltip canvas which renders previews for the emote menu
-	 *
-	 * @return (HTMLElement) : The canvas HTMLElement of the PIXI canvas created, or 
-	 *						  null if unsuccessful. 
-	 * @private
-	 */
-	_initTheatreToolTip() {
-		let app = new PIXI.Application({ width: 140, height: 140, transparent: true, antialias: true });
-		let canvas = app.view;
-
-		if (!canvas) {
-			console.log("FAILED TO INITILIZE TOOLTIP CANVAS!");
-			return null;
-		}
-
-		let holder = document.createElement("div");
-		KHelpers.addClass(holder, "theatre-tooltip");
-		KHelpers.addClass(holder, "app");
-		holder.appendChild(canvas);
-
-		// turn off ticker
-		app.ticker.autoStart = false;
-		app.ticker.stop();
-
-		this.pixiToolTipCTX = app;
-
-		// hide
-		//holder.style.display = "none"; 
-		holder.style.opacity = 0;
-
-		return holder;
-	}
-
-	/**
-	 * configure the theatre tool tip based on the provided
-	 * insert, if none is provided, the do nothing
-	 *
-	 * @params theatreId (String) : The theatreId of the insert to display in
-	 *							  the theatre tool tip.
-	 * @params emote (String) : The emote of the theatreId to get for dispay 
-	 *						  in the theatre tool tip. 
-	 */
-	configureTheatreToolTip(theatreId, emote) {
-		if (!theatreId || theatreId == Theatre.NARRATOR) return;
-
-		let actorId = theatreId.replace("theatre-", "");
-		let params = this._getInsertParamsFromActorId(actorId);
-		let resources = PIXI.Loader.shared.resources;
-
-		if (!params) {
-			console.log("ERROR actor no longer exists for %s", theatreId);
-			return;
-		}
-
-		let resName = (emote && params.emotes[emote] && params.emotes[emote].insert ? params.emotes[emote].insert : params.src);
-
-		if (!resources[resName] || !resources[resName].texture) {
-			console.log("ERROR could not load texture (for tooltip) %s", resName, resources);
-			return;
-		}
-
-		let app = this.pixiToolTipCTX;
-
-		// clear canvas
-		for (let idx = app.stage.children.length - 1; idx >= 0; --idx) {
-			let child = app.stage.children[idx];
-			child.destroy();
-			//app.stage.removeChildAt(idx); 
-		}
-
-
-		let sprite = new PIXI.Sprite(resources[resName].texture);
-		let portWidth = resources[resName].texture.width;
-		let portHeight = resources[resName].texture.height;
-		let maxSide = Math.max(portWidth, portHeight);
-		let scaledWidth, scaledHeight, ratio;
-		if (maxSide == portWidth) {
-			// scale portWidth to 200px, assign height as a fraction
-			scaledWidth = 140;
-			scaledHeight = portHeight * 140 / portWidth;
-			ratio = scaledHeight / portHeight;
-			app.stage.width = scaledWidth;
-			app.stage.height = scaledHeight;
-
-			app.stage.addChild(sprite);
-			app.stage.scale.x = ratio * 2;
-			app.stage.scale.y = ratio * 2;
-			app.stage.y = 70 - (portHeight * ratio) / 2;
-		} else {
-			// scale portHeight to 200px, assign width as a fraction
-			scaledHeight = 140;
-			scaledWidth = portWidth * 140 / portHeight;
-			ratio = scaledWidth / portWidth;
-			app.stage.width = scaledWidth;
-			app.stage.height = scaledHeight;
-
-			app.stage.addChild(sprite);
-			app.stage.scale.x = ratio * 2;
-			app.stage.scale.y = ratio * 2;
-			app.stage.x = 70 - (portWidth * ratio * 2) / 2;
-		}
-
-		// adjust dockContainer + portraitContainer dimensions to fit the image
-		//app.stage.y = portHeight*ratio/2; 
-
-		// set sprite initial coordinates + state
-		sprite.x = 0;
-		sprite.y = 0;
-
-		//console.log("Tooltip Portrait loaded with w:%s h:%s scale:%s",portWidth,portHeight,ratio,sprite); 
-
-		// render and show the tooltip
-		app.render();
-		this.theatreToolTip.style.opacity = 1;
-
 	}
 
 	/**
@@ -2148,7 +1975,7 @@ export default class Theatre {
 		let insert = this.stage.getInsertById(imgId);
 		// If no insert/container, this is fine
 		let actorId = imgId.replace("theatre-", "");
-		let actorParams = this._getInsertParamsFromActorId(actorId);
+		let actorParams = Tools.getInsertParamsFromActorId(actorId);
 		// no actor is also fine if this is some kind of rigging resource
 
 		// src check, not fine at all!
@@ -2217,7 +2044,7 @@ export default class Theatre {
 		let insert = this.stage.getInsertById(imgId);
 		// If no insert/container, this is fine
 		let actorId = imgId.replace("theatre-", "");
-		let actorParams = this._getInsertParamsFromActorId(actorId);
+		let actorParams = Tools.getInsertParamsFromActorId(actorId);
 		// no actor is also fine if this is some kind of rigging resource
 
 		// src check, not fine at all!
@@ -2421,7 +2248,7 @@ export default class Theatre {
 		let imgSrcs = [];
 		for (let id of ids) {
 			actorId = id.replace("theatre-", "");
-			params = this._getInsertParamsFromActorId(actorId);
+			params = Tools.getInsertParamsFromActorId(actorId);
 			if (!params) continue;
 
 			// base insert
@@ -2454,7 +2281,7 @@ export default class Theatre {
 	 */
 	stageInsertById(theatreId, remote) {
 		let actorId = theatreId.replace("theatre-", "");
-		let params = this._getInsertParamsFromActorId(actorId);
+		let params = Tools.getInsertParamsFromActorId(actorId);
 		if (!params) return;
 		//console.log("params: ",params); 
 		// kick asset loader to cache the portrait + emotes
@@ -2648,8 +2475,6 @@ export default class Theatre {
 		}
 
 	}
-
-
 
 	/**
 	 * Add a textBox to the theatreBar
@@ -3976,7 +3801,7 @@ export default class Theatre {
 		if (!navItem) return;
 
 
-		let params = this._getInsertParamsFromActorId(actorId);
+		let params = Tools.getInsertParamsFromActorId(actorId);
 
 		if (Theatre.DEBUG) console.log(" set as active");
 		// set as user active
@@ -4361,8 +4186,6 @@ export default class Theatre {
 
 	}
 
-
-
 	/**
 	 * ============================================================
 	 *
@@ -4406,22 +4229,6 @@ export default class Theatre {
 			this.reorderTOId = null;
 		}, 250);
 
-	}
-
-
-
-	/**
-	 * Store mouse position for our tooltip which will roam
-	 *
-	 * @param ev (Event) : The Event that triggered the mouse move.
-	 */
-	handleEmoteMenuMouseMove(ev) {
-		this.theatreToolTip.style.top =
-			`${(ev.clientY || ev.pageY) - this.theatreToolTip.offsetHeight - 20}px`;
-		this.theatreToolTip.style.left =
-			`${Math.min(
-				(ev.clientX || ev.pageX) - this.theatreToolTip.offsetWidth / 2,
-				this.stage.theatreDock.offsetWidth - this.theatreToolTip.offsetWidth)}px`;
 	}
 
 	/**
@@ -4655,8 +4462,6 @@ export default class Theatre {
 		//ev.currentTarget.scrollLeft -= ev.deltaY/4; 	
 	}
 
-
-
 	/**
 	 * Handle window mouse up
 	 *
@@ -4772,7 +4577,7 @@ export default class Theatre {
 
 		let id = ev.currentTarget.getAttribute("imgId");
 		let actorId = id.replace("theatre-", "");
-		let params = this._getInsertParamsFromActorId(actorId);
+		let params = Tools.getInsertParamsFromActorId(actorId);
 
 		if (!params) {
 			ui.notifications.error(`ERROR, actorId ${actorId}%s does not exist!`);
@@ -5009,13 +4814,6 @@ export default class Theatre {
 
 		return tweenParams;
 	}
-
-
-
-
-
-
-
 
 	/**
 	 * Split to chars, logically group words based on language. 
@@ -5422,7 +5220,7 @@ export default class Theatre {
 		// add click handler to push it into the theatre bar, if it already exists on the bar, remove it
 		// from the bar
 		// add click handler logic to remove it from the stage
-		let theatreId = getTheatreId(actor);
+		let theatreId = Tools.getTheatreId(actor);
 		let portrait = (actor.img ? actor.img : "icons/mystery-man.png");
 		let optAlign = "top";
 		let name = actor.name;
@@ -5484,7 +5282,7 @@ export default class Theatre {
 		if (!actor)
 			return;
 
-		const theatreId = getTheatreId(actor);
+		const theatreId = Tools.getTheatreId(actor);
 		this._removeFromStage(theatreId);
 
 	}

@@ -16,8 +16,8 @@ export default class Portrait {
 
     updatePortrait() {
         const portraitDimensions = this.calculatePortraitDimensions();
-        this.updatePortraitDimensions()
-        this.updatePortraitPosition()
+        this.updatePortraitDimensions(portraitDimensions)
+        this._updatePortraitPosition(portraitDimensions)
         // set mirror state if mirrored
         if (this.insert.mirrored) {
             this.insert.portraitContainer.scale.x = -1;
@@ -30,17 +30,14 @@ export default class Portrait {
         const portHeight = portraitDimensions.height;
 
         // IMPORTANT: the order is important and can not be changed
-        this.insert.portrait.width = portWidth;
-        this.insert.portrait.height = portHeight;
         this.insert.portraitContainer.width = portWidth
         this.insert.portraitContainer.height = portHeight
         this.insert.dockContainer.width = portWidth
         this.insert.dockContainer.height = portHeight
     }
 
-    updatePortraitPosition(portraitDimensions = this.calculatePortraitDimensions()) {
-        this.insert.portrait.x = 0;
-        this.insert.portrait.y = 0;
+    /** @private */
+    _updatePortraitPosition(portraitDimensions = this.calculatePortraitDimensions()) {
         this.insert.portraitContainer.pivot.x = portraitDimensions.width / 2;
         this.insert.portraitContainer.pivot.y = portraitDimensions.height / 2;
         this.insert.portraitContainer.x = this.insert.portraitContainer.x + portraitDimensions.width / 2;

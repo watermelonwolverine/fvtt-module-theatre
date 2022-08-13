@@ -68,7 +68,7 @@ export default class _TheatrePortraitContainerSetupWorker {
 
         portraitContainer.addChild(insert.portrait);
 
-        portrait.updatePortraitDimensions();
+        portrait.updatePortrait();
 
         const portraitDimensions = portrait.calculatePortraitDimensions();
 
@@ -174,7 +174,6 @@ export default class _TheatrePortraitContainerSetupWorker {
         } else {
             dockContainer.alpha = 1;
         }
-
 
         if (!this.context.rendering)
             this.context._renderTheatre(performance.now());

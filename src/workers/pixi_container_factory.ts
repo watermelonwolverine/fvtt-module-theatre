@@ -6,6 +6,7 @@ import { RiggingResource } from "../resources/resources_types";
 import Theatre from "../Theatre";
 import ActorExtensions from "../extensions/ActorExtensions";
 import _TheatreWorkers from "./workers";
+import Tools from "./Tools";
 
 
 export default class _TheatrePixiContainerFactory {
@@ -100,7 +101,7 @@ export default class _TheatrePixiContainerFactory {
         if (Theatre.DEBUG) console.log("Adding %s with src %s", portName, imgPath);
         // get actor, load all emote images
         let actorId = imgId.replace("theatre-", "");
-        let params: Params = this.context._getInsertParamsFromActorId(actorId);
+        let params: Params = Tools.getInsertParamsFromActorId(actorId);
 
         if (!params) {
             console.log("ERROR: Actor does not exist for %s", actorId);
