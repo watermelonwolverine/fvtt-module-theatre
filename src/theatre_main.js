@@ -137,7 +137,7 @@ Hooks.on("preCreateChatMessage", function (chatMessage) {
 	if (!Theatre.instance) return;
 
 	// make the message OOC if needed
-	if (!chatMessage.data.roll && $(theatre.theatreChatCover).hasClass("theatre-control-chat-cover-ooc")) {
+	if (!chatMessage.data.roll && $(Theatre.instance.theatreChatCover).hasClass("theatre-control-chat-cover-ooc")) {
 		const user = game.users.get(chatMessage.data.user);
 		chatData.speaker.alias = user.data.name;
 		chatData.speaker.actor = null;
@@ -447,7 +447,7 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 });
 
 Hooks.on("renderChatLog", function () {
-	theatre.initialize();
+	Theatre.instance.initialize();
 	// window may not be ready?
 	console.log(
 		"%cTheatre Inserts",
@@ -484,9 +484,8 @@ Hooks.on("getActorDirectoryEntryContext", async (html, options) => {
 	});
 });
 
-var theatre;
 Hooks.once("setup", () => {
-	theatre = new Theatre();
+	globalThis.theatre = new Theatre();
 });
 
 Hooks.once("init", () => {
@@ -755,7 +754,7 @@ Hooks.on("theatreDockActive", insertCount => {
 
 	if (!TheatreSettings.get("autoHideBottom")) return;
 
-	if (!theatre.isSuppressed) {
+	if (!Theatre.instance.isSuppressed) {
 		$('#players').addClass("theatre-invisible");
 		$('#hotbar').addClass("theatre-invisible");
 	}
@@ -769,7 +768,7 @@ Hooks.once("ready", () => {
 	if (!game.modules.get("enhancedcombathud")?.active) return;
 
 	libWrapper.register(TheatreSettings.NAMESPACE, "CombatHudCanvasElement.prototype.toggleMacroPlayers", (wrapped, togg) => {
-		if (togg && theatre?.dockActive) return;
+		if (togg && Theatre.instance?.dockActive) return;
 		return wrapped(togg);
 	}, "MIXED");
 });
@@ -780,7 +779,7 @@ Hooks.once("ready", () => {
 Hooks.on("theatreSuppression", suppressed => {
 	if (!TheatreSettings.get("autoHideBottom")) return;
 	if (!TheatreSettings.get("suppressMacroHotbar")) return;
-	if (!theatre.dockActive) return;
+	if (!Theatre.instance.dockActive) return;
 
 	if (suppressed) {
 		$("#players").removeClass("theatre-invisible");
@@ -793,7 +792,7 @@ Hooks.on("theatreSuppression", suppressed => {
 });
 
 Hooks.on("renderPause", () => {
-	if (!theatre?.dockActive) return;
+	if (!Theatre.instance?.dockActive) return;
 	if (!TheatreSettings.get(TheatreSettings.SHIFT_PAUSE_ICON)) return;
 	// The "MyTab" module inserts another element with id "pause". Use querySelectorAll to make sure we catch both
 	document.querySelectorAll("#pause").forEach(ele => KHelpers.addClass(ele, "theatre-centered"));

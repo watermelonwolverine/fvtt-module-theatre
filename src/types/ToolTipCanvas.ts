@@ -10,7 +10,7 @@ export default class ToolTipCanvas {
     holder: HTMLDivElement;
     stage: Stage;
 
-    constructur(stage: Stage) {
+    constructor(stage: Stage) {
         this.stage = stage;
     }
 

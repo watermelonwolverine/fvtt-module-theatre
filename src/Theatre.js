@@ -82,7 +82,7 @@ export default class Theatre {
 			this.speakingAs = null;
 			// Map of theatreId to TheatreActor
 			this.stage = new Stage();
-			this.toolTipCanvas = new ToolTipCanvas();
+			this.toolTipCanvas = new ToolTipCanvas(this.stage);
 
 			/** @type {Map<string,EmotionDefinition>}*/
 			this.userEmotes = new Map();
@@ -99,7 +99,9 @@ export default class Theatre {
 
 			// Load in default settings (theatreStyle is loaded on HTML Injection)
 
-			this.emoteMenuRenderer = new EmoteMenuRenderer(this);
+			this.emoteMenuRenderer = new EmoteMenuRenderer(
+				this,
+				this.toolTipCanvas);
 			this.insertReorderer = new InsertReorderer(
 				this,
 				this.stage);
@@ -229,7 +231,7 @@ export default class Theatre {
 		btnQuote.setAttribute("title", game.i18n.localize("Theatre.UI.Title.QuoteToggle"));
 		btnDelayEmote.setAttribute("title", game.i18n.localize("Theatre.UI.Title.DelayEmoteToggle"));
 		//btnCinema.setAttribute("title",game.i18n.localize("Theatre.UI.Title.CinemaSelector")); 
-		btnEmote.addEventListener("click", this.handleBtnEmoteClick);
+		btnEmote.addEventListener("click", (ev) => this.handleBtnEmoteClick(ev));
 		btnSuppress.addEventListener("click", this.handleBtnSuppressClick);
 		btnResync.addEventListener("click", this.handleBtnResyncClick);
 		btnQuote.addEventListener("click", this.handleBtnQuoteClick);
@@ -2908,7 +2910,7 @@ export default class Theatre {
 	 * @return (HTMLElement) : The nav item, if found, else undefined. 
 	 */
 	getNavItemById(id) {
-		const theatreActor = this.stage.actors[id];
+		const theatreActor = this.stage.actors.get(id);
 		if (theatreActor)
 			return theatreActor.navElement;
 	}
@@ -3757,29 +3759,32 @@ export default class Theatre {
 	 */
 	_getInitialEmotionSetFromInsertParams(params, useDefault) {
 		if (Theatre.DEBUG) console.log("use default? %s", !useDefault);
+
+		const emotes = this.userEmotes.get(game.user.id);
+
 		let emotions = {
 			emote: (!useDefault && params.settings.emote ? params.settings.emote : null)
-				|| (this.userEmotes[game.user.id] ? this.userEmotes[game.user.id].emote : null),
+				|| (emotes ? emotes.emote : null),
 			textFlyin: (!useDefault && params.settings.emote && params.emotes[params.settings.emote] && params.emotes[params.settings.emote].settings
 				? params.emotes[params.settings.emote].settings.textflyin : null)
 				|| (!useDefault ? params.settings.textflyin : null)
-				|| (this.userEmotes[game.user.id] ? this.userEmotes[game.user.id].textFlyin : null),
+				|| (emotes ? emotes.textFlyin : null),
 			textStanding: (!useDefault && params.settings.emote && params.emotes[params.settings.emote] && params.emotes[params.settings.emote].settings
 				? params.emote.settings.textstanding : null)
 				|| (!useDefault ? params.settings.textstanding : null)
-				|| (this.userEmotes[game.user.id] ? this.userEmotes[game.user.id].textStanding : null),
+				|| (emotes ? emotes.textStanding : null),
 			textFont: (!useDefault && params.settings.emote && params.emotes[params.settings.emote] && params.emotes[params.settings.emote].settings
 				? params.emote.settings.textfont : null)
 				|| (!useDefault ? params.settings.textfont : null)
-				|| (this.userEmotes[game.user.id] ? this.userEmotes[game.user.id].textFont : null),
+				|| (emotes ? emotes.textFont : null),
 			textSize: (!useDefault && params.settings.emote && params.emotes[params.settings.emote] && params.emotes[params.settings.emote].settings
 				? params.emote.settings.textsize : null)
 				|| (!useDefault ? params.settings.textsize : null)
-				|| (this.userEmotes[game.user.id] ? this.userEmotes[game.user.id].textSize : null),
+				|| (emotes ? emotes.textSize : null),
 			textColor: (!useDefault && params.settings.emote && params.emotes[params.settings.emote] && params.emotes[params.settings.emote].settings
 				? params.emote.settings.textcolor : null)
 				|| (!useDefault ? params.settings.textcolor : null)
-				|| (this.userEmotes[game.user.id] ? this.userEmotes[game.user.id].textColor : null)
+				|| (emotes ? emotes.textColor : null)
 		}
 		return emotions;
 	}
@@ -4088,19 +4093,19 @@ export default class Theatre {
 	toggleNarratorBar(active, remote) {
 		if (active) {
 			// spawn it
-			let narratorBackdrop = Theatre.instance.theatreNarrator.getElementsByClassName("theatre-narrator-backdrop")[0];
-			if (Theatre.DEBUG) console.log("NarratorBackdrop ", narratorBackdrop, Theatre.instance.theatreNarrator);
+			let narratorBackdrop = this.theatreNarrator.getElementsByClassName("theatre-narrator-backdrop")[0];
+			if (Theatre.DEBUG) console.log("NarratorBackdrop ", narratorBackdrop, this.theatreNarrator);
 			narratorBackdrop.style.width = "100%";
-			Theatre.instance.theatreNarrator.style.opacity = "1";
-			Theatre.instance.isNarratorActive = true;
+			this.theatreNarrator.style.opacity = "1";
+			this.isNarratorActive = true;
 			// check if a navItem is active, if so, deactive it. 
 			// set speakingAs to "narrator" note that this will need heavy regression testing
 			// as it'll be plugging into the insert workflow when it's truely not a real insert
 			if (game.user.isGM) {
-				let btnNarrator = Theatre.instance.theatreControls.getElementsByClassName("theatre-icon-narrator")[0].parentNode;
-				let oldSpeakingItem = Theatre.instance.getNavItemById(Theatre.instance.speakingAs);
-				let oldSpeakingInsert = Theatre.instance.stage.getInsertById(Theatre.instance.speakingAs);
-				let oldSpeakingLabel = Theatre.instance._getLabelFromInsert(oldSpeakingInsert);
+				let btnNarrator = this.theatreControls.getElementsByClassName("theatre-icon-narrator")[0].parentNode;
+				let oldSpeakingItem = this.getNavItemById(this.speakingAs);
+				let oldSpeakingInsert = this.stage.getInsertById(this.speakingAs);
+				let oldSpeakingLabel = this._getLabelFromInsert(oldSpeakingInsert);
 
 				KHelpers.addClass(btnNarrator, "theatre-control-nav-bar-item-speakingas");
 				if (oldSpeakingItem)
@@ -4110,50 +4115,52 @@ export default class Theatre {
 					this._removeDockTween(this.speakingAs, null, "nameSpeakingPulse");
 				}
 
-				let textFlyin = Theatre.instance.theatreNarrator.getAttribute("textflyin");
-				let textStanding = Theatre.instance.theatreNarrator.getAttribute("textstanding");
-				let textFont = Theatre.instance.theatreNarrator.getAttribute("textfont");
-				let textSize = Theatre.instance.theatreNarrator.getAttribute("textsize");
-				let textColor = Theatre.instance.theatreNarrator.getAttribute("textcolor");
+				let textFlyin = this.theatreNarrator.getAttribute("textflyin");
+				let textStanding = this.theatreNarrator.getAttribute("textstanding");
+				let textFont = this.theatreNarrator.getAttribute("textfont");
+				let textSize = this.theatreNarrator.getAttribute("textsize");
+				let textColor = this.theatreNarrator.getAttribute("textcolor");
 
-				Theatre.instance.theatreNarrator.setAttribute("textflyin", textFlyin ? textFlyin
-					: (Theatre.instance.userEmotes[game.user.id] ? Theatre.instance.userEmotes[game.user.id].textFlyin : null))
-				Theatre.instance.theatreNarrator.setAttribute("textstanding", textStanding ? textStanding
-					: (Theatre.instance.userEmotes[game.user.id] ? Theatre.instance.userEmotes[game.user.id].textStanding : null))
-				Theatre.instance.theatreNarrator.setAttribute("textfont", textFont ? textFont
-					: (Theatre.instance.userEmotes[game.user.id] ? Theatre.instance.userEmotes[game.user.id].textFont : null))
-				Theatre.instance.theatreNarrator.setAttribute("textsize", textSize ? textSize
-					: (Theatre.instance.userEmotes[game.user.id] ? Theatre.instance.userEmotes[game.user.id].textSize : null))
-				Theatre.instance.theatreNarrator.setAttribute("textcolor", textColor ? textColor
-					: (Theatre.instance.userEmotes[game.user.id] ? Theatre.instance.userEmotes[game.user.id].textColor : null))
+				const emotes = this.userEmotes.get(game.user.id);
 
-				let cimg = Theatre.instance.getTheatreCoverPortrait();
+				this.theatreNarrator.setAttribute("textflyin", textFlyin ? textFlyin
+					: (emotes ? emotes.textFlyin : null))
+				this.theatreNarrator.setAttribute("textstanding", textStanding ? textStanding
+					: (emotes ? emotes.textStanding : null))
+				this.theatreNarrator.setAttribute("textfont", textFont ? textFont
+					: (emotes ? emotes.textFont : null))
+				this.theatreNarrator.setAttribute("textsize", textSize ? textSize
+					: (emotes ? emotes.textSize : null))
+				this.theatreNarrator.setAttribute("textcolor", textColor ? textColor
+					: (emotes ? emotes.textColor : null))
+
+				let cimg = this.getTheatreCoverPortrait();
 				// clear cover
 				cimg.removeAttribute("src");
 				cimg.style.opacity = "0";
 				// clear typing theatreId data
-				Theatre.instance.removeUserTyping(game.user.id);
-				Theatre.instance.usersTyping[game.user.id].theatreId = null;
+				this.removeUserTyping(game.user.id);
+				this.usersTyping[game.user.id].theatreId = null;
 				// Mark speaking as Narrator
-				Theatre.instance.speakingAs = Theatre.NARRATOR;
-				Theatre.instance.setUserTyping(game.user.id, Theatre.NARRATOR);
+				this.speakingAs = Theatre.NARRATOR;
+				this.setUserTyping(game.user.id, Theatre.NARRATOR);
 				// push focus to chat-message
 				let chatMessage = document.getElementById("chat-message");
 				chatMessage.focus();
 				// send event to triggier the narrator bar
 				if (!remote)
-					Theatre.instance._sendSceneEvent("narrator", { active: true });
+					this._sendSceneEvent("narrator", { active: true });
 				// re-render the emote menu (expensive)
-				Theatre.instance.emoteMenuRenderer.render();
+				this.emoteMenuRenderer.render();
 			}
 		} else {
 			// remove it
-			let narratorBackdrop = Theatre.instance.theatreNarrator.getElementsByClassName("theatre-narrator-backdrop")[0];
-			let narratorContent = Theatre.instance.theatreNarrator.getElementsByClassName("theatre-narrator-content")[0];
-			if (Theatre.DEBUG) console.log("NarratorBackdrop ", narratorBackdrop, Theatre.instance.theatreNarrator);
+			let narratorBackdrop = this.theatreNarrator.getElementsByClassName("theatre-narrator-backdrop")[0];
+			let narratorContent = this.theatreNarrator.getElementsByClassName("theatre-narrator-content")[0];
+			if (Theatre.DEBUG) console.log("NarratorBackdrop ", narratorBackdrop, this.theatreNarrator);
 			narratorBackdrop.style.width = "0%";
-			Theatre.instance.theatreNarrator.style.opacity = "0";
-			Theatre.instance.isNarratorActive = false;
+			this.theatreNarrator.style.opacity = "0";
+			this.isNarratorActive = false;
 			// kill animations
 			for (let c of narratorContent.children) {
 				for (let sc of c.children)
@@ -4170,17 +4177,17 @@ export default class Theatre {
 			narratorContent.textContent = '';
 
 			if (game.user.isGM) {
-				let btnNarrator = Theatre.instance.theatreControls.getElementsByClassName("theatre-icon-narrator")[0].parentNode;
+				let btnNarrator = this.theatreControls.getElementsByClassName("theatre-icon-narrator")[0].parentNode;
 				KHelpers.removeClass(btnNarrator, "theatre-control-nav-bar-item-speakingas");
 				// clear narrator
-				Theatre.instance.speakingAs = null;
-				Theatre.instance.removeUserTyping(game.user.id);
-				Theatre.instance.usersTyping[game.user.id].theatreId = null;
+				this.speakingAs = null;
+				this.removeUserTyping(game.user.id);
+				this.usersTyping[game.user.id].theatreId = null;
 				// send event to turn off the narrator bar
 				if (!remote)
-					Theatre.instance._sendSceneEvent("narrator", { active: false });
+					this._sendSceneEvent("narrator", { active: false });
 				// re-render the emote menu (expensive)
-				Theatre.instance.emoteMenuRenderer.render();
+				this.emoteMenuRenderer.render();
 			}
 		}
 
@@ -4240,11 +4247,11 @@ export default class Theatre {
 		if (Theatre.DEBUG) console.log("emote click");
 
 		if (KHelpers.hasClass(ev.currentTarget, "theatre-control-btn-down")) {
-			Theatre.instance.theatreEmoteMenu.style.display = "none";
+			this.theatreEmoteMenu.style.display = "none";
 			KHelpers.removeClass(ev.currentTarget, "theatre-control-btn-down");
 		} else {
-			Theatre.instance.emoteMenuRenderer.render();
-			Theatre.instance.theatreEmoteMenu.style.display = "flex";
+			this.emoteMenuRenderer.render();
+			this.theatreEmoteMenu.style.display = "flex";
 			KHelpers.addClass(ev.currentTarget, "theatre-control-btn-down");
 		}
 	}
@@ -5240,7 +5247,7 @@ export default class Theatre {
 				optAlign = actor.flags.theatre.optalign;
 		}
 
-		if (this.stage.actors[theatreId]) {
+		if (this.stage.actors.get(theatreId)) {
 			ui.notifications.info(actor.name + game.i18n.localize("Theatre.UI.Notification.AlreadyStaged"));
 			return;
 		}
@@ -5269,7 +5276,7 @@ export default class Theatre {
 		// stage event
 		this.stageInsertById(theatreId);
 		// Store reference
-		this.stage.actors[theatreId] = new TheatreActor(actor, navItem);
+		this.stage.actors.set(theatreId, new TheatreActor(actor, navItem));
 	}
 
 	/**
@@ -5293,7 +5300,7 @@ export default class Theatre {
 	 * @params id (string) : The theatreId to remove from the stage.
 	 */
 	_removeFromStage(theatreId) {
-		const staged = this.stage.actors[theatreId];
+		const staged = this.stage.actors.get(theatreId);
 		if (staged) {
 			if (staged.navElement) {
 				this.theatreNavBar.removeChild(staged.navElement);

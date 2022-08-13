@@ -1,7 +1,6 @@
 import TheatreSettings from "../extensions/settings";
 import Stage from "./Stage";
 import StageInsert from "./StageInsert";
-import TheatreStyle from "./TheatreStyle";
 
 export default class Portrait {
 
@@ -15,31 +14,33 @@ export default class Portrait {
     }
 
     updatePortrait() {
-        const portraitDimensions = this.calculatePortraitDimensions();
-        this.updatePortraitDimensions(portraitDimensions)
-        this._updatePortraitPosition(portraitDimensions)
+        const dimensions = this.calculatePortraitDimensions();
+        this._updatePortraitDimensions(dimensions)
+        this._updatePortraitPosition(dimensions)
+        this._updatePivot()
         // set mirror state if mirrored
         if (this.insert.mirrored) {
             this.insert.portraitContainer.scale.x = -1;
         }
     }
 
-    updatePortraitDimensions(portraitDimensions = this.calculatePortraitDimensions()) {
+    _updatePortraitDimensions(portraitDimensions = this.calculatePortraitDimensions()) {
 
-        const portWidth = portraitDimensions.width;
-        const portHeight = portraitDimensions.height;
+        const width = portraitDimensions.width;
+        const height = portraitDimensions.height;
+        this.insert.portrait.height = height;
+        this.insert.portrait.width = width;
+    }
 
-        // IMPORTANT: the order is important and can not be changed
-        this.insert.portraitContainer.width = portWidth
-        this.insert.portraitContainer.height = portHeight
-        this.insert.dockContainer.width = portWidth
-        this.insert.dockContainer.height = portHeight
+    _updatePivot() {
+        const container = this.insert.portraitContainer;
+        container.pivot.x = container.width / 2;
+        container.pivot.y = container.height / 2;
     }
 
     /** @private */
     _updatePortraitPosition(portraitDimensions = this.calculatePortraitDimensions()) {
-        this.insert.portraitContainer.pivot.x = portraitDimensions.width / 2;
-        this.insert.portraitContainer.pivot.y = portraitDimensions.height / 2;
+
         this.insert.portraitContainer.x = this.insert.portraitContainer.x + portraitDimensions.width / 2;
         this.insert.portraitContainer.y = this.insert.portraitContainer.y + portraitDimensions.height / 2;
         this.insert.dockContainer.y = this.stage.theatreDock.offsetHeight - (this.insert.optAlign == "top" ? this.stage.theatreBar.offsetHeight : 0) - portraitDimensions.height;
