@@ -1,10 +1,10 @@
 import Theatre from "../Theatre";
-import TextFlyinAnimationsFactory from "./flyin_animations_factory";
-import KHelpers from "./KHelpers";
-import { TextStandingAnimationDefinitionDictionary } from "./standing_animations_factory";
-import TextBoxToCharSplitter from "./TextBoxToCharSplitter";
+import TextFlyinAnimationsFactory from "../workers/flyin_animations_factory";
+import KHelpers from "../workers/KHelpers";
+import { TextStandingAnimationDefinitionDictionary } from "../workers/standing_animations_factory";
+import TextBoxToCharSplitter from "../workers/TextBoxToCharSplitter";
 
-export default class TextStandingMenuMouseEventHandler {
+export default class TextStandingMenuItemMouseEventHandler {
 
     theatre: Theatre;
     animationDefinitions: TextStandingAnimationDefinitionDictionary;

@@ -32,13 +32,14 @@ import TheatreSettingsInitializer from './workers/SettingsInitializer';
 import TheatreStyle from './types/TheatreStyle';
 import Tools from "./workers/Tools";
 import EmotionDefinition from "./types/EmotionDefinition";
-import EmoteMenuRenderer from './workers/EmoteMenuRenderer';
+import EmoteMenuInitilializer from './emoteMenu/EmoteMenuRenderer';
 import InsertReorderer from './workers/InsertReorderer';
 import ToolTipCanvas from './types/ToolTipCanvas';
 import Portrait from './types/Portrait';
 import User from './types/User';
 import StageInsert from './types/StageInsert';
 import NavItemMouseEventHandler from './workers/NavItemMouseEventHandler';
+import EmoteSetter from './workers/EmoteSetter';
 
 export default class Theatre {
 
@@ -102,13 +103,14 @@ export default class Theatre {
 
 			// Load in default settings (theatreStyle is loaded on HTML Injection)
 
-			this.emoteMenuRenderer = new EmoteMenuRenderer(
+			this.emoteMenuRenderer = new EmoteMenuInitilializer(
 				this,
 				this.toolTipCanvas);
 			this.insertReorderer = new InsertReorderer(
 				this,
 				this.stage);
 			this.navItemMouseEventHandler = new NavItemMouseEventHandler(this);
+			this.emoteSetter = new EmoteSetter(this);
 
 		}
 		return Theatre.instance;
@@ -970,7 +972,7 @@ export default class Theatre {
 				this.setUserEmote(senderId, data.insertid, "textsize", textSize, true);
 				this.setUserEmote(senderId, data.insertid, "textcolor", textColor, true);
 				if (data.insertid == this.speakingAs)
-					this.emoteMenuRenderer.render();
+					this.emoteMenuRenderer.initialize();
 				break;
 			case "addtexture":
 				if (Theatre.DEBUG) console.log("texturereplace:", data);
@@ -1013,7 +1015,7 @@ export default class Theatre {
 						this._repositionInsertElements(insert);
 
 						if (data.insertid == this.speakingAs);
-						this.emoteMenuRenderer.render();
+						this.emoteMenuRenderer.initialize();
 						if (!this.rendering)
 							this._renderTheatre(performance.now());
 					}
@@ -1064,7 +1066,7 @@ export default class Theatre {
 						this._repositionInsertElements(insert);
 
 						if (data.insertid == this.speakingAs);
-						this.emoteMenuRenderer.render();
+						this.emoteMenuRenderer.initialize();
 						if (!this.rendering)
 							this._renderTheatre(performance.now());
 					}
@@ -1126,7 +1128,7 @@ export default class Theatre {
 		this.setUserEmote(userId, data.insertid, "textcolor", textColor, true);
 		// if the insertid is our speaking id, update our emote menu
 		if (data.insertid == this.speakingAs)
-			this.emoteMenuRenderer.render();
+			this.emoteMenuRenderer.initialize();
 	}
 
 
@@ -1245,7 +1247,13 @@ export default class Theatre {
 	 * @param value (String) : The value of the emote state that is being set
 	 * @param remote (Boolean) : Boolean indicating if this is a remote or local action
 	 */
-	setUserEmote(userId, theatreId, subType, value, remote = undefined) {
+	setUserEmote(
+		userId,
+		theatreId,
+		subType,
+		value,
+		remote = undefined) {
+
 		if (!this.userEmotes[userId])
 			this.userEmotes[userId] = {};
 
@@ -1846,7 +1854,6 @@ export default class Theatre {
 	 *
 	 * @params insert (Object) : An Object representing the insert
 	 *
-	 * @private
 	 */
 	_repositionInsertElements(insert) {
 		if (!insert || !insert.portrait) {
@@ -2075,7 +2082,6 @@ export default class Theatre {
 	 * @param imgId : The theatreId of the insert whose dockContainer we should
 	 *				clear. 
 	 *
-	 * @private
 	 */
 	_clearPortraitContainer(imgId) {
 		let insert = this.stage.getInsertById(imgId);
@@ -2155,9 +2161,9 @@ export default class Theatre {
 	/**
 	 * Add sprites to the PIXI Loader
 	 *
-	 * @params imcSrcs (Array[Object]) : An array of {imgsrc: (String), resname (String)} pairs
+	 * @param {{imgsrc: string, resname: string}[]} imcSrcs: An array of {imgsrc: (String), resname (String)} pairs
 	 *								   representing the assets to be loaded into PIXI's loader.
-	 * @params cb (Function) : The function to invoke once the assets are loaded. 
+	 * @param {(loader:PIXI.Loader, resources: Partial<Record<string, LoaderResource )=> void} cb : The function to invoke once the assets are loaded. 
 	 *
 	 */
 	_addSpritesToPixi(imgSrcs, cb) {
@@ -2315,7 +2321,7 @@ export default class Theatre {
 	setEmoteForInsertById(ename, id, remote) {
 		let insert = this.stage.getInsertById(id);
 
-		this._setEmoteForInsert(ename, insert, remote);
+		this.emoteSetter.setEmoteForInsert(ename, insert, remote);
 	}
 	/**
 	 * Set the emote given the name
@@ -2327,140 +2333,11 @@ export default class Theatre {
 	setEmoteForInsertByName(ename, name, remote) {
 		let insert = this.stage.getInsertByName(name);
 
-		this._setEmoteForInsert(ename, insert, remote);
-	}
-	/**
-	 * Set the emote given the insert
-	 * the moment the insert is in the RP bar
-	 *
-	 * @params ename (String) : The emote name.
-	 * @params insert (Object) : An Object representing the insert. 
-	 * @params remote (Boolean) : Wither this is being invoked remotely or locally. 
-	 *
-	 * @private
-	 */
-	_setEmoteForInsert(ename, insert, remote) {
-		// given the emote name, get the image if possible,
-		// and add it to the insert canvas.
-		//
-		// If the insert already is that emote, do nothing,
-		// If the insert emote does not exist, set the base insert
-		// if the insert emote does not exist and the insert is
-		// already either the base insert, or an emote without an
-		// insert, do nothing
-		if (!insert) return;
-		let aEmote = insert.emote;
-		let actorId = insert.imgId.replace("theatre-", "");
-		let actor = game.actors.get(actorId);
-		if (!actor) return;
-
-		let baseInsert = actor.data.img ? actor.data.img : "icons/mystery-man.png";
-
-		if (actor.data.flags.theatre)
-			baseInsert = actor.data.flags.theatre.baseinsert ? actor.data.flags.theatre.baseinsert : baseInsert;
-		let emotes = ActorExtensions.getEmotes(actorId);
-
-		// emote already active
-		//if ((this.speakingAs != insert.imgId && !this.isDelayEmote) || this.delayedSentState > 2)
-		if (remote || !this.isDelayEmote)
-			if (aEmote == ename || (ename == null && aEmote == null)) return;
-
-		if (!!ename
-			&& emotes[ename]
-			&& emotes[ename].insert
-			&& emotes[ename].insert != "") {
-			// clear the pixi container
-			this._clearPortraitContainer(insert.imgId)
-			// set this sprite to span the PIXI Container via setupPortraitCanvas
-			let imgSrcs = [];
-			// emote base image
-			let emoteResName = emotes[ename].insert;
-			imgSrcs.push({ imgpath: emotes[ename].insert, resname: emoteResName });
-			// add sprites
-			this._addSpritesToPixi(imgSrcs, (loader, resources) => {
-				if (Theatre.DEBUG) console.log("emote insert loaded", resources);
-				// Error loading the sprite
-				if (!resources[emoteResName] || resources[emoteResName].error) {
-					console.error("ERROR loading resource %s : %s : %s", insert.imgId, emoteResName, emotes[ename].insert);
-					ui.notifications.error(game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P1") +
-						+ emoteResName
-						+ game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P2") + emotes[ename].insert + "'");
-					this.stage.removeInsertById(insert.imgId);
-				}
-
-				// flag our insert with our emote state
-				insert.emote = ename;
-				// now fix up the PIXI Container and make it pretty
-				this.workers.portrait_container_setup_worker.setupPortraitContainer(insert.imgId, insert.optAlign, emoteResName, resources);
-				// re-attach label + typingBubble
-				insert.dockContainer.addChild(insert.label);
-				insert.dockContainer.addChild(insert.typingBubble);
-
-				this._repositionInsertElements(insert);
-
-				if (!this.rendering)
-					this._renderTheatre(performance.now());
-			});
-		} else {
-			// load base insert unless the base insert is already loaded
-			let loader = PIXI.Loader.shared;
-			let baseExists = false;
-
-			this._clearPortraitContainer(insert.imgId)
-
-			// flag our insert with our emote state, unless we're "actually" no emote rather
-			// than just emoting with no insert available
-			if (ename)
-				insert.emote = ename;
-			else
-				insert.emote = null;
-
-			// if baseInsert is not present, put it in
-			if (!loader.resources[baseInsert]) {
-				let imgSrcs = [];
-				// clear the PIXI Container
-				imgSrcs.push({ imgpath: baseInsert, resname: baseInsert });
-				this._addSpritesToPixi(imgSrcs, (loader, resources) => {
-					if (Theatre.DEBUG) console.log("base insert re-loaded", resources);
-					// Error loading the sprite
-					if (!resources[baseInsert] || resources[baseInsert].error) {
-						console.error("ERROR loading resource %s : %s : %s", insert.imgId, baseInsert, baseInsert);
-						ui.notifications.error(game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P1") +
-							+ baseInsert
-							+ game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P2") + baseInsert + "'");
-						this.stage.removeInsertById(insert.imgId);
-					}
-
-					// now fix up the PIXI Container and make it pretty
-					this.workers.portrait_container_setup_worker.setupPortraitContainer(insert.imgId, insert.optAlign, baseInsert, resources);
-
-					// re-attach label + typingBubble
-					insert.dockContainer.addChild(insert.label);
-					insert.dockContainer.addChild(insert.typingBubble);
-
-					this._repositionInsertElements(insert);
-
-					if (!this.rendering)
-						this._renderTheatre(performance.now());
-				});
-			} else {
-				// base exists
-				this.workers.portrait_container_setup_worker.setupPortraitContainer(insert.imgId, insert.optAlign, baseInsert, loader.resources);
-
-				// re-attach label + typingBubble
-				insert.dockContainer.addChild(insert.label);
-				insert.dockContainer.addChild(insert.typingBubble);
-
-				this._repositionInsertElements(insert);
-
-				if (!this.rendering)
-					this._renderTheatre(performance.now());
-			}
-
-		}
-
+		this.emoteSetter.setEmoteForInsert(ename, insert, remote);
 	}
 
+
+	
 	/**
 	 * Add a textBox to the theatreBar
 	 *
@@ -3730,7 +3607,7 @@ export default class Theatre {
 		this._sendTypingEvent();
 		this.setUserTyping(game.user.id, this.speakingAs);
 		// re-render the emote menu (expensive)
-		this.emoteMenuRenderer.render();
+		this.emoteMenuRenderer.initialize();
 	}
 
 	/**
@@ -3935,7 +3812,7 @@ export default class Theatre {
 				if (!remote)
 					this._sendSceneEvent("narrator", { active: true });
 				// re-render the emote menu (expensive)
-				this.emoteMenuRenderer.render();
+				this.emoteMenuRenderer.initialize();
 			}
 		} else {
 			// remove it
@@ -3971,7 +3848,7 @@ export default class Theatre {
 				if (!remote)
 					this._sendSceneEvent("narrator", { active: false });
 				// re-render the emote menu (expensive)
-				this.emoteMenuRenderer.render();
+				this.emoteMenuRenderer.initialize();
 			}
 		}
 
@@ -4027,7 +3904,7 @@ export default class Theatre {
 			this.theatreEmoteMenu.style.display = "none";
 			KHelpers.removeClass(ev.currentTarget, "theatre-control-btn-down");
 		} else {
-			this.emoteMenuRenderer.render();
+			this.emoteMenuRenderer.initialize();
 			this.theatreEmoteMenu.style.display = "flex";
 			KHelpers.addClass(ev.currentTarget, "theatre-control-btn-down");
 		}

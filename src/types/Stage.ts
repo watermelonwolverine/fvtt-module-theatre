@@ -217,7 +217,7 @@ export default class Stage {
             // clear label
             // clear speakingAs
             this.theatre.speakingAs = null;
-            this.theatre.emoteMenuRenderer.render();
+            this.theatre.emoteMenuRenderer.initialize();
         }
         // kill any animations of textBox
         for (let c of toRemoveTextBox.children) {

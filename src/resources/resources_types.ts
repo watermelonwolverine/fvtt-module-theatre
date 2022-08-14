@@ -20,7 +20,7 @@ export interface EmoteDefinition {
     label: string;
     rigging: AnimationRigging;
     image?: string;
-    insert?: unknown;
+    insert?: string;
 }
 
 export interface EmoteDictionary {

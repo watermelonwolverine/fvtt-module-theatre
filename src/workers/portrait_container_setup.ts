@@ -35,7 +35,7 @@ export default class TheatrePortraitContainerSetupWorker {
         optAlign: string, // TODO remove
         resName: string,
         resources: Resources,
-        reorder: boolean): void {
+        reorder = false): void {
 
 
         const stage = this.context.stage;
@@ -137,7 +137,7 @@ export default class TheatrePortraitContainerSetupWorker {
             let actorId = insert.imgId.replace("theatre-", "");
             let defaultDisabled = this.context.isDefaultDisabled(insert.imgId);
             if (Theatre.DEBUG) console.log("is default disabled? : %s", defaultDisabled);
-            let emotes = ActorExtensions.getEmotes(actorId, defaultDisabled);
+            let emotes = ActorExtensions.getEmotesForActor(actorId, defaultDisabled);
             let rigResMap = ActorExtensions.getRiggingResources(actorId);
             if (emotes[insert.emote] && emotes[insert.emote].rigging) {
                 for (let anim of emotes[insert.emote].rigging.animations) {

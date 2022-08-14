@@ -1,9 +1,9 @@
 import Theatre from "../Theatre";
-import TextFlyinAnimationsFactory from "./flyin_animations_factory";
-import KHelpers from "./KHelpers";
-import TextBoxToCharSplitter from "./TextBoxToCharSplitter";
+import TextFlyinAnimationsFactory from "../workers/flyin_animations_factory";
+import KHelpers from "../workers/KHelpers";
+import TextBoxToCharSplitter from "../workers/TextBoxToCharSplitter";
 
-export default class TextFlyInMenuMouseEventHandler {
+export default class TextFlyInMenuItemMouseEventHandler {
 
     theatre: Theatre;
 

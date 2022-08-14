@@ -4,24 +4,29 @@ import { EmoteDictionary } from "../resources/resources_types";
 import Theatre from "../Theatre";
 import StageInsert from "../types/StageInsert";
 import ToolTipCanvas from "../types/ToolTipCanvas";
-import TextFlyInMenuMouseEventHandler from "./TextFlyInMenuMouseEventHandler";
-import TextFlyinAnimationsFactory, { TextFlyinAnimationDefinitions } from "./flyin_animations_factory";
-import KHelpers from "./KHelpers";
-import TextStandingAnimationsFactory, { TextStandingAnimationDefinitionDictionary } from "./standing_animations_factory";
-import TextStandingMenuMouseEventHandler from "./TextStandingMenuMouseEventHandler";
+import TextFlyInMenuItemMouseEventHandler from "./TextFlyInMenuItemMouseEventHandler";
+import TextFlyinAnimationsFactory, { TextFlyinAnimationDefinitions } from "../workers/flyin_animations_factory";
+import KHelpers from "../workers/KHelpers";
+import TextStandingAnimationsFactory, { TextStandingAnimationDefinitionDictionary } from "../workers/standing_animations_factory";
+import TextStandingMenuItemMouseEventHandler from "./TextStandingMenuItemMouseEventHandler";
+import Tools from "../workers/Tools";
+import EmoteMenuItemMouseEventHandler from "./EmoteMenuItemMouseEventHandler";
 
-export default class EmoteMenuRenderer {
+export default class EmoteMenuInitilializer {
+
     // given
     theatre: Theatre;
     toolTipCanvas: ToolTipCanvas;
 
     // workers
-    textFlyinMenuMouseEventHandler: TextFlyInMenuMouseEventHandler;
-    textStandingMenuMouseEventHandler: TextStandingMenuMouseEventHandler;
+    textFlyinMenuMouseEventHandler: TextFlyInMenuItemMouseEventHandler;
+    textStandingMenuMouseEventHandler: TextStandingMenuItemMouseEventHandler;
+    emoteMenuItemMouseEventHandler: EmoteMenuItemMouseEventHandler;
 
     // data
     textStandingAnimationDefinitions: TextStandingAnimationDefinitionDictionary;
     textFlyinAnimationsDefinitions: TextFlyinAnimationDefinitions;
+
 
     constructor(theatre: Theatre,
         toolTipCanvas: ToolTipCanvas) {
@@ -31,26 +36,25 @@ export default class EmoteMenuRenderer {
         this.textStandingAnimationDefinitions = TextStandingAnimationsFactory.getDefinitions();
         this.textFlyinAnimationsDefinitions = TextFlyinAnimationsFactory.getDefinitions();
 
-        this.textFlyinMenuMouseEventHandler = new TextFlyInMenuMouseEventHandler(theatre);
-        this.textStandingMenuMouseEventHandler = new TextStandingMenuMouseEventHandler(theatre,
+        this.textFlyinMenuMouseEventHandler = new TextFlyInMenuItemMouseEventHandler(theatre);
+        this.textStandingMenuMouseEventHandler = new TextStandingMenuItemMouseEventHandler(theatre,
             this.textStandingAnimationDefinitions);
+        this.emoteMenuItemMouseEventHandler = new EmoteMenuItemMouseEventHandler(theatre,
+            toolTipCanvas);
 
     }
 
-    /**
- * Render the emote menu
- */
-    render() {
+    initialize() {
         // each actor may have a different emote set
         // get actor emote set for currently speaking emote, else use the default set
-        let actorId = this.theatre.speakingAs ? this.theatre.speakingAs.replace("theatre-", "") : null;
+        let actorId = this.theatre.speakingAs ? Tools.toActorId(this.theatre.speakingAs) : null;
 
         let actor;
         if (actorId)
             actor = game.actors.get(actorId);
 
 
-        const emotes = ActorExtensions.getEmotes(actorId);
+        const emotes = ActorExtensions.getEmotesForActor(actorId);
         // TODO find available fonts
         let fonts: string[] = [];
 
@@ -60,10 +64,10 @@ export default class EmoteMenuRenderer {
             textStanding: this.textStandingAnimationDefinitions,
             fonts
         }
-        ).then(template => { this.add_listeners(template, emotes); });
+        ).then(template => { this._add_listeners(template, emotes); });
     }
 
-    add_listeners(template: string,
+    _add_listeners(template: string,
         emotes: EmoteDictionary) {
 
         let insert = this.theatre.stage.getInsertById(this.theatre.speakingAs);
@@ -72,21 +76,16 @@ export default class EmoteMenuRenderer {
         this.theatre.theatreEmoteMenu.style.top = `${this.theatre.theatreControls.offsetTop - 410}px`;
         this.theatre.theatreEmoteMenu.innerHTML = template;
 
-        // bind handlers for the font/size/color selectors
-
-        this.configure_selects(insert);
-
-        // bind click listeners for the textanim elements to animate a preview
-        // hover-off will reset the text content
+        this._initTextAttributeSelectors(insert);
 
         this._initTextFlyinColumn(insert);
 
         this._initTextStandingColumn(insert);
 
-        this.do_stuff_3(insert,
+        this._initEmoteTable(insert,
             emotes);
     }
-    configure_selects(insert: StageInsert) {
+    _initTextAttributeSelectors(insert: StageInsert) {
         const colorSelect = <HTMLSelectElement>this.theatre.theatreEmoteMenu.getElementsByClassName('colorselect')[0];
         const fontSelect = <HTMLSelectElement>this.theatre.theatreEmoteMenu.getElementsByClassName('fontselect')[0];
 
@@ -104,7 +103,7 @@ export default class EmoteMenuRenderer {
 
         fontSelect.addEventListener("change", ev => {
             this.theatre.setUserEmote(game.user.id, this.theatre.speakingAs, 'textfont', (<HTMLSelectElement>(<HTMLElement>ev.currentTarget)).value);
-            this.render();
+            this.initialize();
         });
 
         colorSelect.addEventListener("change", ev => {
@@ -124,6 +123,8 @@ export default class EmoteMenuRenderer {
             (<HTMLElement>e).addEventListener("wheel", ev => this.wheelFunc2(ev));
         }
     }
+
+
     configure_size_select(insert: StageInsert) {
 
         let sizeSelect = <HTMLSelectElement>this.theatre.theatreEmoteMenu.getElementsByClassName('sizeselect')[0];
@@ -269,6 +270,7 @@ export default class EmoteMenuRenderer {
             child.addEventListener("mouseup", (ev) => this.textStandingMenuMouseEventHandler.handleMouseUp(ev));
 
             let childTextMode = child.getAttribute("name");
+
             if (insert) {
                 let insertTextMode = insert.textStanding;
                 if (insertTextMode && insertTextMode == childTextMode) {
@@ -294,7 +296,7 @@ export default class EmoteMenuRenderer {
 
     }
 
-    do_stuff_3(insert: StageInsert,
+    _initEmoteTable(insert: StageInsert,
         emotes: EmoteDictionary) {
 
         // If speaking as theatre, minimize away the emote section
@@ -314,32 +316,10 @@ export default class EmoteMenuRenderer {
             for (const child_ of emoteBtns) {
 
                 const child = <HTMLElement>child_;
-                //bind annomous click listener
-                child.addEventListener("mouseup", (ev) => {
-                    if (ev.button == 0) {
-                        let emName = (<HTMLElement>ev.currentTarget).getAttribute("name");
-                        if (Theatre.DEBUG) console.log("em name: %s was clicked", emName);
-                        if (KHelpers.hasClass((<HTMLElement>ev.currentTarget), "emote-active")) {
-                            KHelpers.removeClass((<HTMLElement>ev.currentTarget), "emote-active");
-                            // if speaking set to base
-                            this.theatre.setUserEmote(game.user.id, this.theatre.speakingAs, 'emote', null);
-                        } else {
-                            let lastActives = this.theatre.theatreEmoteMenu.getElementsByClassName("emote-active");
-                            for (let la of lastActives)
-                                KHelpers.removeClass(<HTMLElement>la, "emote-active");
-                            KHelpers.addClass((<HTMLElement>ev.currentTarget), "emote-active");
-                            // if speaking, then set our emote!
-                            this.theatre.setUserEmote(game.user.id, this.theatre.speakingAs, 'emote', emName);
-                        }
-                        // push focus to chat-message
-                        let chatMessage = document.getElementById("chat-message");
-                        chatMessage.focus();
-                    }
-                });
-                // bind mouseenter Listener
-                child.addEventListener("mouseenter", (ev) => {
-                    this.toolTipCanvas.configureTheatreToolTip(this.theatre.speakingAs, (<HTMLElement>ev.currentTarget).getAttribute("name"));
-                });
+                child.addEventListener("mouseup", (ev) => this.emoteMenuItemMouseEventHandler.handleMouseUp(ev));
+                child.addEventListener("mouseenter", (ev) => this.emoteMenuItemMouseEventHandler.handleMouseEnter(ev));
+
+
                 // check if this child is our configured 'emote'
                 let childEmote = child.getAttribute("name");
                 if (insert) {

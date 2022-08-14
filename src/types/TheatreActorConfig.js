@@ -73,7 +73,7 @@ export default class TheatreActorConfig extends FormApplication {
 			entityName: entityName,
 			isGM: game.user.isGM,
 			object: duplicate(this.object.data),
-			emote: ActorExtensions.getEmotes(this.object.data._id),
+			emote: ActorExtensions.getEmotesForActor(this.object.data._id),
 			options: this.options,
 		}
 	}
@@ -415,7 +415,7 @@ export default class TheatreActorConfig extends FormApplication {
 			}
 
 			if (theatreId == Theatre.instance.speakingAs);
-			Theatre.instance.emoteMenuRenderer.render();
+			Theatre.instance.emoteMenuRenderer.initialize();
 			if (insertDirty)
 				Theatre.instance._sendSceneEvent("renderinsert", { insertid: theatreId });
 

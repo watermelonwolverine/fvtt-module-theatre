@@ -15,7 +15,7 @@ export default class ActorExtensions {
      *
      * @return (Object) : An Object containg the emotes for the requested actorId. 
      */
-    static getEmotes(
+    static getEmotesForActor(
         actorId: string,
         disableDefault?: boolean): EmoteDictionary {
 
