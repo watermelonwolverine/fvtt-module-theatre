@@ -25,20 +25,15 @@ export default class TextBoxMouseEventHandler {
         textBox.addEventListener("dblclick", (ev) => this.handleTextBoxMouseDoubleClick(ev));
     }
 
-    /**
-    * Handle textBox MouseDown
-    *
-    * @param ev (Event) : The Event that triggered this handler
-    */
     handleTextBoxMouseDown(ev: MouseEvent) {
         if (ev.button == 0) {
-            this.handleLMBDown(ev);
+            this.handleTextBoxLMBDown(ev);
         } else if (ev.button == 2) {
-            this.handleRMBDown(ev);
+            this.handleTextBoxRMBDown(ev);
         }
     }
 
-    handleLMBDown(ev: MouseEvent) {
+    handleTextBoxLMBDown(ev: MouseEvent) {
 
         if (ev.ctrlKey
             || ev.shiftKey
@@ -47,10 +42,8 @@ export default class TextBoxMouseEventHandler {
 
         let id = (ev.currentTarget as HTMLElement).getAttribute("imgId");
 
-        // if old dragPoint exists reset the style, and clear any interval that may exist
         if (!!this.dragPoint && !!this.dragPoint.insert) {
-            console.log("PREXISTING DRAGPOINT!");
-            //this.context.dragPoint.port.style.transition = "top 0.5s ease, left 0.5s ease, transform 0.5s ease"; 
+            console.error("PREXISTING DRAGPOINT!");
         }
 
         let insert = this.theatre.stage.getInsertById(id);
@@ -61,76 +54,59 @@ export default class TextBoxMouseEventHandler {
             return;
         }
 
-        // original cooords
-        //let portStyles = KHelpers.style(port); 
-        let origX = insert.portrait.root.x;
-        let origY = insert.portrait.root.y;
-
-        // change the transition style while we're dragging
-        //port.style.transition = "top 0.5s ease, left 0.5s ease, transform 0.5s ease"; 
-
-        // normal mouse down, start "drag" tracking
         this.dragPoint = {
             dragStartX: (ev.clientX || ev.pageX),
             dragStartY: (ev.clientY || ev.pageY),
             insert: insert
         }
-        // bind listeners
+
         window.removeEventListener("mouseup", this.windowMouseButtonUpHandler);
         window.addEventListener("mouseup", this.windowMouseButtonUpHandler);
         ev.stopPropagation();
 
     }
 
-    handleRMBDown(ev: MouseEvent) {
+    handleTextBoxRMBDown(ev: MouseEvent) {
         let id = (ev.currentTarget as HTMLElement).getAttribute("imgId");
         this.swapTarget = id;
         ev.stopPropagation();
     }
 
-    /**
-     * Handle textBox Mouse Double Click
-     *
-     * @param ev (Event) : The Event that triggered this handler
-     */
     handleTextBoxMouseDoubleClick(ev: MouseEvent) {
         if (Theatre.DEBUG) console.log("MOUSE DOUBLE CLICK");
         let id = (ev.currentTarget as HTMLElement).getAttribute("imgId");
         this.theatre.resetInsertById(id);
     }
 
-    /**
-     * Handle textBox mouse up
-     *
-     * @param ev (Event) : The Event that triggered this handler
-     */
     handleTextBoxMouseUp(ev: MouseEvent) {
         if (ev.button == 0) {
-            this.handleLMBUp(ev);
+            this.handleTextBoxLMBUp(ev);
         } else if (ev.button == 2) {
-            this.handleRMBUp(ev);
+            this.handleTextBoxRMBUp(ev);
         }
     }
 
-    handleLMBUp(ev: MouseEvent) {
+    handleTextBoxLMBUp(ev: MouseEvent) {
+
         let id = (ev.currentTarget as HTMLElement).getAttribute("imgId");
         let chatMessage = document.getElementById("chat-message");
+
         if (ev.ctrlKey) {
-            // => CTRL + LMB
+
             this.theatre.decayTextBoxById(id);
             ev.stopPropagation();
         } else if (ev.shiftKey) {
-            // => SHIFT + LMB
+
             this.theatre.pushInsertById(id, true);
             chatMessage.focus();
             ev.stopPropagation();
         } else if (ev.altKey) {
-            // => ALT + LMB
+
             this.theatre.activateInsertById(id, ev);
         }
     }
 
-    handleRMBUp(ev: MouseEvent) {
+    handleTextBoxRMBUp(ev: MouseEvent) {
         let id = (ev.currentTarget as HTMLElement).getAttribute("imgId");
         let chatMessage = document.getElementById("chat-message");
         if (ev.ctrlKey) {
@@ -151,7 +127,6 @@ export default class TextBoxMouseEventHandler {
             this.theatre.addToNavBar(actor.data);
         } else if (this.swapTarget) {
             if (this.swapTarget != id) {
-                //this.context.swapInsertsById(id,this.context.swapTarget); 
                 this.theatre.moveInsertById(id, this.swapTarget);
                 this.swapTarget = null;
             } else {
@@ -163,11 +138,6 @@ export default class TextBoxMouseEventHandler {
         }
     }
 
-    /**
-     * Handle window mouse up
-     *
-     * @param ev (Event) : The Event that triggered this handler
-     */
     handleWindowMouseUp(ev: MouseEvent) {
 
         const insert = this.dragPoint.insert;
@@ -186,15 +156,12 @@ export default class TextBoxMouseEventHandler {
             y: insert.portrait.y,
             ease: Power3.easeOut,
             onComplete: function (ctx, imgId, tweenId) {
-                // decrement the rendering accumulator
                 ctx._removeDockTween(imgId, this, tweenId);
-                // remove our own reference from the dockContainer tweens
             },
             onCompleteParams: [Theatre.instance, insert.imgId, tweenId]
         });
         Theatre.instance._addDockTween(insert.imgId, tween, tweenId);
 
-        // send sceneEvent
         Theatre.instance._sendSceneEvent("positionupdate", {
             insertid: insert.imgId,
             position: {
@@ -206,7 +173,7 @@ export default class TextBoxMouseEventHandler {
 
         window.removeEventListener("mouseup", this.windowMouseButtonUpHandler);
         this.dragPoint = null;
-        // push focus to chat-message
+
         let chatMessage = document.getElementById("chat-message");
         chatMessage.focus();
     }
@@ -225,11 +192,10 @@ export default class TextBoxMouseEventHandler {
         const bottomLeft = new PIXI.Point(0, 0);
         const bottomRight = new PIXI.Point(this.theatre.stage.width - portrait.width, 0);
 
-        // bottom corners relative to parent
+        // bottom corner positions relative to parent
         const localBottomLeftX = portrait.root.parent.toLocal(bottomLeft).x;
         const localBottomRightX = portrait.root.parent.toLocal(bottomRight).x;
 
-        // Don't let image out of canvas
         // don't overshoot to the left
         const minX = Math.max(
             localBottomLeftX,
