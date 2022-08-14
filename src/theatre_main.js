@@ -326,7 +326,7 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 			});
 			// Pop our insert a little
 			let tweenId = "portraitPop";
-			let tween = TweenMax.to(insert.portraitContainer, 0.25, {
+			let tween = TweenMax.to(insert.portrait.root, 0.25, {
 				pixi: { scaleX: insert.mirrored ? -1.05 : 1.05, scaleY: 1.05 },
 				ease: Power3.easeOut,
 				repeat: 1,
@@ -577,9 +577,9 @@ Hooks.once("init", () => {
 			if (!imgId) return;
 
 			const insert = Theatre.instance.stage.stageInserts.find(p => p.imgId === imgId);
-			const oleft = insert.portraitContainer.x, otop = insert.portraitContainer.y;
+			const oleft = insert.portrait.root.x, otop = insert.portrait.root.y;
 			const tweenId = "portraitMove";
-			const tween = TweenMax.to(insert.portraitContainer, 0.5, {
+			const tween = TweenMax.to(insert.portrait.root, 0.5, {
 				pixi: { x: oleft - 50, y: otop },
 				ease: Power3.easeOut,
 				onComplete: function (ctx, imgId, tweenId) {
@@ -612,9 +612,9 @@ Hooks.once("init", () => {
 			if (!imgId) return;
 
 			const insert = Theatre.instance.stage.stageInserts.find(p => p.imgId === imgId);
-			const oleft = insert.portraitContainer.x, otop = insert.portraitContainer.y;
+			const oleft = insert.portrait.root.x, otop = insert.portrait.root.y;
 			const tweenId = "portraitMove";
-			const tween = TweenMax.to(insert.portraitContainer, 0.5, {
+			const tween = TweenMax.to(insert.portrait.root, 0.5, {
 				pixi: { x: oleft + 50, y: otop },
 				ease: Power3.easeOut,
 				onComplete: function (ctx, imgId, tweenId) {
@@ -647,9 +647,9 @@ Hooks.once("init", () => {
 			if (!imgId) return;
 
 			const insert = Theatre.instance.stage.stageInserts.find(p => p.imgId === imgId);
-			const oleft = insert.portraitContainer.x, otop = insert.portraitContainer.y;
+			const oleft = insert.portrait.root.x, otop = insert.portrait.root.y;
 			const tweenId = "portraitMove";
-			const tween = TweenMax.to(insert.portraitContainer, 0.5, {
+			const tween = TweenMax.to(insert.portrait.root, 0.5, {
 				pixi: { x: oleft, y: otop - 50 },
 				ease: Power3.easeOut,
 				onComplete: function (ctx, imgId, tweenId) {
@@ -682,9 +682,9 @@ Hooks.once("init", () => {
 			if (!imgId) return;
 
 			const insert = Theatre.instance.stage.stageInserts.find(p => p.imgId === imgId);
-			const oleft = insert.portraitContainer.x, otop = insert.portraitContainer.y;
+			const oleft = insert.portrait.root.x, otop = insert.portrait.root.y;
 			const tweenId = "portraitMove";
-			const tween = TweenMax.to(insert.portraitContainer, 0.5, {
+			const tween = TweenMax.to(insert.portrait.root, 0.5, {
 				pixi: { x: oleft, y: otop + 50 },
 				ease: Power3.easeOut,
 				onComplete: function (ctx, imgId, tweenId) {

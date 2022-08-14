@@ -8,15 +8,12 @@ import TheatreStyle from "../types/TheatreStyle";
 import Stage from "../types/Stage";
 import Portrait from "../types/Portrait";
 
-export default class _TheatrePortraitContainerSetupWorker {
+export default class TheatrePortraitContainerSetupWorker {
 
     context: Theatre;
-    workers: _TheatreWorkers;
 
-    constructor(context: Theatre,
-        workers: _TheatreWorkers) {
+    constructor(context: Theatre) {
         this.context = context;
-        this.workers = workers;
     }
 
     /**
@@ -59,25 +56,14 @@ export default class _TheatrePortraitContainerSetupWorker {
         }
 
         let dockContainer = insert.dockContainer;
-        let portraitContainer = insert.portraitContainer;
-
-        insert.portrait = new PIXI.Sprite(resources[resName].texture);
-
-        const portrait = new Portrait(stage,
-            insert);
-
-        portraitContainer.addChild(insert.portrait);
-
-        portrait.initPortrait();
+        insert.portrait.updateTexture(resources[resName].texture);
+        insert.portrait.init();
 
         insert.dockContainer.x = 0;
         insert.dockContainer.y = insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight;
 
-        const portraitDimensions = portrait._calculatePortraitTargetSize();
-
-        const portWidth = portraitDimensions.width;
-        const portHeight = portraitDimensions.height;
-
+        const portWidth = insert.portrait.width;
+        const portHeight = insert.portrait.height;
 
         // setup label if not setup
         if (!insert.label) {

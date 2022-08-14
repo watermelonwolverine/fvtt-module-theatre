@@ -7,18 +7,19 @@ import Theatre from "../Theatre";
 import ActorExtensions from "../extensions/ActorExtensions";
 import _TheatreWorkers from "./workers";
 import Tools from "./Tools";
-import Stage from "../types/Stage";
+import Portrait from "../types/Portrait";
+import TheatrePortraitContainerSetupWorker from "./portrait_container_setup";
 
 
 export default class _TheatrePixiContainerFactory {
 
     context: Theatre;
-    workers: _TheatreWorkers;
+    portrait_container_setup: TheatrePortraitContainerSetupWorker;
 
     constructor(context: Theatre,
-        workers: _TheatreWorkers) {
+        portrait_container_setup: TheatrePortraitContainerSetupWorker) {
         this.context = context;
-        this.workers = workers;
+        this.portrait_container_setup = portrait_container_setup;
     }
 
     /**
@@ -57,8 +58,8 @@ export default class _TheatrePixiContainerFactory {
         const dockContainer = new PIXI.Container();
         this.context.stage.pixiApplication.stage.addChild(dockContainer);
 
-        const portraitContainer = new PIXI.Container();
-        dockContainer.addChild(portraitContainer);
+        const portrait = new Portrait(this.context.stage);
+        dockContainer.addChild(portrait.root)
 
         //console.log("Creating PortraintPIXIContainer with emotions: ",emotions); 
 
@@ -82,13 +83,11 @@ export default class _TheatrePixiContainerFactory {
             textFont: textFont,
             textSize: textSize,
             textColor: textColor,
-            portraitContainer: portraitContainer,
-            portrait: null,
+            portrait: portrait,
             label: null,
             typingBubble: null,
             exitOrientation: (isLeft ? "left" : "right"),
             nameOrientation: "left",
-            mirrored: false,
             optAlign: optAlign,
             tweens: {},
             order: 0,
@@ -136,16 +135,16 @@ export default class _TheatrePixiContainerFactory {
             if (!ename) {
                 // load in default portrait
                 dockContainer.x = initX;
-                this.workers.portrait_container_setup_worker.setupPortraitContainer(imgId, optAlign, imgPath, resources, true);
+                this.portrait_container_setup.setupPortraitContainer(imgId, optAlign, imgPath, resources, true);
             } else {
                 // load in the ename emote portrait instead if possible, else load the default
                 if (params.emotes[ename] && params.emotes[ename].insert) {
                     dockContainer.x = isLeft ?
                         (-1 * portWidth) : (this.context.stage.theatreDock.offsetWidth + portWidth);
-                    this.workers.portrait_container_setup_worker.setupPortraitContainer(imgId, optAlign, params.emotes[ename].insert, resources, true);
+                    this.portrait_container_setup.setupPortraitContainer(imgId, optAlign, params.emotes[ename].insert, resources, true);
                 } else {
                     dockContainer.x = initX;
-                    this.workers.portrait_container_setup_worker.setupPortraitContainer(imgId, optAlign, imgPath, resources, true);
+                    this.portrait_container_setup.setupPortraitContainer(imgId, optAlign, imgPath, resources, true);
                 }
             }
 

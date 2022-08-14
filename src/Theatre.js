@@ -35,6 +35,7 @@ import EmotionDefinition from "./types/EmotionDefinition";
 import EmoteMenuRenderer from './workers/EmoteMenuRenderer';
 import InsertReorderer from './workers/InsertReorderer';
 import ToolTipCanvas from './types/ToolTipCanvas';
+import Portrait from './types/Portrait';
 
 export default class Theatre {
 
@@ -66,8 +67,6 @@ export default class Theatre {
 			// position/order related
 			this.currentTheatreStyle = undefined;
 			this.reorderTOId = null;
-			this.swapTarget = null;
-			this.dragPoint = null;
 			this.dragNavItem = null;
 			// toggle related
 			this.isNarratorActive = false;
@@ -483,7 +482,6 @@ export default class Theatre {
 	 * @param evenData (Object) : An Object whose properties are needed for
 	 *							the scene event subtype
 	 *
-	 * @private
 	 */
 	_sendSceneEvent(eventType, eventData) {
 		if (Theatre.DEBUG) console.log("Sending Scene state %s with payload: ", eventType, eventData)
@@ -599,8 +597,8 @@ export default class Theatre {
 			let dat = {
 				insertid: insert.imgId,
 				position: {
-					x: insert.portraitContainer.x/* - insert.portrait.width/2*/,
-					y: insert.portraitContainer.y/* - insert.portrait.height/2*/,
+					x: insert.portrait.x,
+					y: insert.portrait.y,
 					mirror: insert.mirrored
 				},
 				emotions: {
@@ -826,9 +824,9 @@ export default class Theatre {
 									insert.mirrored = Boolean(dat.position.mirror);
 								}
 								// apply positioning data
-								insert.portraitContainer.scale.x = (insert.mirrored ? -1 : 1);
-								insert.portraitContainer.x = dat.position.x;
-								insert.portraitContainer.y = dat.position.y;
+								insert.portrait.scaleX.x = (insert.mirrored ? -1 : 1);
+								insert.portrait.x = dat.position.x;
+								insert.portrait.y = dat.position.y;
 								// apply texyflyin/textstanding data
 								insert.textFlyin = dat.emotions.textflyin;
 								insert.textStanding = dat.emotions.textstanding;
@@ -912,8 +910,10 @@ export default class Theatre {
 					if (Boolean(data.position.mirror) != insert.mirrored)
 						insert.mirrored = data.position.mirror;
 					let tweenId = "portraitMove";
-					let tween = TweenMax.to(insert.portraitContainer, 0.5, {
-						pixi: { scaleX: (data.position.mirror ? -1 : 1), x: data.position.x, y: data.position.y },
+					let tween = TweenMax.to(insert.portrait, 0.5, {
+						scaleX: (data.position.mirror ? -1 : 1),
+						x: data.position.x,
+						y: data.position.y ,
 						ease: Power3.easeOut,
 						onComplete: function (ctx, imgId, tweenId) {
 							// decrement the rendering accumulator
@@ -1035,9 +1035,9 @@ export default class Theatre {
 
 						this._clearPortraitContainer(data.insertid);
 						this.workers.portrait_container_setup_worker.setupPortraitContainer(
-							data.insertid, 
-							insert.optAlign, 
-							data.eresname, 
+							data.insertid,
+							insert.optAlign,
+							data.eresname,
 							resources);
 						// re-attach label + typingBubble
 						insert.dockContainer.addChild(insert.label);
@@ -1797,12 +1797,11 @@ export default class Theatre {
 				this._removeDockTween(imgId, null, tweenId);
 			insert.tweens = null;
 			// destroy children
-			for (let child of insert.portraitContainer.children)
-				child.destroy();
+			insert.portrait.destroy();
+
 			for (let child of insert.dockContainer.children)
 				child.destroy();
 			insert.portrait = null;
-			insert.portraitContainer = null;
 			insert.label = null;
 			// destroy self
 			insert.dockContainer.destroy();
@@ -1820,49 +1819,6 @@ export default class Theatre {
 		if (!this.rendering)
 			this._renderTheatre(performance.now());
 
-	}
-
-	/**
-	 *
-	 * Updates the PIXIText containing our debug information. 
-	 *
-	 * @params insert (Objet) : An Object represeting the insert
-	 *
-	 */
-	_updateTheatreDebugInfo(insert) {
-		if (!insert || !insert.dockContainer)
-			return;
-		let info = insert.dockContainer.children.find(e => e.theatreComponentName == "debugInfo");
-		if (info) {
-			info.text = (
-				`imgId: ${insert.imgId}\n` +
-				`dockContainer (exists): ${!!insert.dockContainer}\n` +
-				`name: ${insert.name}\n` +
-				`emote: ${insert.emote}\n` +
-				`textFlyin: ${insert.textFlyin}\n` +
-				`textStanding: ${insert.textStanding}\n` +
-				`textFont: ${insert.textFont}\n` +
-				`textSize: ${insert.textSize}\n` +
-				`textColor: ${insert.textColor}\n` +
-				`portraitContainer (exists): ${!!insert.portraitContainer}\n` +
-				`portraitContainer (XPos): ${insert.portraitContainer.x}\n` +
-				`portraitContainer (YPos): ${insert.portraitContainer.y}\n` +
-				`portrait (exists): ${!!insert.portrait}\n` +
-				`label: ${insert.label.text}\n` +
-				`typingBubble (exists): ${!!insert.typingBubble}\n` +
-				`exitOrientation: ${insert.exitOrientation}\n` +
-				`nameOrientation: ${insert.nameOrientation}\n` +
-				`mirrored: ${insert.mirrored}\n` +
-				`optAlign: ${insert.optAlign}\n` +
-				`tweens (# active): ${Object.keys(insert.tweens).length}\n` +
-				`decayTOId: ${insert.decayTOId}\n` +
-				`order: ${insert.order}\n` +
-				`renderOrder: ${insert.renderOrder}\n`
-				/*
-				`meta (#): ${insert.meta.length}\n`
-				*/
-			);
-		}
 	}
 
 	/**
@@ -2108,8 +2064,8 @@ export default class Theatre {
 		if (!insert || !insert.dockContainer || !insert.portrait) return;
 
 		// preserve position without portrait offset
-		let ox = insert.portraitContainer.x - insert.portrait.width / 2;
-		let oy = insert.portraitContainer.y - insert.portrait.height / 2;
+		let ox = insert.portrait.x;
+		let oy = insert.portrait.y;
 		let ocx = insert.dockContainer.x;
 		let ocy = insert.dockContainer.y;
 		let oLabelAnim = insert.tweens["nameSpeakingPulse"];
@@ -2140,9 +2096,8 @@ export default class Theatre {
 		if (oTypingVanishAnim)
 			insert.tweens["typingVanish"] = oTypingVanishAnim;
 
-		// destroy children
-		for (let child of insert.portraitContainer.children)
-			child.destroy();
+		insert.portrait.destroy();
+
 		// attempt to preserve label + typingBubble
 		for (let idx = insert.dockContainer.children.length - 1; idx >= 0; --idx) {
 			let child = insert.dockContainer.children[idx];
@@ -2153,23 +2108,23 @@ export default class Theatre {
 			else
 				child.destroy();
 		}
+
+
 		insert.portrait = null;
-		insert.portraitContainer = null;
 		// destroy self
 		insert.dockContainer.destroy();
 		insert.dockContainer = null;
 		// re-generate the container
 		let dockContainer = new PIXI.Container();
-		let portraitContainer = new PIXI.Container();
-		dockContainer.addChild(portraitContainer);
+		let portrait = new Portrait(this.stage);
+		dockContainer.addChild(portrait.root);
 		// initial positioning
-		portraitContainer.x = ox;
-		portraitContainer.y = oy;
 		dockContainer.x = ocx;
 		dockContainer.y = ocy
+		portrait.x = ox;
+		portrait.y = oy;
 		// assignment
 		insert.dockContainer = dockContainer;
-		insert.portraitContainer = portraitContainer;
 		if (Theatre.DEBUG) console.log("saving ox: %s, oy: %s", ox, oy);
 		// label is NOT re-attached, must be done by the clearer
 		// typingBubble is NOT re-attached, must be done by the clearer
@@ -2973,20 +2928,6 @@ export default class Theatre {
 	}
 
 	/**
-	 * Get the portrait container given the insert
-	 *
-	 * @params insert (Object) : The Object representing the insert.
-	 *
-	 * @return (Object PIXIContainer) : The PIXIContainer portrait container of the sprite.
-	 *
-	 * @private
-	 */
-	_getPortraitContainerFromInsert(insert) {
-		if (!insert || !insert.dockContainer) return null;
-		return insert.portraitContainer;
-	}
-
-	/**
 	 * Get the label sprite given the insert
 	 *
 	 * @params insert (Object) : The Object representing the insert.
@@ -3030,17 +2971,6 @@ export default class Theatre {
 	getSpeakingLabel() {
 		let insert = this.stage.getInsertById(this.speakingAs);
 		return this._getLabelFromInsert(insert);
-	}
-
-	/**
-	 * Get speaking portrait container of /this/ user
-	 *
-	 * @return (Object PIXIContainer) : The PIXIContainer portrait container 
-	 *	of the insert the User is speaking as, else undefined. 
-	 */
-	getSpeakingPortraitContainer() {
-		let insert = this.stage.getInsertById(this.speakingAs);
-		return this._getPortraitContainerFromInsert(insert);
 	}
 
 	/**
@@ -3521,8 +3451,8 @@ export default class Theatre {
 		let broadcast = false;
 		if (!insert.mirrored && !insert.tweens[tweenId]) {
 			insert.mirrored = true;
-			let tween = TweenMax.to(insert.portraitContainer, 0.5, {
-				pixi: { scaleX: -1 },
+			let tween = TweenMax.to(insert.portrait, 0.5, {
+				scaleX: -1,
 				ease: Power4.easeInOut,
 				onComplete: function (ctx, imgId, tweenId) {
 					// decrement the rendering accumulator
@@ -3534,8 +3464,8 @@ export default class Theatre {
 			broadcast = true;
 		} else if (!insert.tweens[tweenId]) {
 			insert.mirrored = false;
-			let tween = TweenMax.to(insert.portraitContainer, 0.5, {
-				pixi: { scaleX: 1 },
+			let tween = TweenMax.to(insert.portrait, 0.5, {
+				scaleX: 1,
 				ease: Power4.easeInOut,
 				onComplete: function (ctx, imgId, tweenId) {
 					// decrement the rendering accumulator
@@ -3552,8 +3482,8 @@ export default class Theatre {
 			Theatre.instance._sendSceneEvent("positionupdate", {
 				insertid: insert.imgId,
 				position: {
-					x: insert.portraitContainer.x,
-					y: insert.portraitContainer.y,
+					x: insert.x,
+					y: insert.y,
 					mirror: insert.mirrored
 				}
 			});
@@ -3604,8 +3534,10 @@ export default class Theatre {
 		// reset position of portraitContainer
 		insert.mirrored = false;
 		tweenId = "portraitMove";
-		tween = TweenMax.to(insert.portraitContainer, 0.5, {
-			pixi: { scaleX: 1, x: insert.portrait.width / 2, y: insert.portrait.height / 2 },
+		tween = TweenMax.to(insert.portrait, 0.5, {
+			scaleX: 1,
+			x: 0,
+			y: 0,
 			ease: Power3.easeOut,
 			onComplete: function (ctx, imgId, tweenId) {
 				// decrement the rendering accumulator
@@ -3656,10 +3588,8 @@ export default class Theatre {
 		}
 
 		let sprite = new PIXI.Sprite(resource.texture);
-		let spriteWidth = resource.texture.width;
-		let spriteHeight = resource.texture.height;
 		sprite.anchor.set(0.5);
-		insert.portraitContainer.addChild(sprite);
+		insert.portrait.container.addChild(sprite);
 
 		for (let idx = 0; idx < tweenParams.length; ++idx) {
 
@@ -4475,67 +4405,6 @@ export default class Theatre {
 		let pos = ev.deltaY > 0;
 		ev.currentTarget.scrollLeft += (pos ? 10 : -10);
 		//ev.currentTarget.scrollLeft -= ev.deltaY/4; 	
-	}
-
-	/**
-	 * Handle window mouse up
-	 *
-	 * @param ev (Event) : The Event that triggered this handler
-	 */
-	handleWindowMouseUp(ev) {
-		// finish moving insert
-		if (Theatre.DEBUG) console.log("WINDOW MOUSE UP");
-
-		let x = ev.clientX || ev.pageX;
-		let y = ev.clientY || ev.pageY;
-
-		let insert = Theatre.instance.dragPoint.insert
-		let box = Theatre.instance.dragPoint.box
-		let ix = Theatre.instance.dragPoint.ix;
-		let iy = Theatre.instance.dragPoint.iy;
-		let ox = Theatre.instance.dragPoint.oleft;
-		let oy = Theatre.instance.dragPoint.otop;
-
-		let dx = (x - ix) + ox;
-		let dy = (y - iy) + oy;
-
-		if (dx < box.minleft) dx = box.minleft;
-		if (dx > box.maxleft) dx = box.maxleft;
-		if (dy > box.maxtop) dy = box.maxtop;
-		if (dy < box.mintop) dy = box.mintop;
-
-		if (Theatre.DEBUG) console.log("WINDOW MOUSE UP FINAL x: " + x + " y: " + y + " ix: " + ix + " iy: " + iy + " dx: " + dx + " dy: " + dy + " ox: " + ox + " oy: " + oy);
-
-		if (!insert.dockContainer || !insert.portraitContainer) {
-			console.log("ERROR: insert dockContainer or portrait is INVALID");
-			window.removeEventListener("mouseup", Theatre.instance.handleWindowMouseUp);
-			return;
-		}
-
-		let tweenId = "portraitMove";
-		let tween = TweenMax.to(insert.portraitContainer, 0.5, {
-			pixi: { x: dx, y: dy },
-			ease: Power3.easeOut,
-			onComplete: function (ctx, imgId, tweenId) {
-				// decrement the rendering accumulator
-				ctx._removeDockTween(imgId, this, tweenId);
-				// remove our own reference from the dockContainer tweens
-			},
-			onCompleteParams: [Theatre.instance, insert.imgId, tweenId]
-		});
-		Theatre.instance._addDockTween(insert.imgId, tween, tweenId);
-
-		// send sceneEvent
-		Theatre.instance._sendSceneEvent("positionupdate", {
-			insertid: insert.imgId,
-			position: { x: dx, y: dy, mirror: insert.mirrored }
-		});
-
-		window.removeEventListener("mouseup", Theatre.instance.handleWindowMouseUp);
-		Theatre.instance.dragPoint = null;
-		// push focus to chat-message
-		let chatMessage = document.getElementById("chat-message");
-		chatMessage.focus();
 	}
 
 	/**

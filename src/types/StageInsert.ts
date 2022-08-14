@@ -1,3 +1,5 @@
+import Portrait from "./Portrait";
+
 export default class StageInsert {
     /** Id of the image, usually theatre-<actorId> */
     imgId: string;
@@ -11,14 +13,11 @@ export default class StageInsert {
     textFont: string;
     textSize: number;
     textColor: string;
-    // wraps portrait for easier positioning and scaling
-    portraitContainer: PIXI.Container;
-    portrait: PIXI.Sprite;
+    portrait: Portrait;
     label: PIXI.Text;
     typingBubble: PIXI.Sprite;
     exitOrientation: "left" | "right";
     nameOrientation: "left" | "right";
-    mirrored: boolean;
     optAlign: string;
     tweens: unknown;
     order: number;

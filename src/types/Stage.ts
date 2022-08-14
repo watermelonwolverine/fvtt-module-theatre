@@ -199,12 +199,9 @@ export default class Stage {
 
     updatePortraitSizes() {
         for (const insert of this.stageInserts) {
-            const portrait = new Portrait(this, insert);
-            portrait.updatePortrait();
+            insert.portrait.updateGeometry();
         }
-
-        if (!Theatre.instance.rendering)
-            Theatre.instance._renderTheatre(performance.now());
+		Theatre.instance._renderTheatre(performance.now());
     }
 
 
