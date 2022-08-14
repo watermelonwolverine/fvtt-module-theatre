@@ -156,4 +156,8 @@ export default class Portrait {
 
     }
 
+    addEmote(emote: PIXI.Sprite) {
+        this.portraitContainer.addChild(emote);
+    }
+
 }

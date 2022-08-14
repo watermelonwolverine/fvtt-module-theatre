@@ -233,18 +233,20 @@ export default class Stage {
         // fade away text box
         toRemoveTextBox.style.opacity = "0";
 
+        const theatre = this.theatre;
+
         // animate away the dockContainer
         let tweenId = "containerSlide";
         let tween = TweenMax.to(toRemoveInsert.dockContainer, 1, {
             //delay: 0.5,
             pixi: { x: exitX, alpha: 0 },
             ease: Power4.easeOut,
-            onComplete: function (ctx, imgId, tweenId) {
+            onComplete: function (imgId, tweenId) {
                 // decrement the rendering accumulator
-                ctx._removeDockTween(imgId, this, tweenId);
+                theatre._removeDockTween(imgId, this, tweenId);
                 // remove our own reference from the dockContainer tweens
             },
-            onCompleteParams: [this, toRemoveInsert.imgId, tweenId],
+            onCompleteParams: [toRemoveInsert.imgId, tweenId],
         });
         this.theatre._addDockTween(toRemoveInsert.imgId, tween, tweenId);
 

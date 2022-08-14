@@ -37,6 +37,7 @@ import InsertReorderer from './workers/InsertReorderer';
 import ToolTipCanvas from './types/ToolTipCanvas';
 import Portrait from './types/Portrait';
 import User from './types/User';
+import StageInsert from './types/StageInsert';
 
 export default class Theatre {
 
@@ -826,7 +827,7 @@ export default class Theatre {
 									insert.mirrored = Boolean(dat.position.mirror);
 								}
 								// apply positioning data
-								insert.portrait.scaleX.x = (insert.mirrored ? -1 : 1);
+								insert.portrait.scaleX = (insert.mirrored ? -1 : 1);
 								insert.portrait.x = dat.position.x;
 								insert.portrait.y = dat.position.y;
 								// apply texyflyin/textstanding data
@@ -3400,7 +3401,7 @@ export default class Theatre {
 	 * @params animSyntax (String) : The animation syntax.
 	 * @params resMap (Array[Object]) : The resource map to use consisting of
 	 *								  {name: (String), path: (String)} tuples. 
-	 * @params insert (Object) :  The object represeting the insert that will contain this
+	 * @param {StageInsert} insert :  The object represeting the insert that will contain this
 	 *							animation. 
 	 */
 	addTweensFromAnimationSyntax(animName, animSyntax, resMap, insert) {
@@ -3416,9 +3417,9 @@ export default class Theatre {
 			return;
 		}
 
-		let sprite = new PIXI.Sprite(resource.texture);
+		const sprite = new PIXI.Sprite(resource.texture);
 		sprite.anchor.set(0.5);
-		insert.portrait.container.addChild(sprite);
+		insert.portrait.addEmote(sprite);
 
 		for (let idx = 0; idx < tweenParams.length; ++idx) {
 

@@ -13,12 +13,12 @@ import TheatrePortraitContainerSetupWorker from "./portrait_container_setup";
 
 export default class _TheatrePixiContainerFactory {
 
-    context: Theatre;
+    theatre: Theatre;
     portrait_container_setup: TheatrePortraitContainerSetupWorker;
 
-    constructor(context: Theatre,
+    constructor(theatre: Theatre,
         portrait_container_setup: TheatrePortraitContainerSetupWorker) {
-        this.context = context;
+        this.theatre = theatre;
         this.portrait_container_setup = portrait_container_setup;
     }
 
@@ -47,18 +47,18 @@ export default class _TheatrePixiContainerFactory {
 
 
         // track the dockContainer
-        if (this.context.stage.getInsertById(imgId)) {
+        if (this.theatre.stage.getInsertById(imgId)) {
             // this.context dockContainer should be destroyed
             console.log("PRE-EXISTING PIXI CONTAINER FOR %s ", imgId);
-            this.context._destroyPortraitDock(imgId);
+            this.theatre._destroyPortraitDock(imgId);
         }
 
         // given an image, we will generate a PIXI container to add to the theatreDock and size
         // it to the image loaded
         const dockContainer = new PIXI.Container();
-        this.context.stage.pixiApplication.stage.addChild(dockContainer);
+        this.theatre.stage.pixiApplication.stage.addChild(dockContainer);
 
-        const portrait = new Portrait(this.context.stage);
+        const portrait = new Portrait(this.theatre.stage);
         dockContainer.addChild(portrait.root)
 
         //console.log("Creating PortraintPIXIContainer with emotions: ",emotions); 
@@ -73,7 +73,7 @@ export default class _TheatrePixiContainerFactory {
             textColor = emotions.textColor;
         }
 
-        this.context.stage.stageInserts.push({
+        this.theatre.stage.stageInserts.push({
             imgId: imgId,
             dockContainer: dockContainer,
             name: portName,
@@ -106,7 +106,7 @@ export default class _TheatrePixiContainerFactory {
 
         if (!params) {
             console.log("ERROR: Actor does not exist for %s", actorId);
-            this.context._destroyPortraitDock(imgId);
+            this.theatre._destroyPortraitDock(imgId);
             return null;
         }
         // load all rigging assets
@@ -124,13 +124,13 @@ export default class _TheatrePixiContainerFactory {
                     imgSrcs.push({ imgpath: params.emotes[emName].insert, resname: params.emotes[emName].insert });
 
         // handles the waiting game of grabbing loader for us
-        this.context._addSpritesToPixi(imgSrcs, (loader?: any, resources?: Resources) => {
+        this.theatre._addSpritesToPixi(imgSrcs, (loader?: any, resources?: Resources) => {
             // PIXI Container is ready!
             // Setup the dockContainer to display the base insert
             if (Theatre.DEBUG) console.log("Sprites added to PIXI createPortraitPIXIContainer", resources);
             let portWidth = (ename && params.emotes[ename] && params.emotes[ename].insert) ?
                 resources[params.emotes[ename].insert].texture.width : resources[imgPath].texture.width;
-            let initX = isLeft ? (-1 * portWidth) : (this.context.stage.theatreDock.offsetWidth + portWidth);
+            let initX = isLeft ? (-1 * portWidth) : (this.theatre.stage.theatreDock.offsetWidth + portWidth);
 
             if (!ename) {
                 // load in default portrait
@@ -140,7 +140,7 @@ export default class _TheatrePixiContainerFactory {
                 // load in the ename emote portrait instead if possible, else load the default
                 if (params.emotes[ename] && params.emotes[ename].insert) {
                     dockContainer.x = isLeft ?
-                        (-1 * portWidth) : (this.context.stage.theatreDock.offsetWidth + portWidth);
+                        (-1 * portWidth) : (this.theatre.stage.theatreDock.offsetWidth + portWidth);
                     this.portrait_container_setup.setupPortraitContainer(imgId, optAlign, params.emotes[ename].insert, resources, true);
                 } else {
                     dockContainer.x = initX;
