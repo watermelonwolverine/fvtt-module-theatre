@@ -38,6 +38,7 @@ import ToolTipCanvas from './types/ToolTipCanvas';
 import Portrait from './types/Portrait';
 import User from './types/User';
 import StageInsert from './types/StageInsert';
+import NavItemMouseEventHandler from './workers/NavItemMouseEventHandler';
 
 export default class Theatre {
 
@@ -107,6 +108,7 @@ export default class Theatre {
 			this.insertReorderer = new InsertReorderer(
 				this,
 				this.stage);
+			this.navItemMouseEventHandler = new NavItemMouseEventHandler(this);
 
 		}
 		return Theatre.instance;
@@ -239,7 +241,7 @@ export default class Theatre {
 		btnQuote.addEventListener("click", this.handleBtnQuoteClick);
 		btnDelayEmote.addEventListener("click", this.handleBtnDelayEmoteClick);
 		//btnCinema.addEventListener("click", this.handleBtnCinemaClick); 
-		this.theatreNavBar.addEventListener("wheel", this.handleNavBarWheel);
+		this.theatreNavBar.addEventListener("wheel", ev => this.handleNavBarWheel(ev));
 
 		btnEmote.appendChild(iconEmote);
 		btnSuppress.appendChild(iconSuppress);
@@ -308,6 +310,19 @@ export default class Theatre {
 		 */
 		this.theatreEmoteMenu.addEventListener("mousemove", ev => this.toolTipCanvas.handleEmoteMenuMouseMove(ev));
 	}
+
+	/**
+	 * Handle naveBar Wheel 
+	 *
+	 * @param ev (Event) : The Event that triggered this handler
+	 */
+	handleNavBarWheel(ev) {
+		ev.preventDefault();
+		let pos = ev.deltaY > 0;
+		ev.currentTarget.scrollLeft += (pos ? 10 : -10);
+		//ev.currentTarget.scrollLeft -= ev.deltaY/4; 	
+	}
+
 
 	/**
 	 * Configure the theatre display mode
@@ -1343,7 +1358,7 @@ export default class Theatre {
 	 */
 	setUserTyping(userId, theatreId) {
 		if (!this.usersTyping.get(userId))
-			this.usersTyping.set(userId,{});
+			this.usersTyping.set(userId, {});
 
 		let userTyping = this.usersTyping.get(userId);
 		if (userTyping.timeoutId)
@@ -3523,7 +3538,6 @@ export default class Theatre {
 	 *
 	 * @return (Object) : The object containing the emotion properties to be used. 
 	 *
-	 * @private
 	 */
 	_getInitialEmotionSetFromInsertParams(params, useDefault) {
 		if (Theatre.DEBUG) console.log("use default? %s", !useDefault);
@@ -4218,122 +4232,7 @@ export default class Theatre {
 		Hooks.call("theatreSuppression", Theatre.instance.isSuppressed);
 	}
 
-	/**
-	 * Handle naveBar Wheel 
-	 *
-	 * @param ev (Event) : The Event that triggered this handler
-	 */
-	handleNavBarWheel(ev) {
-		ev.preventDefault();
-		let pos = ev.deltaY > 0;
-		ev.currentTarget.scrollLeft += (pos ? 10 : -10);
-		//ev.currentTarget.scrollLeft -= ev.deltaY/4; 	
-	}
 
-	/**
-	 * Handle a nav item dragstart
-	 *
-	 * @param ev (Event) : The Event that triggered this handler
-	 */
-	handleNavItemDragStart(ev) {
-		//ev.preventDefault(); 
-		ev.dataTransfer.clearData("text/plain");
-		ev.dataTransfer.clearData("text/html");
-		ev.dataTransfer.clearData("text/uri-list");
-		ev.dataTransfer.dropEffect = "move";
-		ev.dataTransfer.setDragImage(ev.currentTarget, 16, 16);
-		Theatre.instance.dragNavItem = ev.currentTarget;
-	}
-
-	/**
-	 * Handle a nav item dragend
-	 *
-	 * @param ev (Event) : The Event that triggered this handler
-	 */
-	handleNavItemDragEnd(ev) {
-		ev.preventDefault();
-		Theatre.instance.dragNavItem = null;
-	}
-
-	/**
-	 * Handle a nav item dragover
-	 *
-	 * @param ev (Event) : The Event that triggered this handler
-	 */
-	handleNavItemDragOver(ev) {
-		ev.preventDefault();
-		ev.dataTransfer.dropEffect = "move";
-	}
-
-	/**
-	 * Handle a nav item dragdrop
-	 *
-	 * @param ev (Event) : The Event that triggered this handler
-	 */
-	handleNavItemDragDrop(ev) {
-		ev.preventDefault();
-		KHelpers.insertBefore(Theatre.instance.dragNavItem, ev.currentTarget);
-	}
-
-	/**
-	 * Handle mouse up on navItems
-	 *
-	 * @param ev (Event) : The Event that triggered this handler
-	 */
-	handleNavItemMouseUp(ev) {
-
-		let id = ev.currentTarget.getAttribute("imgId");
-		let actorId = id.replace("theatre-", "");
-		let params = Tools.getInsertParamsFromActorId(actorId);
-
-		if (!params) {
-			ui.notifications.error(`ERROR, actorId ${actorId}%s does not exist!`);
-			// TODO SHOW ERROR MESSAGE
-			console.error("ERROR, actorId %s does not exist!", actorId);
-			// remove the nav Item
-			ev.currentTarget.parentNode.removeChild(ev.currentTarget);
-			return;
-		}
-
-		if (Theatre.DEBUG) console.log("Button UP on nav add?", ev.button);
-
-		switch (ev.button) {
-			case 0:
-				this.activateInsertById(id, ev);
-				break;
-			case 2:
-				let removed = this.stage.removeInsertById(id);
-				let cimg = this.getTheatreCoverPortrait();
-				if (ev.ctrlKey) {
-					// unstage the actor
-					this._removeFromStage(id);
-					return;
-				}
-				if (!removed) {
-					let src = params.src;
-					let name = params.name;
-					let optAlign = params.optalign;
-					let emotions;
-
-					// determine if to launch with actor saves or default settings
-					if (ev.altKey)
-						emotions = this._getInitialEmotionSetFromInsertParams(params, true);
-					else
-						emotions = this._getInitialEmotionSetFromInsertParams(params);
-
-					if (!ev.shiftKey) {
-						if (game.user.isGM)
-							this.injectLeftPortrait(src, name, id, optAlign, emotions);
-						else
-							this.injectRightPortrait(src, name, id, optAlign, emotions);
-					} else
-						this.injectRightPortrait(src, name, id, optAlign, emotions);
-
-				}
-				break;
-		}
-
-	}
 
 	/**
 	 * Set wither or not to display or hide theatre debug information. 
@@ -4967,11 +4866,11 @@ export default class Theatre {
 		if (this.stage.getInsertById(theatreId))
 			KHelpers.addClass(navItem, "theatre-control-nav-bar-item-active");
 
-		navItem.addEventListener("mouseup", ev => this.handleNavItemMouseUp(ev));
-		navItem.addEventListener("dragstart", ev => this.handleNavItemDragStart(ev));
-		navItem.addEventListener("dragend", ev => this.handleNavItemDragEnd(ev));
-		navItem.addEventListener("dragover", ev => this.handleNavItemDragOver(ev));
-		navItem.addEventListener("drop", ev => this.handleNavItemDragDrop(ev));
+		navItem.addEventListener("mouseup", ev => this.navItemMouseEventHandler.handleNavItemMouseUp(ev));
+		navItem.addEventListener("dragstart", ev => this.navItemMouseEventHandler.handleNavItemDragStart(ev));
+		navItem.addEventListener("dragend", ev => this.navItemMouseEventHandler.handleNavItemDragEnd(ev));
+		navItem.addEventListener("dragover", ev => this.navItemMouseEventHandler.handleNavItemDragOver(ev));
+		navItem.addEventListener("drop", ev => this.navItemMouseEventHandler.handleNavItemDragDrop(ev));
 		this.theatreNavBar.appendChild(navItem);
 		// stage event
 		this.stageInsertById(theatreId);
