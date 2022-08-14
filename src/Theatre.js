@@ -115,7 +115,7 @@ export default class Theatre {
 		// socket 
 		this._initSocket();
 		// global listeners
-		window.addEventListener("resize", ev => this.handleWindowResize(ev));
+		window.addEventListener("resize", ev => this.updateGeometry());
 		// request a resync if needed
 		this._sendResyncRequest("any");
 	}
@@ -327,7 +327,7 @@ export default class Theatre {
 			this.renderInsertById(insert.imgId);
 
 		// apply resize adjustments (ev is unused)
-		this.handleWindowResize(null);
+		this.updateGeometry();
 	}
 
 	_addNewTheatreStyle(theatreStyle) {
@@ -4131,20 +4131,13 @@ export default class Theatre {
 
 	}
 
-	/**
-	 * ============================================================
-	 *
-	 * Internal Theatre handlers
-	 *
-	 * ============================================================
-	 */
 
 	/**
-	 * Handle the window resize eventWindow was resized
-	 *
-	 * @param ev (Event) : Event that triggered this handler
+	 * Handles
+	 * - the window resize eventWindow was resized
+	 * - SideBar collapse
 	 */
-	handleWindowResize(ev) {
+	updateGeometry() {
 		let sideBar = document.getElementById("sidebar");
 		this.stage.theatreBar.style.width = (ui.sidebar._collapsed ? "100%" : `calc(100% - ${sideBar.offsetWidth + 2}px)`);
 		this.theatreNarrator.style.width = (ui.sidebar._collapsed ? "100%" : `calc(100% - ${sideBar.offsetWidth + 2}px)`);

@@ -10,9 +10,12 @@ type Size = {
 export default class Portrait {
 
     stage: Stage;
-    // wraps portrait for easier positioning and scaling
+    // wraps portrait for easier mirroring
     portraitContainer: PIXI.Container;
     portrait: PIXI.Sprite;
+    // wraps container of portrait for easier positioning 
+    // allows keeping scale out of calculations
+    root: PIXI.Container;
     mirrored: boolean;
 
     get width() {
@@ -25,45 +28,43 @@ export default class Portrait {
 
     /** Get X-Position of bottom left corner */
     get x() {
-        return this.root.x - this.width / 2;
+        return this.root.x;
     }
 
     /** Set X-Position of bottom left corner */
     set x(newX) {
-        this.root.x = newX + this.width / 2;
+        this.root.x = newX;
     }
 
     /** Get Y-Position of bottom left corner */
     get y() {
-        return this.root.y - this.height / 2;
+        return this.root.y;
     }
 
     /** Set S-Position of bottom left corner */
     set y(newY) {
-        this.root.y = newY + this.height / 2;
-    }
-
-    get root() {
-        return this.portraitContainer;
+        this.root.y = newY;
     }
 
     get scaleX() {
-        return this.root.scale.x;
+        return this.portraitContainer.scale.x;
     }
 
     set scaleX(newScale) {
-        this.root.scale.x = newScale;
+        this.portraitContainer.scale.x = newScale;
     }
 
     constructor(stage: Stage) {
 
         this.mirrored = false;
+        this.root = new PIXI.Container();
         this.portraitContainer = new PIXI.Container();
         this.portrait = new PIXI.Sprite();
         this.stage = stage;
     }
 
     init() {
+        this.root.addChild(this.portraitContainer);
         this.portraitContainer.addChild(this.portrait);
         this.updateGeometry();
     }
@@ -87,13 +88,9 @@ export default class Portrait {
 
     updateGeometry() {
 
-        // has to be positive during this operation
-        this.scaleX = 1;
-
         const targetSize = this._calculatePortraitTargetSize();
-        this._updateDimensions(targetSize);
-        this._updatePivots(targetSize);
-        this._resetPositions();
+        this._updateDimension(targetSize);
+        this._updatePivot(targetSize);
 
         if (this.mirrored) {
             this.scaleX = -1;
@@ -101,21 +98,17 @@ export default class Portrait {
     }
 
     /** Updates size of portrait. */
-    _updateDimensions(targetSize: Size) {
+    _updateDimension(targetSize: Size) {
         this.portrait.height = targetSize.height;
         this.portrait.width = targetSize.width;
     }
 
     /** Updates pivot of container to be in the middle. Has to be updated everytime because pivot changes */
-    _updatePivots(targetSize: Size) {
+    _updatePivot(targetSize: Size) {
         this.portraitContainer.pivot.x = targetSize.width / 2;
         this.portraitContainer.pivot.y = targetSize.height / 2;
-    }
-
-    /** Updates position of container. Has to be updated everytime because pivot or size changes */
-    _resetPositions() {
-        this.x = 0;
-        this.y = 0;
+        this.portraitContainer.x = targetSize.width / 2;
+        this.portraitContainer.y = targetSize.height / 2;
     }
 
     /**
@@ -143,7 +136,7 @@ export default class Portrait {
                     heightStr.substring(0, heightStr.length - 1)
                 ) / 100;
 
-                height = relativeHeight * this.stage.pixiApplication.renderer.height;
+                height = relativeHeight * this.stage.height;
             }
             else {
                 // => target size does no have a legal string value

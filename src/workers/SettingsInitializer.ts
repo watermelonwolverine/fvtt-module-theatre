@@ -62,7 +62,7 @@ export default class TheatreSettingsInitializer {
             config: true,
             default: TheatreSettings.THEATRE_IMAGE_SIZE_DEFAULT.toString(),
             type: String,
-            onChange: () => Theatre.instance.stage.updatePortraitSizes()
+            onChange: () => Theatre.instance.stage.updatePortraits()
         });
 
         this.register<string>(TheatreSettings.NARRATOR_HEIGHT, {

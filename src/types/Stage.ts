@@ -22,13 +22,18 @@ export default class Stage {
     primeBar?: HTMLDivElement;
     secondBar?: HTMLDivElement;
 
+    get width() {
+        return this.theatreBar.offsetWidth;
+    };
+
+    get height() {
+        return this.pixiApplication.renderer.view.height;
+    }
 
     constructor() {
         this.actors = new Map();
         this.stageInserts = [];
-
     }
-
 
     init() {
 
@@ -181,10 +186,9 @@ export default class Stage {
 
         this.pixiApplication.renderer.view.width = dockWidth;
         this.pixiApplication.renderer.view.height = dockHeight;
+        this.pixiApplication.renderer.resize(dockWidth, dockHeight);
 
         this.maybeReapplyRelativePortraitSize();
-
-        this.pixiApplication.renderer.resize(dockWidth, dockHeight);
         // TODO update size of portraits, now that they support relative heights
     }
 
@@ -194,14 +198,14 @@ export default class Stage {
         if (!imageSizeStr.endsWith("%"))
             return; // absolute values were set, so no dynamic resizing needed
 
-        this.updatePortraitSizes();
+        this.updatePortraits();
     }
 
-    updatePortraitSizes() {
+    updatePortraits() {
         for (const insert of this.stageInserts) {
             insert.portrait.updateGeometry();
         }
-		Theatre.instance._renderTheatre(performance.now());
+        Theatre.instance._renderTheatre(performance.now());
     }
 
 

@@ -83,45 +83,8 @@ Hooks.on("getActorSheetHeaderButtons", (app, buttons) => {
 /**
  * Sidebar collapse hook
  */
-Hooks.on("sidebarCollapse", function (a, collapsed) {
-	// If theatre isn't even ready, then just no
-	if (!Theatre.instance) return;
-
-	if (Theatre.DEBUG) console.log("collapse? : ", a, collapsed);
-	let sideBar = document.getElementById("sidebar");
-	let primeBar = Theatre.instance.stage.primeBar;
-	let secondBar = Theatre.instance.stage.secondBar;
-
-	if (collapsed) {
-		// set width to 100%
-		Theatre.instance.stage.theatreBar.style.width = "100%";
-		Theatre.instance.theatreNarrator.style.width = "100%";
-	} else {
-		// set width to sidebar offset size
-		Theatre.instance.stage.theatreBar.style.width = `calc(100% - ${sideBar.offsetWidth +
-			2}px)`;
-		Theatre.instance.theatreNarrator.style.width = `calc(100% - ${sideBar.offsetWidth +
-			2}px)`;
-		if (Theatre.instance.stage.getTextBoxes().length == 2) {
-			let dualWidth = Math.min(
-				Math.floor(Theatre.instance.stage.theatreBar.offsetWidth / 2),
-				650
-			);
-			primeBar.style.width = dualWidth + "px";
-			secondBar.style.width = dualWidth + "px";
-			secondBar.style.left = `calc(100% - ${dualWidth}px)`;
-		}
-	}
-	Theatre.instance.theatreEmoteMenu.style.top = `${Theatre.instance
-		.theatreControls.offsetTop - 410}px`;
-
-	if (Theatre.instance.reorderTOId)
-		window.clearTimeout(Theatre.instance.reorderTOId);
-
-	Theatre.instance.reorderTOId = window.setTimeout(() => {
-		Theatre.instance.insertReorderer.reorderInserts();
-		Theatre.instance.reorderTOId = null;
-	}, 250);
+Hooks.on("collapseSidebar", function (a, collapsed) {
+	Theatre.instance.updateGeometry();
 });
 
 /**
