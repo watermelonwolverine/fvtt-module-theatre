@@ -4,15 +4,34 @@
     {
       "type": "chrome",
       "request": "launch",
-      "name": "FoundryVTT",
+      "name": "FoundryVTT Primary",
       "sourceMaps": true,
       "port": 9223,
       "url": "http://localhost:30000/game",
       "runtimeArgs": [
         "--remote-debugging-port=9223",
-        "--app=http://localhost:30000"
+        "--app=http://localhost:30000",
+        "--user-data-dir=${workspaceFolder}/tmp/primary"
       ],
       "preLaunchTask": "npm: devbuild",
+      "webRoot": "${config:local-foundry-install-dir}/resources/app/public",
+      "pathMapping": {
+        // Override the path for your own system or module ...
+        "/modules/theatre/src": "${workspaceFolder}"
+      }
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "FoundryVTT Secondary",
+      "sourceMaps": true,
+      "port": 9224,
+      "url": "http://localhost:30000/game",
+      "runtimeArgs": [
+        "--remote-debugging-port=9224",
+        "--app=http://localhost:30000",
+        "--user-data-dir=${workspaceFolder}/tmp/secondary"
+      ],
       "webRoot": "${config:local-foundry-install-dir}/resources/app/public",
       "pathMapping": {
         // Override the path for your own system or module ...
