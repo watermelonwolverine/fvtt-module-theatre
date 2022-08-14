@@ -46,8 +46,8 @@ export default class NavItemMouseEventHandler {
 
         const currentTarget = <HTMLElement>ev.currentTarget;
 
-        let id = currentTarget.getAttribute("imgId");
-        let actorId = id.replace("theatre-", "");
+        let theatreId = currentTarget.getAttribute("imgId");
+        let actorId = Tools.toActorId(theatreId);
         let params = Tools.getInsertParamsFromActorId(actorId);
 
         if (!params) {
@@ -63,13 +63,13 @@ export default class NavItemMouseEventHandler {
 
         switch (ev.button) {
             case 0:
-                this.theatre.activateInsertById(id, ev);
+                this.theatre.activateInsertById(theatreId, ev);
                 break;
             case 2:
-                let removed = this.theatre.stage.removeInsertById(id);
+                let removed = this.theatre.stage.removeInsertById(theatreId);
                 if (ev.ctrlKey) {
                     // unstage the actor
-                    this.theatre._removeFromStage(id);
+                    this.theatre._removeFromStage(theatreId);
                     return;
                 }
                 if (!removed) {
@@ -86,11 +86,11 @@ export default class NavItemMouseEventHandler {
 
                     if (!ev.shiftKey) {
                         if (game.user.isGM)
-                            this.theatre.injectLeftPortrait(src, name, id, optAlign, emotions);
+                            this.theatre.injectLeftPortrait(src, name, theatreId, optAlign, emotions);
                         else
-                            this.theatre.injectRightPortrait(src, name, id, optAlign, emotions);
+                            this.theatre.injectRightPortrait(src, name, theatreId, optAlign, emotions);
                     } else
-                        this.theatre.injectRightPortrait(src, name, id, optAlign, emotions);
+                        this.theatre.injectRightPortrait(src, name, theatreId, optAlign, emotions);
 
                 }
                 break;

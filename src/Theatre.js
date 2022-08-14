@@ -2133,16 +2133,18 @@ export default class Theatre {
 		insert.dockContainer.destroy();
 		insert.dockContainer = null;
 		// re-generate the container
-		let dockContainer = new PIXI.Container();
-		let portrait = new Portrait(this.stage);
-		dockContainer.addChild(portrait.root);
+		const newDockContainer = new PIXI.Container();
+		const newPortrait = new Portrait(this.stage);
+		newPortrait.init();
+		newDockContainer.addChild(newPortrait.root);
+		insert.portrait = newPortrait;
 		// initial positioning
-		dockContainer.x = ocx;
-		dockContainer.y = ocy
-		portrait.x = ox;
-		portrait.y = oy;
+		newDockContainer.x = ocx;
+		newDockContainer.y = ocy
+		newPortrait.x = ox;
+		newPortrait.y = oy;
 		// assignment
-		insert.dockContainer = dockContainer;
+		insert.dockContainer = newDockContainer;
 		if (Theatre.DEBUG) console.log("saving ox: %s, oy: %s", ox, oy);
 		// label is NOT re-attached, must be done by the clearer
 		// typingBubble is NOT re-attached, must be done by the clearer
