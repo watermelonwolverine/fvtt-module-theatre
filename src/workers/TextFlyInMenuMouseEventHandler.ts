@@ -1,0 +1,66 @@
+import Theatre from "../Theatre";
+import TextFlyinAnimationsFactory from "./flyin_animations_factory";
+import KHelpers from "./KHelpers";
+import TextBoxToCharSplitter from "./TextBoxToCharSplitter";
+
+export default class TextFlyInMenuMouseEventHandler {
+
+    theatre: Theatre;
+
+    constructor(theatre: Theatre) {
+        this.theatre = theatre;
+    }
+
+    handleMouseButtonUp(ev: MouseEvent) {
+        if ((<MouseEvent>ev).button == 0) {
+            if (KHelpers.hasClass((<HTMLElement>ev.currentTarget), "textflyin-active")) {
+                KHelpers.removeClass((<HTMLElement>ev.currentTarget), "textflyin-active");
+                this.theatre.setUserEmote(game.user.id, this.theatre.speakingAs, 'textflyin', null);
+            } else {
+                let lastActives = this.theatre.theatreEmoteMenu.getElementsByClassName("textflyin-active");
+                for (let lastActive of lastActives)
+                    KHelpers.removeClass(<HTMLElement>lastActive, "textflyin-active");
+                //if (insert || this.context.speakingAs == Theatre.NARRATOR) {
+                KHelpers.addClass((<HTMLElement>ev.currentTarget), "textflyin-active");
+                this.theatre.setUserEmote(game.user.id, this.theatre.speakingAs, 'textflyin', (<HTMLElement>ev.currentTarget).getAttribute("name"));
+                //}
+            }
+            // push focus to chat-message
+            let chatMessage = document.getElementById("chat-message");
+            chatMessage.focus();
+        }
+    }
+
+    handleMouseOut(ev: MouseEvent, sender: HTMLElement): void {
+
+        const currentTarget = (<HTMLElement>(<HTMLElement>ev.currentTarget));
+
+        for (let child of currentTarget.children) {
+            for (let sub_child of child.children)
+                gsap.killTweensOf(sub_child);
+            gsap.killTweensOf(child);
+        }
+        for (let child of currentTarget.children) {
+            child.parentNode.removeChild(child);
+        }
+
+        gsap.killTweensOf(sender);
+        (<HTMLElement>sender).style.setProperty("overflow-y", "scroll");
+        (<HTMLElement>sender).style.setProperty("overflow-x", "hidden");
+
+        currentTarget.textContent = currentTarget.getAttribute("otext");
+    }
+
+    handleMouseOver(ev: MouseEvent): void {
+        const text = (<HTMLElement>(<HTMLElement>ev.currentTarget)).getAttribute("otext");
+        const anim = (<HTMLElement>(<HTMLElement>ev.currentTarget)).getAttribute("name");
+        //console.log("child text: ",text,(<HTMLElement>ev.currentTarget)); 
+        (<HTMLElement>(<HTMLElement>ev.currentTarget)).textContent = "";
+        const charSpans = TextBoxToCharSplitter.splitTextBoxToChars(text, (<HTMLElement>ev.currentTarget));
+        TextFlyinAnimationsFactory.getForName(anim)(
+            charSpans,
+            0.5,
+            0.05,
+            null);
+    }
+}

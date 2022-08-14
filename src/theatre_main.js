@@ -26,6 +26,7 @@ import TheatreSettings from "./extensions/TheatreSettings";
 import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory";
 import TextStandingAnimationsFactory from "./workers/standing_animations_factory";
 import ActorExtensions from "./extensions/ActorExtensions";
+import TextBoxToCharSplitter from "./workers/TextBoxToCharSplitter"
 
 /**
  * Concat helper
@@ -380,7 +381,7 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 		textBox.style["font-size"] = `${fontSize}px`;
 		textBox.scrollTop = 0;
 
-		charSpans = Theatre.splitTextBoxToChars(textContent, textBox);
+		charSpans = TextBoxToCharSplitter.splitTextBoxToChars(textContent, textBox);
 
 		if (Theatre.DEBUG) console.log("animating text: " + textContent);
 

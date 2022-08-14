@@ -17,6 +17,8 @@ export type TextFlyinAnimationDefinition = {
     label: string;
 }
 
+export type TextFlyinAnimationDefinitions = { [key: string]: TextFlyinAnimationDefinition };
+
 export default class TextFlyinAnimationsFactory {
 
     static TYPEWRITER = "typewriter";
@@ -43,9 +45,9 @@ export default class TextFlyinAnimationsFactory {
         TextFlyinAnimationsFactory.ASSEMBLE
     ]
 
-    static getDefinitions(): { [key: string]: TextFlyinAnimationDefinition } {
+    static getDefinitions(): TextFlyinAnimationDefinitions {
 
-        const result: { [key: string]: TextFlyinAnimationDefinition } = {};
+        const result: TextFlyinAnimationDefinitions = {};
 
         for (const name of this.ALL_ANIMATIONS) {
             result[name] = {
@@ -414,7 +416,7 @@ export default class TextFlyinAnimationsFactory {
                 textBox.style.setProperty("overflow-x", "visible");
             }
         }
-        
+
         for (let idx = 0; idx < charSpans.length; ++idx) {
             TweenMax.from(charSpans[idx], animTime, {
                 delay: idx * speed,
