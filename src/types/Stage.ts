@@ -1,13 +1,14 @@
-import TheatreSettings from "../extensions/settings";
+import TheatreSettings from "../extensions/TheatreSettings";
 import Theatre from "../Theatre";
 import KHelpers from "../workers/KHelpers";
 import Tools from "../workers/Tools";
-import Portrait from "./Portrait";
 import StageInsert from "./StageInsert.js"
 import TheatreActor from "./TheatreActor.js"
 import TheatreStyle from "./TheatreStyle";
 
 export default class Stage {
+
+    theatre: Theatre;
 
     /**
      * Actors by theatre-id
@@ -22,6 +23,7 @@ export default class Stage {
     primeBar?: HTMLDivElement;
     secondBar?: HTMLDivElement;
 
+
     get width() {
         return this.theatreBar.offsetWidth;
     };
@@ -30,9 +32,10 @@ export default class Stage {
         return this.pixiApplication.renderer.view.height;
     }
 
-    constructor() {
+    constructor(theatre: Theatre) {
         this.actors = new Map();
         this.stageInserts = [];
+        this.theatre = theatre;
     }
 
     init() {
@@ -108,7 +111,7 @@ export default class Stage {
 
     removeInsertById(
         theatreId: string,
-        remote?: boolean): void {
+        remote?: boolean): boolean {
 
         const toRemoveInsert = this.getInsertBy(insert => insert.imgId == theatreId && !insert.deleting);
 
@@ -119,14 +122,149 @@ export default class Stage {
         const toRemoveTextBox: HTMLElement = this.getTextBoxes().find(textBoxFilter);
 
         if (!toRemoveInsert || !toRemoveTextBox)
-            return; // no-op
+            return null; // no-op
 
         toRemoveInsert.deleting = true;
 
-        Theatre.instance._removeInsert(
+        return this._removeInsert(
             toRemoveInsert,
             toRemoveTextBox,
             remote);
+    }
+
+    /**
+     * Remove Inserts given the insert dock + corresponding TextBox
+     *
+     * @params toRemoveInsert (Object) : An Object representing the insert to be removed.
+     * @params toRemoveTextBox (HTMLElement) : The textbox of the insert to be removed.
+     * @params remote (Boolean) : Boolean indicating if this is being invoked remotely, or locally. 
+     *
+     * @return (Object) : An object containing the items that were removed {insert : (Object), textBox: (HTMLElement)}
+     *					 or null if there was nothing to remove. 
+     *
+     */
+    _removeInsert(
+        toRemoveInsert: StageInsert,
+        toRemoveTextBox: HTMLElement,
+        remote?: boolean) {
+        let isOwner = this.theatre.isActorOwner(game.user.id, toRemoveInsert.imgId);
+        // permission check
+        if (!remote && !isOwner) {
+            ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.DoNotControl"));
+            return false;
+        }
+
+        if (toRemoveInsert.decayTOId) {
+            window.clearTimeout(toRemoveInsert.decayTOId);
+            toRemoveInsert.decayTOId = null;
+        }
+
+        // WMW: TODO: Disabled for now, not sure if ever worked as intented
+        // Save configuration if this is not a remote operation, and we're the owners of this 
+        // insert        
+        // if (!remote && isOwner) {
+        //     const actorId = Tools.toActorId(toRemoveInsert.imgId);
+        //     const actor: Actor = game.actors.get(actorId);
+        //     if (actor) {
+        //         let skel = {};
+        //         skel["flags.theatre.settings.emote"] = toRemoveInsert.emote;
+        //         skel["flags.theatre.settings.textflyin"] = toRemoveInsert.textFlyin;
+        //         skel["flags.theatre.settings.textstanding"] = toRemoveInsert.textStanding;
+        //         skel["flags.theatre.settings.textfont"] = toRemoveInsert.textFont;
+        //         skel["flags.theatre.settings.textsize"] = toRemoveInsert.textSize;
+        //         skel["flags.theatre.settings.textcolor"] = toRemoveInsert.textColor;
+        //         actor.update(skel).then((response) => {
+        //             if (Theatre.DEBUG) console.log("updated with resp: ", response);
+        //         });
+        //     }
+        // }
+
+        // animate and delayed removal
+        //let isLeft = toRemoveInsert.getElementsByClassName("theatre-portrait-left").length > 0; 
+        let exitX = 0;
+        if (toRemoveInsert.portrait) {
+            if (toRemoveInsert.exitOrientation == "left") {
+                exitX = toRemoveInsert.dockContainer.x - toRemoveInsert.portrait.width
+            } else {
+                exitX = toRemoveInsert.dockContainer.x + toRemoveInsert.portrait.width
+            }
+        }
+
+        // Push to socket our event
+        if (!remote)
+            this.theatre._sendSceneEvent("exitscene", { insertid: toRemoveInsert.imgId });
+
+        // unactivate from navbar
+        for (const navItem of this.theatre.theatreNavBar.children)
+            if (navItem.getAttribute("imgId") == toRemoveInsert.imgId) {
+                KHelpers.removeClass(<HTMLElement>navItem, "theatre-control-nav-bar-item-active");
+                if (toRemoveInsert.imgId == this.theatre.speakingAs)
+                    KHelpers.removeClass(<HTMLElement>navItem, "theatre-control-nav-bar-item-speakingas");
+            }
+        // clear chat cover + effects if active for this ID
+        if (this.theatre.speakingAs == toRemoveInsert.imgId) {
+            let cimg = this.theatre.getTheatreCoverPortrait();
+            cimg.removeAttribute("src");
+            cimg.style.opacity = "0";
+            gsap.killTweensOf(toRemoveInsert.label);
+            // clear typing
+            for (let userId in this.theatre.usersTyping)
+                if (this.theatre.usersTyping.get(userId) && (this.theatre.usersTyping.get(userId).theatreId == toRemoveInsert.imgId)) {
+                    this.theatre.removeUserTyping(userId);
+                    this.theatre.usersTyping.delete(userId);
+                    break;
+                }
+            // clear label
+            // clear speakingAs
+            this.theatre.speakingAs = null;
+            this.theatre.emoteMenuRenderer.render();
+        }
+        // kill any animations of textBox
+        for (let c of toRemoveTextBox.children) {
+            for (let sc of c.children)
+                gsap.killTweensOf(sc);
+            gsap.killTweensOf(c);
+        }
+        gsap.killTweensOf(toRemoveTextBox);
+        /*
+        for (let c of toRemoveTextBox.children)
+            c.parentNode.removeChild(c); 
+        */
+        // fade away text box
+        toRemoveTextBox.style.opacity = "0";
+
+        // animate away the dockContainer
+        let tweenId = "containerSlide";
+        let tween = TweenMax.to(toRemoveInsert.dockContainer, 1, {
+            //delay: 0.5,
+            pixi: { x: exitX, alpha: 0 },
+            ease: Power4.easeOut,
+            onComplete: function (ctx, imgId, tweenId) {
+                // decrement the rendering accumulator
+                ctx._removeDockTween(imgId, this, tweenId);
+                // remove our own reference from the dockContainer tweens
+            },
+            onCompleteParams: [this, toRemoveInsert.imgId, tweenId],
+        });
+        this.theatre._addDockTween(toRemoveInsert.imgId, tween, tweenId);
+
+
+        window.setTimeout(() => {
+            this.theatre._destroyPortraitDock(toRemoveInsert.imgId)
+            this.theatre._removeTextBoxFromTheatreBar(toRemoveTextBox);
+
+            if (this.theatre.reorderTOId)
+                window.clearTimeout(this.theatre.reorderTOId)
+
+            this.theatre.reorderTOId = window.setTimeout(() => {
+                this.theatre.insertReorderer.reorderInserts();
+                this.theatre.reorderTOId = null;
+            }, 750);
+
+        }, 1000);
+
+        // return results of what was removed
+        return true;
     }
 
     getInsertByName(name: string): StageInsert {

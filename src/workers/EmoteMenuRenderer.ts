@@ -1,5 +1,5 @@
 import ActorExtensions from "../extensions/ActorExtensions";
-import TheatreSettings from "../extensions/settings";
+import TheatreSettings from "../extensions/TheatreSettings";
 import { EmoteDictionary } from "../resources/resources_types";
 import Theatre from "../Theatre";
 import StageInsert from "../types/StageInsert";

@@ -21,7 +21,7 @@
  *
  */
 
-import TheatreSettings from './extensions/settings';
+import TheatreSettings from './extensions/TheatreSettings';
 import _TheatreWorkers from './workers/workers';
 import KHelpers from "./workers/KHelpers";
 import ActorExtensions from './extensions/ActorExtensions';
@@ -36,6 +36,7 @@ import EmoteMenuRenderer from './workers/EmoteMenuRenderer';
 import InsertReorderer from './workers/InsertReorderer';
 import ToolTipCanvas from './types/ToolTipCanvas';
 import Portrait from './types/Portrait';
+import User from './types/User';
 
 export default class Theatre {
 
@@ -80,12 +81,13 @@ export default class Theatre {
 			// global insert state related
 			this.speakingAs = null;
 			// Map of theatreId to TheatreActor
-			this.stage = new Stage();
+			this.stage = new Stage(this);
 			this.toolTipCanvas = new ToolTipCanvas(this.stage);
 
-			/** @type {Map<string,EmotionDefinition>}*/
+			/** @type {Map<String,EmotionDefinition>}*/
 			this.userEmotes = new Map();
-			this.usersTyping = {};
+			/** @type {Map<String, User>} */
+			this.usersTyping = new Map();
 			this.userSettings = {};
 			this.lastTyping = 0;
 			this.resync = {
@@ -913,7 +915,7 @@ export default class Theatre {
 					let tween = TweenMax.to(insert.portrait, 0.5, {
 						scaleX: (data.position.mirror ? -1 : 1),
 						x: data.position.x,
-						y: data.position.y ,
+						y: data.position.y,
 						ease: Power3.easeOut,
 						onComplete: function (ctx, imgId, tweenId) {
 							// decrement the rendering accumulator
@@ -1118,9 +1120,9 @@ export default class Theatre {
 	 * @param userId (String) : The userId of user to check
 	 */
 	isUserTyping(userId) {
-		if (!this.usersTyping[userId]) return false;
+		if (!this.usersTyping.get(userId)) return false;
 
-		return this.usersTyping[userId].timeoutId;
+		return this.usersTyping.get(userId).timeoutId;
 	}
 
 	/**
@@ -1210,8 +1212,8 @@ export default class Theatre {
 	 */
 	getInsertsTyping() {
 		let typing = [];
-		for (let userId in this.usersTyping)
-			if (this.usersTyping[userId].theatreId)
+		for (let userId in this.usersTyping.keys())
+			if (this.usersTyping.get(userId).theatreId)
 				typing.push(userId);
 
 		return typing;
@@ -1339,10 +1341,10 @@ export default class Theatre {
 	 * @param theatreId (String) : The theatreId the user is 'typing' as.
 	 */
 	setUserTyping(userId, theatreId) {
-		if (!this.usersTyping[userId])
-			this.usersTyping[userId] = {};
+		if (!this.usersTyping.get(userId))
+			this.usersTyping.set(userId,{});
 
-		let userTyping = this.usersTyping[userId];
+		let userTyping = this.usersTyping.get(userId);
 		if (userTyping.timeoutId)
 			window.clearTimeout(userTyping.timeoutId);
 
@@ -1490,16 +1492,16 @@ export default class Theatre {
 	 * @param userId (String) : The userId to remove as 'typing'.
 	 */
 	removeUserTyping(userId) {
-		if (Theatre.DEBUG) console.log("removeUserTyping: ", this.usersTyping[userId]);
-		if (!this.usersTyping[userId]) {
-			this.usersTyping[userId] = {};
+		if (Theatre.DEBUG) console.log("removeUserTyping: ", this.usersTyping.get(userId));
+		if (!this.usersTyping.get(userId)) {
+			this.usersTyping.set(userId, {});
 			return;
 		}
-		if (!this.usersTyping[userId].timeoutId)
+		if (!this.usersTyping.get(userId).timeoutId)
 			return;
 
-		if (this.usersTyping[userId].theatreId) {
-			let insert = this.stage.getInsertById(this.usersTyping[userId].theatreId);
+		if (this.usersTyping.get(userId).theatreId) {
+			let insert = this.stage.getInsertById(this.usersTyping.get(userId).theatreId);
 			// if not destroyed already
 			if (insert) {
 				// kill tweens
@@ -1545,8 +1547,8 @@ export default class Theatre {
 		}
 
 		if (Theatre.DEBUG) console.log("%s is no longer typing (removed)", userId);
-		window.clearTimeout(this.usersTyping[userId].timeoutId);
-		this.usersTyping[userId].timeoutId = null;
+		window.clearTimeout(this.usersTyping.get(userId).timeoutId);
+		this.usersTyping.get(userId).timeoutId = null;
 	}
 
 	/**
@@ -2683,178 +2685,6 @@ export default class Theatre {
 	}
 
 	/**
-	 * Removes insert by name, in the event that there
-	 * are inserts with the same name, the first one is found
-	 * and removed.
-	 *
-	 * @params name (String) : The label name of the insert to remove.
-	 * @params remote (Boolean) : Boolean indicating if this is being invoked remotely, or locally. 
-	 *
-	 * @return (Object) : An object containing the items that were removed {insert : (Object), textBox: (HTMLElement)}
-	 *					 or null if there was nothing to remove. 
-	 */
-	removeInsertByName(name, remote) {
-		name = name.toLowerCase();
-		let id = null,
-			toRemoveInsert,
-			toRemoveTextBox;
-		for (let insert of this.stage.stageInserts) {
-			if (insert.name == name && !insert.deleting) {
-				id = insert.imgId;
-				//insert.parentNode.removeChild(insert); 
-				insert.deleting = true;
-				toRemoveInsert = insert;
-				break;
-			}
-		}
-		if (!id) return;
-		for (let textBox of this.stage.getTextBoxes()) {
-			if (textBox.getAttribute("imgId") == id && !textBox.getAttribute("deleting")) {
-				//textBox.parentNode.removeChild(textBox); 
-				textBox.setAttribute("deleting", true);
-				toRemoveTextBox = textBox
-				break;
-			}
-		}
-		if (!toRemoveInsert || !toRemoveTextBox)
-			return null;
-
-		return this._removeInsert(toRemoveInsert, toRemoveTextBox, remote);
-	}
-
-	/**
-	 * Remove Inserts given the insert dock + corresponding TextBox
-	 *
-	 * @params toRemoveInsert (Object) : An Object representing the insert to be removed.
-	 * @params toRemoveTextBox (HTMLElement) : The textbox of the insert to be removed.
-	 * @params remote (Boolean) : Boolean indicating if this is being invoked remotely, or locally. 
-	 *
-	 * @return (Object) : An object containing the items that were removed {insert : (Object), textBox: (HTMLElement)}
-	 *					 or null if there was nothing to remove. 
-	 *
-	 */
-	_removeInsert(toRemoveInsert, toRemoveTextBox, remote) {
-		let isOwner = this.isActorOwner(game.user.id, toRemoveInsert.imgId);
-		// permission check
-		if (!remote && !isOwner) {
-			ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.DoNotControl"));
-			return null;
-		}
-
-		if (toRemoveInsert.decayTOId) {
-			window.clearTimeout(toRemoveInsert.decayTOId);
-			toRemoveInsert.decayTOId = null;
-		}
-
-		// Save configuration if this is not a remote operation, and we're the owners of this 
-		// insert
-		if (!remote && isOwner) {
-			let actorId = toRemoveInsert.imgId.replace("theatre-", "");
-			let actor = game.actors.get(actorId);
-			if (actor) {
-				let skel = {};
-				skel["flags.theatre.settings.emote"] = toRemoveInsert.emote;
-				skel["flags.theatre.settings.textflyin"] = toRemoveInsert.textFlyin;
-				skel["flags.theatre.settings.textstanding"] = toRemoveInsert.textStanding;
-				skel["flags.theatre.settings.textfont"] = toRemoveInsert.textFont;
-				skel["flags.theatre.settings.textsize"] = toRemoveInsert.textSize;
-				skel["flags.theatre.settings.textcolor"] = toRemoveInsert.textColor;
-				actor.update(skel).then((response) => {
-					if (Theatre.DEBUG) console.log("updated with resp: ", response);
-				});
-			}
-		}
-
-		// animate and delayed removal
-		//let isLeft = toRemoveInsert.getElementsByClassName("theatre-portrait-left").length > 0; 
-		let exitX = 0;
-		if (toRemoveInsert.portrait) {
-			if (toRemoveInsert.exitOrientation == "left") {
-				exitX = toRemoveInsert.dockContainer.x - toRemoveInsert.portrait.width
-			} else {
-				exitX = toRemoveInsert.dockContainer.x + toRemoveInsert.portrait.width
-			}
-		}
-
-		// Push to socket our event
-		if (!remote)
-			this._sendSceneEvent("exitscene", { insertid: toRemoveInsert.imgId });
-
-		// unactivate from navbar
-		for (let navItem of this.theatreNavBar.children)
-			if (navItem.getAttribute("imgId") == toRemoveInsert.imgId) {
-				KHelpers.removeClass(navItem, "theatre-control-nav-bar-item-active");
-				if (toRemoveInsert.imgId == this.speakingAs)
-					KHelpers.removeClass(navItem, "theatre-control-nav-bar-item-speakingas");
-			}
-		// clear chat cover + effects if active for this ID
-		if (this.speakingAs == toRemoveInsert.imgId) {
-			let cimg = this.getTheatreCoverPortrait();
-			cimg.removeAttribute("src");
-			cimg.style.opacity = "0";
-			let label = this._getLabelFromInsert(toRemoveInsert);
-			TweenMax.killTweensOf(label);
-			// clear typing
-			for (let userId in this.usersTyping)
-				if (this.usersTyping[userId] && (this.usersTyping[userId].theatreId == toRemoveInsert.imgId)) {
-					this.removeUserTyping(userId);
-					this.usersTyping[userId] = null;
-					break;
-				}
-			// clear label
-			// clear speakingAs
-			this.speakingAs = null;
-			this.emoteMenuRenderer.render();
-		}
-		// kill any animations of textBox
-		for (let c of toRemoveTextBox.children) {
-			for (let sc of c.children)
-				TweenMax.killTweensOf(sc);
-			TweenMax.killTweensOf(c);
-		}
-		TweenMax.killTweensOf(toRemoveTextBox);
-		/*
-		for (let c of toRemoveTextBox.children)
-			c.parentNode.removeChild(c); 
-		*/
-		// fade away text box
-		toRemoveTextBox.style.opacity = 0;
-
-		// animate away the dockContainer
-		let tweenId = "containerSlide";
-		let tween = TweenMax.to(toRemoveInsert.dockContainer, 1, {
-			//delay: 0.5,
-			pixi: { x: exitX, alpha: 0 },
-			ease: Power4.easeOut,
-			onComplete: function (ctx, imgId, tweenId) {
-				// decrement the rendering accumulator
-				ctx._removeDockTween(imgId, this, tweenId);
-				// remove our own reference from the dockContainer tweens
-			},
-			onCompleteParams: [this, toRemoveInsert.imgId, tweenId],
-		});
-		this._addDockTween(toRemoveInsert.imgId, tween, tweenId);
-
-
-		window.setTimeout(() => {
-			this._destroyPortraitDock(toRemoveInsert.imgId)
-			this._removeTextBoxFromTheatreBar(toRemoveTextBox);
-
-			if (this.reorderTOId)
-				window.clearTimeout(this.reorderTOId)
-
-			this.reorderTOId = window.setTimeout(() => {
-				this.insertReorderer.reorderInserts();
-				this.reorderTOId = null;
-			}, 750);
-
-		}, 1000);
-
-		// return results of what was removed
-		return { insert: toRemoveInsert, textBox: toRemoveTextBox };
-	}
-
-	/**
 	 * If the dock is active, a number > 0 will be returned indicating
 	 * the number of active Theatre Inserts in the dock. 0 meaning the dock
 	 * is inactive
@@ -2934,7 +2764,6 @@ export default class Theatre {
 	 *
 	 * @return (Object PIXIText) : The PIXIText label of the insert. 
 	 *
-	 * @private
 	 */
 	_getLabelFromInsert(insert) {
 		if (!insert || !insert.dockContainer) return null;
@@ -3818,7 +3647,7 @@ export default class Theatre {
 				cimg.style.opacity = "0";
 				// clear typing theatreId data
 				this.removeUserTyping(game.user.id);
-				this.usersTyping[game.user.id].theatreId = null;
+				this.usersTyping.get(game.user.id).theatreId = null;
 			}
 		} else {
 			let src = params.src;
@@ -4078,7 +3907,7 @@ export default class Theatre {
 				cimg.style.opacity = "0";
 				// clear typing theatreId data
 				this.removeUserTyping(game.user.id);
-				this.usersTyping[game.user.id].theatreId = null;
+				this.usersTyping.get(game.user.id).theatreId = null;
 				// Mark speaking as Narrator
 				this.speakingAs = Theatre.NARRATOR;
 				this.setUserTyping(game.user.id, Theatre.NARRATOR);
@@ -4120,7 +3949,7 @@ export default class Theatre {
 				// clear narrator
 				this.speakingAs = null;
 				this.removeUserTyping(game.user.id);
-				this.usersTyping[game.user.id].theatreId = null;
+				this.usersTyping.get(game.user.id).theatreId = null;
 				// send event to turn off the narrator bar
 				if (!remote)
 					this._sendSceneEvent("narrator", { active: false });

@@ -9,6 +9,10 @@ export default class Tools {
         return THEATRE_PREFIX + actor._id;
     }
 
+    static toActorId(theatreId: string){
+       return theatreId.replace(THEATRE_PREFIX, "");
+    }
+
     /**
      * Pull insert theatre parameters from an actor if possible
      *

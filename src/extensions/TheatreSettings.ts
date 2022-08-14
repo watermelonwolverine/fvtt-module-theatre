@@ -68,4 +68,8 @@ export default class TheatreSettings {
 		return "Riffic";
 	}
 
+	static getAutoDecay(): boolean{
+		return true;
+	}
+
 }

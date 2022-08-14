@@ -3,7 +3,7 @@ import Resources from "../extensions/foundry_extensions";
 import Theatre from "../Theatre";
 import ActorExtensions from "../extensions/ActorExtensions";
 import _TheatreWorkers from "./workers";
-import TheatreSettings from "../extensions/settings";
+import TheatreSettings from "../extensions/TheatreSettings";
 import TheatreStyle from "../types/TheatreStyle";
 import Stage from "../types/Stage";
 import Portrait from "../types/Portrait";

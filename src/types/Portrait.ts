@@ -1,4 +1,4 @@
-import TheatreSettings from "../extensions/settings";
+import TheatreSettings from "../extensions/TheatreSettings";
 import Stage from "./Stage";
 import StageInsert from "./StageInsert";
 

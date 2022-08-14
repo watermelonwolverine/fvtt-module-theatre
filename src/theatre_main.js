@@ -22,7 +22,7 @@
 
 import Theatre from "./Theatre";
 import KHelpers from "./workers/KHelpers";
-import TheatreSettings from "./extensions/settings";
+import TheatreSettings from "./extensions/TheatreSettings";
 import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory";
 import TextStandingAnimationsFactory from "./workers/standing_animations_factory";
 import ActorExtensions from "./extensions/ActorExtensions";
@@ -114,9 +114,9 @@ Hooks.on("preCreateChatMessage", function (chatMessage) {
 	if (
 		!chatMessage.data.roll &&
 		Theatre.instance.speakingAs &&
-		Theatre.instance.usersTyping[chatMessage.data.user]
+		Theatre.instance.usersTyping.get(chatMessage.data.user)
 	) {
-		let theatreId = Theatre.instance.usersTyping[chatMessage.data.user].theatreId;
+		let theatreId = Theatre.instance.usersTyping.get(chatMessage.data.user).theatreId;
 		let insert = Theatre.instance.stage.getInsertById(theatreId);
 		let actorId = theatreId.replace("theatre-", "");
 		let actor = game.actors.get(actorId) || null;
@@ -221,8 +221,8 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 	// If theatre isn't even ready, then just no
 	if (!Theatre.instance) return;
 
-	if (Theatre.instance.usersTyping[userId]) {
-		theatreId = Theatre.instance.usersTyping[userId].theatreId;
+	if (Theatre.instance.usersTyping.get(userId)) {
+		theatreId = Theatre.instance.usersTyping.get(userId).theatreId;
 		Theatre.instance.removeUserTyping(userId);
 	}
 
@@ -393,15 +393,15 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 
 		// auto decay?
 		if (insert && insert.decayTOId) window.clearTimeout(insert.decayTOId);
-		if (insert && Theatre.instance.settings.autoDecay) {
+		if (insert && TheatreSettings.getAutoDecay()) {
 			insert.decayTOId = window.setTimeout(
 				imgId => {
 					let insert = Theatre.instance.stage.getInsertById(imgId);
 					if (insert) Theatre.instance.decayTextBoxById(imgId, true);
 				},
 				Math.max(
-					Theatre.instance.settings.decayRate * charSpans.length,
-					Theatre.instance.settings.decayMin
+					TheatreSettings.getTextDecayRate() * charSpans.length,
+					TheatreSettings.getTextDecayMin()
 				),
 				insert.imgId
 			);

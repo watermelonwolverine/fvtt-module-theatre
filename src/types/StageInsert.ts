@@ -6,6 +6,7 @@ export default class StageInsert {
     // contains label and portraitContainer
     // sits right on top the textBox
     dockContainer: PIXI.Container;
+    decayTOId?: string;
     name: string;
     emote: string;
     textFlyin: string;
