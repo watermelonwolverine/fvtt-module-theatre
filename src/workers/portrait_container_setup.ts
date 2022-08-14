@@ -68,9 +68,12 @@ export default class _TheatrePortraitContainerSetupWorker {
 
         portraitContainer.addChild(insert.portrait);
 
-        portrait.updatePortrait();
+        portrait.initPortrait();
 
-        const portraitDimensions = portrait.calculatePortraitDimensions();
+        insert.dockContainer.x = 0;
+        insert.dockContainer.y = insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight;
+
+        const portraitDimensions = portrait._calculatePortraitTargetSize();
 
         const portWidth = portraitDimensions.width;
         const portHeight = portraitDimensions.height;
@@ -116,7 +119,7 @@ export default class _TheatrePortraitContainerSetupWorker {
             typingBubble.theatreComponentName = "typingBubble";
             typingBubble.alpha = 0;
             typingBubble.y = portHeight -
-                (insert.optAlign  == "top" ? 0 : stage.theatreBar.offsetHeight) - insert.label.style.lineHeight + typingBubble.height / 2;
+                (insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight) - insert.label.style.lineHeight + typingBubble.height / 2;
 
 
             insert.typingBubble = typingBubble;
@@ -127,13 +130,13 @@ export default class _TheatrePortraitContainerSetupWorker {
         switch (TheatreSettings.getTheatreStyle()) {
             case TheatreStyle.LIGHTBOX:
                 // to allow top-aligned portraits to work without a seam
-                dockContainer.y += (insert.optAlign  == "top" ? 8 : 0);
+                dockContainer.y += (insert.optAlign == "top" ? 8 : 0);
                 insert.label.y -= (insert.optAlign == "top" ? 8 : 0);
                 break;
             case TheatreStyle.CLEARBOX:
                 dockContainer.y = stage.theatreDock.offsetHeight - portHeight;
-                insert.label.y += (insert.optAlign  == "top" ? 0 : stage.theatreBar.offsetHeight);
-                insert.typingBubble.y += (insert.optAlign  == "top" ? 0 : stage.theatreBar.offsetHeight);
+                insert.label.y += (insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight);
+                insert.typingBubble.y += (insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight);
                 break;
             case TheatreStyle.MANGABUBBLE:
                 break;

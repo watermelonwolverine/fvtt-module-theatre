@@ -7,6 +7,7 @@ import Theatre from "../Theatre";
 import ActorExtensions from "../extensions/ActorExtensions";
 import _TheatreWorkers from "./workers";
 import Tools from "./Tools";
+import Stage from "../types/Stage";
 
 
 export default class _TheatrePixiContainerFactory {
@@ -42,14 +43,7 @@ export default class _TheatrePixiContainerFactory {
         optAlign: string,
         emotions: EmotionDefinition,
         isLeft: boolean): void {
-        // given an image, we will generate a PIXI container to add to the theatreDock and size
-        // it to the image loaded
-        let dockContainer = new PIXI.Container();
-        let portraitContainer = new PIXI.Container();
-        dockContainer.addChild(portraitContainer);
 
-        let app = this.context.stage.pixiApplication;
-        app.stage.addChild(dockContainer);
 
         // track the dockContainer
         if (this.context.stage.getInsertById(imgId)) {
@@ -57,6 +51,14 @@ export default class _TheatrePixiContainerFactory {
             console.log("PRE-EXISTING PIXI CONTAINER FOR %s ", imgId);
             this.context._destroyPortraitDock(imgId);
         }
+
+        // given an image, we will generate a PIXI container to add to the theatreDock and size
+        // it to the image loaded
+        const dockContainer = new PIXI.Container();
+        this.context.stage.pixiApplication.stage.addChild(dockContainer);
+
+        const portraitContainer = new PIXI.Container();
+        dockContainer.addChild(portraitContainer);
 
         //console.log("Creating PortraintPIXIContainer with emotions: ",emotions); 
 

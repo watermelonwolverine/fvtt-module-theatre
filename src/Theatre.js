@@ -983,7 +983,11 @@ export default class Theatre {
 						insert.label.text = params.name;
 
 						this._clearPortraitContainer(data.insertid);
-						this.workers.portrait_container_setup_worker.setupPortraitContainer(data.insertid, insert.optAlign, data.resname, resources);
+						this.workers.portrait_container_setup_worker.setupPortraitContainer(
+							data.insertid,
+							insert.optAlign,
+							data.resname,
+							resources);
 						// re-attach label + typingBubble
 						insert.dockContainer.addChild(insert.label);
 						insert.dockContainer.addChild(insert.typingBubble);
@@ -1030,7 +1034,11 @@ export default class Theatre {
 						insert.label.text = params.name;
 
 						this._clearPortraitContainer(data.insertid);
-						this.workers.portrait_container_setup_worker.setupPortraitContainer(data.insertid, insert.optAlign, data.eresname, resources);
+						this.workers.portrait_container_setup_worker.setupPortraitContainer(
+							data.insertid, 
+							insert.optAlign, 
+							data.eresname, 
+							resources);
 						// re-attach label + typingBubble
 						insert.dockContainer.addChild(insert.label);
 						insert.dockContainer.addChild(insert.typingBubble);

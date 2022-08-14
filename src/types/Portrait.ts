@@ -2,6 +2,11 @@ import TheatreSettings from "../extensions/settings";
 import Stage from "./Stage";
 import StageInsert from "./StageInsert";
 
+type Size = {
+    width: number,
+    height: number
+}
+
 export default class Portrait {
 
     stage: Stage;
@@ -13,40 +18,46 @@ export default class Portrait {
         this.insert = insert;
     }
 
+    initPortrait() {
+        this.updatePortrait();
+    }
+
     updatePortrait() {
-        const dimensions = this.calculatePortraitDimensions();
-        this._updatePortraitDimensions(dimensions)
-        this._updatePortraitPosition(dimensions)
-        this._updatePivot()
-        // set mirror state if mirrored
+
+        this.insert.portraitContainer.scale.x = 1;
+
+        const targetSize = this._calculatePortraitTargetSize();
+        this._updateDimensions(targetSize);
+        this._updatePivots(targetSize);
+        this._updatePositions(targetSize);
+
         if (this.insert.mirrored) {
             this.insert.portraitContainer.scale.x = -1;
         }
     }
 
-    _updatePortraitDimensions(portraitDimensions = this.calculatePortraitDimensions()) {
-
-        const width = portraitDimensions.width;
-        const height = portraitDimensions.height;
-        this.insert.portrait.height = height;
-        this.insert.portrait.width = width;
+    /** Updates size of portrait. */
+    _updateDimensions(targetSize: Size) {
+        this.insert.portrait.height = targetSize.height;
+        this.insert.portrait.width = targetSize.width;
     }
 
-    _updatePivot() {
-        const container = this.insert.portraitContainer;
-        container.pivot.x = container.width / 2;
-        container.pivot.y = container.height / 2;
+    /** Updates pivot of container to be in the middle. Has to be updated everytime because pivot changes */
+    _updatePivots(targetSize: Size) {
+        this.insert.portraitContainer.pivot.x = targetSize.width / 2;
+        this.insert.portraitContainer.pivot.y = targetSize.height / 2;
     }
 
-    /** @private */
-    _updatePortraitPosition(portraitDimensions = this.calculatePortraitDimensions()) {
-
-        this.insert.portraitContainer.x = this.insert.portraitContainer.x + portraitDimensions.width / 2;
-        this.insert.portraitContainer.y = this.insert.portraitContainer.y + portraitDimensions.height / 2;
-        this.insert.dockContainer.y = this.stage.theatreDock.offsetHeight - (this.insert.optAlign == "top" ? this.stage.theatreBar.offsetHeight : 0) - portraitDimensions.height;
+    /** Updates position of container. Has to be updated everytime because pivot or size changes */
+    _updatePositions(targetSize: Size) {
+        this.insert.portraitContainer.x = targetSize.width / 2;
+        this.insert.portraitContainer.y = targetSize.height / 2;
     }
 
-    calculatePortraitDimensions(): { width: number, height: number } {
+    /**
+     * Calculates portrait target size according to the set target height.  
+     */
+    _calculatePortraitTargetSize(): Size {
 
         const texture = this.insert.portrait.texture;
 
@@ -60,9 +71,10 @@ export default class Portrait {
 
         let height: number;
 
+        
         if (isNaN(heightStr as unknown as number)) {
             if (heightStr.endsWith("%")) {
-
+                // => target height is relative to canvas size
                 const relativeHeight = parseInt(
                     heightStr.substring(0, heightStr.length - 1)
                 ) / 100;
@@ -70,11 +82,13 @@ export default class Portrait {
                 height = relativeHeight * this.stage.pixiApplication.renderer.height;
             }
             else {
+                // => target size does no have a legal string value
                 ui.notifications.error(`Illegal value for: ${TheatreSettings.getNameLocalizationKey(TheatreSettings.THEATRE_IMAGE_SIZE)}`);
                 height = TheatreSettings.THEATRE_IMAGE_SIZE_DEFAULT;
             }
         }
         else {
+            // => target height is absolute
             height = parseInt(heightStr);
         }
 
