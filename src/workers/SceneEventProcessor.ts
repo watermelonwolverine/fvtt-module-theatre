@@ -1,43 +1,9 @@
 import Theatre from "../Theatre";
 import EmotionDefinition from "../types/EmotionDefinition";
-import Params from "../types/Params";
 import Stage from "../types/Stage";
 import StageInsert from "../types/StageInsert";
+import { AddAllTexturesEvent, AddTextureEvent, DecayTextEvent, EmoteEvent, EnterSceneEvent, ExitSceneEvent, MoveEvent, NarratorEvent, PositionUpdateEvent, PushEvent, RenderInsertEvent, SceneEvent, StageEvent, SwapEvent } from "./SceneEvents";
 import Tools from "./Tools";
-
-export class Position {
-    x: number;
-    y: number;
-    mirror: boolean;
-}
-
-// TODO split this into several event types
-export class SceneEventDataBase { };
-
-// TODO split this into several event types
-export class SceneEventData {
-    insertid: string;
-    emotions: EmotionDefinition;
-    isleft: boolean;
-    insertid1: string;
-    insertid2: string;
-    tofront: boolean;
-    emote: string;
-    imgsrc: string;
-    resname: string;
-    eresname: string;
-    imgsrcs: string[];
-    active: boolean;
-};
-
-export class PositionUpdateEvent extends SceneEventDataBase {
-    insertid: string;
-    position: Position;
-}
-
-export class ExitSceneEvent extends SceneEventDataBase {
-    insertid: string;
-}
 
 export class SceneEventTypes {
     /** an insert was injected remotely */
@@ -89,240 +55,287 @@ export default class SceneEventProcessor {
     processSceneEvent(
         senderId: string,
         type: string,
-        data: SceneEventData) {
+        data: SceneEvent) {
 
         let insert: StageInsert;
-        let actorId: string;
-        let params: Params;
-        let emote: string;
-        let port;
-        let emotions;
-        let resName;
-        let app: PIXI.Application;
-        let insertEmote;
-        let render: boolean;
 
         switch (type) {
             case SceneEventTypes.enterscene:
-                actorId = Tools.toActorId(data.insertid);
-                params = Tools.getInsertParamsFromActorId(actorId);
-
-                emotions = (data.emotions ? data.emotions : {
-                    emote: null,
-                    textFlying: null,
-                    textStanding: null,
-                    textFont: null,
-                    textSize: null,
-                    textColor: null
-                });
-
-                if (!params) return;
-                if (data.isleft)
-                    this.theatre.injectLeftPortrait(params.src, params.name, params.imgId, params.optalign, emotions, true);
-                else
-                    this.theatre.injectRightPortrait(params.src, params.name, params.imgId, params.optalign, emotions, true);
-
+                this.processEnterSceneEvent(data as EnterSceneEvent)
                 break;
             case SceneEventTypes.exitscene:
-                this.stage.removeInsertById(data.insertid, true);
+                this.processExitSceneEvent(data as ExitSceneEvent);
                 break;
             case SceneEventTypes.positionupdate:
-
-                insert = this.stage.getInsertById(data.insertid);
-
-                const positionUpdateEvent = data as unknown as PositionUpdateEvent;
-
-                if (insert) {
-                    // apply mirror state
-                    if (Theatre.DEBUG) console.log("mirroring desired: %s , current mirror %s", positionUpdateEvent.position.mirror, insert.mirrored);
-                    if (Boolean(positionUpdateEvent.position.mirror) != insert.mirrored)
-                        insert.mirrored = positionUpdateEvent.position.mirror;
-                    let tweenId = "portraitMove";
-                    let tween = TweenMax.to(insert.portrait, 0.5, {
-                        scaleX: (positionUpdateEvent.position.mirror ? -1 : 1),
-                        x: positionUpdateEvent.position.x,
-                        y: positionUpdateEvent.position.y,
-                        ease: Power3.easeOut,
-                        onComplete: function (ctx, imgId, tweenId) {
-                            // decrement the rendering accumulator
-                            ctx._removeDockTween(imgId, this, tweenId);
-                            // remove our own reference from the dockContainer tweens
-                        },
-                        onCompleteParams: [this, insert.imgId, tweenId]
-                    });
-                    this.theatre._addDockTween(insert.imgId, tween, tweenId);
-                }
+                this.processPositionEvent(data as PositionUpdateEvent);
                 break;
             case SceneEventTypes.push:
-                this.theatre.pushInsertById(
-                    data.insertid,
-                    data.tofront,
-                    true);
+                this.processPushEvent(data as PushEvent);
                 break;
             case SceneEventTypes.swap:
-                this.theatre.swapInsertsById(
-                    data.insertid1,
-                    data.insertid2,
-                    true);
+                this.processSwapEvent(data as SwapEvent);
                 break;
             case SceneEventTypes.move:
-                this.theatre.moveInsertById(
-                    data.insertid1,
-                    data.insertid2,
-                    true);
+                this.processMoveEvent(data as MoveEvent);
                 break;
             case SceneEventTypes.emote:
-                emote = data.emotions.emote;
-                let textFlyin = data.emotions.textFlyin;
-                let textStanding = data.emotions.textStanding;
-                let textFont = data.emotions.textFont;
-                let textSize = data.emotions.textSize;
-                let textColor = data.emotions.textColor;
-                this.theatre.setUserEmote(senderId, data.insertid, "emote", emote, true);
-                this.theatre.setUserEmote(senderId, data.insertid, "textflyin", textFlyin, true);
-                this.theatre.setUserEmote(senderId, data.insertid, "textstanding", textStanding, true);
-                this.theatre.setUserEmote(senderId, data.insertid, "textfont", textFont, true);
-                this.theatre.setUserEmote(senderId, data.insertid, "textsize", textSize, true);
-                this.theatre.setUserEmote(senderId, data.insertid, "textcolor", textColor, true);
-
-                if (data.insertid == this.theatre.speakingAs)
-                    this.theatre.emoteMenuRenderer.initialize();
-
+                this.processEmoteEvent(
+                    senderId,
+                    data as EmoteEvent);
                 break;
             case SceneEventTypes.addtexture:
-                if (Theatre.DEBUG) console.log("texturereplace:", data);
-                insert = this.stage.getInsertById(data.insertid);
-                actorId = data.insertid.replace("theatre-", "");
-                params = Tools.getInsertParamsFromActorId(actorId);
-                if (!params) return;
-
-                app = this.stage.pixiApplication;
-                insertEmote = this.theatre._getEmoteFromInsert(insert);
-                render = false;
-
-                if (insertEmote == data.emote)
-                    render = true;
-                else if (!data.emote)
-                    render = true;
-
-                this.theatre._AddTextureResource(
-                    data.imgsrc,
-                    data.resname,
-                    data.insertid,
-                    data.emote,
-                    (loader: PIXI.Loader, resources: PIXI.IResourceDictionary) => {
-                        // if oure emote is active and we're replacing the emote texture, or base is active, and we're replacing the base texture
-
-                        if (render && app && insert && insert.dockContainer) {
-                            if (Theatre.DEBUG) console.log("RE-RENDERING with NEW texture resource %s : %s", data.resname, data.imgsrc);
-
-                            // bubble up dataum from the update
-                            insert.optAlign = params.optalign;
-                            insert.name = params.name;
-                            insert.label.text = params.name;
-
-                            this.theatre._clearPortraitContainer(data.insertid);
-                            this.theatre.workers.portrait_container_setup_worker.setupPortraitContainer(
-                                data.insertid,
-                                insert.optAlign,
-                                data.resname,
-                                resources);
-                            // re-attach label + typingBubble
-                            insert.dockContainer.addChild(insert.label);
-                            insert.dockContainer.addChild(insert.typingBubble);
-
-                            this.theatre._repositionInsertElements(insert);
-
-                            if (data.insertid == this.theatre.speakingAs) {
-                                this.theatre.emoteMenuRenderer.initialize();
-                            }
-                            if (!this.theatre.rendering) {
-                                this.theatre._renderTheatre(performance.now());
-                            }
-                        }
-                    }, true);
+                this.processAddTextureEvent(data as AddTextureEvent)
                 break;
             case SceneEventTypes.addalltextures:
-                if (Theatre.DEBUG) console.log("textureallreplace:", data);
-                insert = this.stage.getInsertById(data.insertid);
-                actorId = data.insertid.replace("theatre-", "");
-                params = Tools.getInsertParamsFromActorId(actorId);
-                if (!params) return;
-
-                app = this.stage.pixiApplication;
-                insertEmote = this.theatre._getEmoteFromInsert(insert);
-                render = false;
-
-                if (insertEmote == data.emote)
-                    render = true;
-                else if (!data.emote)
-                    render = true;
-
-                this.theatre._AddAllTextureResources(
-                    data.imgsrcs,
-                    data.insertid,
-                    data.emote,
-                    data.eresname,
-                    // TODO refactor: This is almost the same as above
-                    (loader: PIXI.Loader, resources: PIXI.IResourceDictionary) => {
-                        // if oure emote is active and we're replacing the emote texture, or base is active, and we're replacing the base texture
-
-                        if (Theatre.DEBUG) console.log("add all textures complete! ", data.emote, data.eresname, params.emotes[data.emote]);
-                        if (render
-                            && app
-                            && insert
-                            && insert.dockContainer
-                            && data.eresname) {
-                            if (Theatre.DEBUG) console.log("RE-RENDERING with NEW texture resource %s", data.eresname);
-
-                            // bubble up dataum from the update
-                            insert.optAlign = params.optalign;
-                            insert.name = params.name;
-                            insert.label.text = params.name;
-
-                            this.theatre._clearPortraitContainer(data.insertid);
-                            this.theatre.workers.portrait_container_setup_worker.setupPortraitContainer(
-                                data.insertid,
-                                insert.optAlign,
-                                data.eresname,
-                                resources);
-                            // re-attach label + typingBubble
-                            insert.dockContainer.addChild(insert.label);
-                            insert.dockContainer.addChild(insert.typingBubble);
-
-                            this.theatre._repositionInsertElements(insert);
-
-                            if (data.insertid == this.theatre.speakingAs) {
-                                this.theatre.emoteMenuRenderer.initialize();
-                            }
-                            if (!this.theatre.rendering) {
-                                this.theatre._renderTheatre(performance.now());
-                            }
-                        }
-                    }, true);
-
+                this.processAddAllTexturesEvent(data as AddAllTexturesEvent);
                 break;
             case SceneEventTypes.stage:
-                if (Theatre.DEBUG) console.log("staging insert", data.insertid);
-                this.theatre.stageInsertById(data.insertid, true);
+                this.processStageEvent(data as StageEvent);
                 break;
             case SceneEventTypes.narrator:
-                if (Theatre.DEBUG) console.log("toggle narrator bar", data.active);
-                this.theatre.toggleNarratorBar(data.active, true);
+                this.processNarratorEvent(data as NarratorEvent);
                 break;
             case SceneEventTypes.decaytext:
-                if (Theatre.DEBUG) console.log("decay textbox", data.insertid);
-                this.theatre.decayTextBoxById(data.insertid, true);
+                this.processDecayTextEvent(data as DecayTextEvent);
                 break;
             case SceneEventTypes.renderinsert:
-                insert = this.stage.getInsertById(data.insertid);
-                if (insert)
-                    this.theatre.renderInsertById(data.insertid);
+                this.processRenderInsertEvent(data as RenderInsertEvent);
                 break;
             default:
-                console.log("UNKNOWN SCENE EVENT: %s with data: ", type, data);
+                throw new Error(`UNKNOWN SCENE EVENT: ${type} with data: ${data}`);
         }
     }
+    
+    processEnterSceneEvent(event: EnterSceneEvent) {
+
+        const actorId = Tools.toActorId(event.insertid);
+        const params = Tools.getInsertParamsFromActorId(actorId);
+
+        const emotions = event.emotions ? event.emotions : new EmotionDefinition();
+
+        if (!params) return;
+        if (event.isleft)
+            this.theatre.injectLeftPortrait(params.src, params.name, params.imgId, params.optalign, emotions, true);
+        else
+            this.theatre.injectRightPortrait(params.src, params.name, params.imgId, params.optalign, emotions, true);
+
+    }
+
+    processExitSceneEvent(event: ExitSceneEvent) {
+        this.stage.removeInsertById(event.insertid, true);
+    }
+
+    processPositionEvent(event: PositionUpdateEvent) {
+
+        const insert = this.stage.getInsertById(event.insertid);
+
+        if (insert) {
+            // apply mirror state
+            if (Theatre.DEBUG) console.log("mirroring desired: %s , current mirror %s", event.position.mirror, insert.mirrored);
+            if (Boolean(event.position.mirror) != insert.mirrored)
+                insert.mirrored = event.position.mirror;
+            let tweenId = "portraitMove";
+            let tween = TweenMax.to(insert.portrait, 0.5, {
+                scaleX: (event.position.mirror ? -1 : 1),
+                x: event.position.x,
+                y: event.position.y,
+                ease: Power3.easeOut,
+                onComplete: function (ctx, imgId, tweenId) {
+                    // decrement the rendering accumulator
+                    ctx._removeDockTween(imgId, this, tweenId);
+                    // remove our own reference from the dockContainer tweens
+                },
+                onCompleteParams: [this, insert.imgId, tweenId]
+            });
+            this.theatre._addDockTween(insert.imgId, tween, tweenId);
+        }
+    }
+
+    processPushEvent(event: PushEvent) {
+        this.theatre.pushInsertById(
+            event.insertid,
+            event.tofront,
+            true);
+    }
+
+    processSwapEvent(event: SwapEvent) {
+        this.theatre.swapInsertsById(
+            event.insertid1,
+            event.insertid2,
+            true);
+    }
+
+    processMoveEvent(data: MoveEvent) {
+        this.theatre.moveInsertById(
+            data.insertid1,
+            data.insertid2,
+            true);
+    }
+
+    processEmoteEvent(
+        senderId: string,
+        data: EmoteEvent) {
+
+        const emotions = data.emotions;
+
+        this.theatre.setUserEmote(senderId, data.insertid, "emote", emotions.emote, true);
+        this.theatre.setUserEmote(senderId, data.insertid, "textflyin", emotions.textFlyin, true);
+        this.theatre.setUserEmote(senderId, data.insertid, "textstanding", emotions.textStanding, true);
+        this.theatre.setUserEmote(senderId, data.insertid, "textfont", emotions.textFont, true);
+        this.theatre.setUserEmote(senderId, data.insertid, "textsize", emotions.textSize, true);
+        this.theatre.setUserEmote(senderId, data.insertid, "textcolor", emotions.textColor, true);
+
+        if (data.insertid == this.theatre.speakingAs)
+            this.theatre.emoteMenuRenderer.initialize();
+
+    }
+
+    processAddTextureEvent(event: AddTextureEvent) {
+
+        const insert = this.stage.getInsertById(event.insertid);
+        const actorId = Tools.toActorId(event.insertid);
+
+        const params = Tools.getInsertParamsFromActorId(actorId);
+
+        if (!params) {
+            return;
+        }
+
+        const app = this.stage.pixiApplication;
+
+        const insertEmote = this.theatre._getEmoteFromInsert(insert);
+        let render = false;
+
+        if (insertEmote == event.emote)
+            render = true;
+        else if (!event.emote)
+            render = true;
+
+        this.theatre._AddTextureResource(
+            event.imgsrc,
+            event.resname,
+            event.insertid,
+            event.emote,
+            (loader: PIXI.Loader, resources: PIXI.IResourceDictionary) => {
+                // if oure emote is active and we're replacing the emote texture, or base is active, and we're replacing the base texture
+
+                if (render
+                    && app
+                    && insert
+                    && insert.dockContainer) {
+
+                    // bubble up dataum from the update
+                    insert.optAlign = params.optalign;
+                    insert.name = params.name;
+                    insert.label.text = params.name;
+
+                    this.theatre._clearPortraitContainer(event.insertid);
+                    this.theatre.workers.portrait_container_setup_worker.setupPortraitContainer(
+                        event.insertid,
+                        insert.optAlign,
+                        event.resname,
+                        resources);
+                    // re-attach label + typingBubble
+                    insert.dockContainer.addChild(insert.label);
+                    insert.dockContainer.addChild(insert.typingBubble);
+
+                    this.theatre._repositionInsertElements(insert);
+
+                    if (event.insertid == this.theatre.speakingAs) {
+                        this.theatre.emoteMenuRenderer.initialize();
+                    }
+                    if (!this.theatre.rendering) {
+                        this.theatre._renderTheatre(performance.now());
+                    }
+                }
+            }, true);
+    }
+
+    processAddAllTexturesEvent(event: AddAllTexturesEvent) {
+
+        const insert = this.stage.getInsertById(event.insertid);
+        const actorId = Tools.toActorId(event.insertid);
+        const params = Tools.getInsertParamsFromActorId(actorId);
+
+        if (!params) {
+            return;
+        }
+
+        const app = this.stage.pixiApplication;
+        const insertEmote = this.theatre._getEmoteFromInsert(insert);
+        let render = false;
+
+        if (insertEmote == event.emote)
+            render = true;
+        else if (!event.emote)
+            render = true;
+
+        this.theatre._AddAllTextureResources(
+            event.imgsrcs,
+            event.insertid,
+            event.emote,
+            event.eresname,
+            // TODO refactor: This is almost the same as above
+            (loader: PIXI.Loader, resources: PIXI.IResourceDictionary) => {
+                // if oure emote is active and we're replacing the emote texture, or base is active, and we're replacing the base texture
+
+                if (Theatre.DEBUG) console.log("add all textures complete! ", event.emote, event.eresname, params.emotes[event.emote]);
+                if (render
+                    && app
+                    && insert
+                    && insert.dockContainer
+                    && event.eresname) {
+                    if (Theatre.DEBUG) console.log("RE-RENDERING with NEW texture resource %s", event.eresname);
+
+                    // bubble up dataum from the update
+                    insert.optAlign = params.optalign;
+                    insert.name = params.name;
+                    insert.label.text = params.name;
+
+                    this.theatre._clearPortraitContainer(event.insertid);
+                    this.theatre.workers.portrait_container_setup_worker.setupPortraitContainer(
+                        event.insertid,
+                        insert.optAlign,
+                        event.eresname,
+                        resources);
+                    // re-attach label + typingBubble
+                    insert.dockContainer.addChild(insert.label);
+                    insert.dockContainer.addChild(insert.typingBubble);
+
+                    this.theatre._repositionInsertElements(insert);
+
+                    if (event.insertid == this.theatre.speakingAs) {
+                        this.theatre.emoteMenuRenderer.initialize();
+                    }
+                    if (!this.theatre.rendering) {
+                        this.theatre._renderTheatre(performance.now());
+                    }
+                }
+            }, true);
+    }
+    processStageEvent(event: StageEvent) {
+        this.theatre.stageInsertById(event.insertid, true);
+    }
+    processNarratorEvent(event: NarratorEvent) {
+        this.theatre.toggleNarratorBar(event.active, true);
+    }
+    processDecayTextEvent(event: DecayTextEvent) {
+        this.theatre.decayTextBoxById(event.insertid, true);
+    }
+    processRenderInsertEvent(event: RenderInsertEvent) {
+        const insert = this.stage.getInsertById(event.insertid);
+        if (insert)
+            this.theatre.renderInsertById(event.insertid);
+    }
+
+
+
+
+
+
+
+
+
 
     /**
      * Send a packet to all clients indicating the event type, and
@@ -334,7 +347,7 @@ export default class SceneEventProcessor {
      */
     sendSceneEvent(
         eventType: string,
-        eventData: SceneEventData | ExitSceneEvent | PositionUpdateEvent) {
+        eventData: ExitSceneEvent | PositionUpdateEvent | EnterSceneEvent) {
 
         // Do we even need verification? There's no User Input outside of 
         // cookie cutter responses
