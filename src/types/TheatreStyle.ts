@@ -1,15 +1,9 @@
-class TheatreStyles {
+export type AnyTheatreStyle = "lightbox" | "clearbox" | "mangabubble" | "textbox";
 
-    // LIGHTBOX = "lightbox",
-    // CLEARBOX = "clearbox",
-    // MANGABUBBLE = "mangabubble",
-    // TEXTBOX = "textbox"
-
-    static LIGHTBOX = "lightbox";
-    static CLEARBOX = "clearbox";
-    static MANGABUBBLE = "mangabubble";
-    static TEXTBOX = "textbox";
+export default class TheatreStyles {
+    static LIGHTBOX: AnyTheatreStyle = "lightbox";
+    static CLEARBOX: AnyTheatreStyle = "clearbox";
+    static MANGABUBBLE: AnyTheatreStyle = "mangabubble";
+    static TEXTBOX: AnyTheatreStyle = "textbox";
 }
-
-export default TheatreStyles;
 

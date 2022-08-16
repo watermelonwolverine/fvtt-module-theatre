@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
 import ActorExtensions from "../extensions/ActorExtensions";
-import Resources from "../extensions/foundry_extensions";
 import TheatreSettings from "../extensions/TheatreSettings";
 import Theatre from "../Theatre";
 import TheatreStyle from "../types/TheatreStyle";
@@ -31,7 +30,7 @@ export default class TheatrePortraitContainerSetupWorker {
         imgId: string,
         optAlign: string, // TODO remove
         resName: string,
-        resources: Resources,
+        resources: PIXI.IResourceDictionary,
         reorder = false): void {
 
 

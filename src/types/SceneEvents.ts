@@ -1,10 +1,6 @@
 import EmotionDefinition from "./EmotionDefinition";
+import { Position } from "./Position";
 
-export class Position {
-    x: number;
-    y: number;
-    mirror: boolean;
-}
 export class SceneEvent { };
 
 class SingleTargetEvent extends SceneEvent {

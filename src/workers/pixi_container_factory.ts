@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 import Portrait from "../components/stage/Portrait";
 import ActorExtensions from "../extensions/ActorExtensions";
-import Resources from "../extensions/foundry_extensions";
 import TheatreSettings from "../extensions/TheatreSettings";
 import { RiggingResource } from "../resources/resources_types";
 import Theatre from "../Theatre";
@@ -130,7 +129,7 @@ export default class _TheatrePixiContainerFactory {
                     imgSrcs.push({ imgpath: params.emotes[emName].insert, resname: params.emotes[emName].insert });
 
         // handles the waiting game of grabbing loader for us
-        this.theatre._addSpritesToPixi(imgSrcs, (loader?: any, resources?: Resources) => {
+        this.theatre._addSpritesToPixi(imgSrcs, (loader, resources) => {
             // PIXI Container is ready!
             // Setup the dockContainer to display the base insert
             if (Theatre.DEBUG) console.log("Sprites added to PIXI createPortraitPIXIContainer", resources);

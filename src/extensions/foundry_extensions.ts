@@ -48,11 +48,9 @@ declare global {
 		interface Sprite {
 			theatreComponentName: string;
 		}
+
+		interface DisplayObject {
+			theatreComponentName: string;
+		}
 	}
 }
-
-export default interface Resources extends Partial<Record<string, PIXI.LoaderResource>> { }
-
-
-
-

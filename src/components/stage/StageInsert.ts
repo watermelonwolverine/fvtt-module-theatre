@@ -20,11 +20,12 @@ export default class StageInsert {
     exitOrientation: "left" | "right";
     nameOrientation: "left" | "right";
     optAlign: string;
-    tweens: unknown;
+    tweens: { [key: string]: TweenMax };
     order: number;
     renderOrder: number;
     /** If this dock is in the process of being deleted */
     deleting?= false;
     meta: {}
     mirrored?= false;
+    delayedOldEmote?: string = null;
 }

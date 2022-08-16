@@ -1,3 +1,5 @@
+import { AnyTheatreStyle } from "../types/TheatreStyle";
+
 export default class TheatreSettings {
 
 
@@ -44,7 +46,7 @@ export default class TheatreSettings {
 		return this.get(TheatreSettings.THEATRE_IMAGE_SIZE);
 	}
 
-	static getTheatreStyle(): string {
+	static getTheatreStyle(): AnyTheatreStyle {
 		return this.get(TheatreSettings.THEATRE_STYLE);
 	}
 
@@ -68,7 +70,7 @@ export default class TheatreSettings {
 		return "Riffic";
 	}
 
-	static getAutoDecay(): boolean{
+	static getAutoDecay(): boolean {
 		return true;
 	}
 
