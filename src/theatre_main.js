@@ -27,7 +27,7 @@ import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory";
 import TextStandingAnimationsFactory from "./workers/standing_animations_factory";
 import ActorExtensions from "./extensions/ActorExtensions";
 import TextBoxToCharSplitter from "./workers/TextBoxToCharSplitter"
-import { SceneEventTypes } from "./workers/SceneEventProcessor";
+import { SceneEventTypes } from "./types/SceneEventTypes";
 
 /**
  * Concat helper

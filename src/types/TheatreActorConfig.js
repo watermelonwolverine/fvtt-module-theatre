@@ -22,7 +22,7 @@
 import Theatre from "../Theatre";
 import ActorExtensions from "../extensions/ActorExtensions";
 import KHelpers from "../workers/KHelpers";
-import { SceneEventTypes } from "../workers/SceneEventProcessor";
+import { SceneEventTypes } from "./SceneEventTypes";
 
 export default class TheatreActorConfig extends FormApplication {
 	constructor(object = {}, options = {}) {

@@ -43,7 +43,8 @@ import EmoteSetter from './workers/EmoteSetter';
 import EaseVerifier from './workers/EaseVerifier';
 import { AnimationSyntaxVerifier } from './types/AnimationSyntaxVerifier';
 import NavBar from './types/NavBar';
-import SceneEventProcessor, { SceneEventTypes } from './workers/SceneEventProcessor';
+import SceneEventProcessor from './workers/SceneEventProcessor';
+import { SceneEventTypes } from "./types/SceneEventTypes";
 import TextBoxFactory from './workers/textbox_factory';
 
 export default class Theatre {

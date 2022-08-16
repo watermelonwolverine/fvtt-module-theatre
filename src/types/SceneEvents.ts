@@ -1,4 +1,4 @@
-import EmotionDefinition from "../types/EmotionDefinition";
+import EmotionDefinition from "./EmotionDefinition";
 
 export class Position {
     x: number;
@@ -60,3 +60,5 @@ export class MoveEvent extends DoubleTargetEvent { }
 export class NarratorEvent extends SceneEvent {
     active: boolean;
 }
+
+export type AnySceneEvent = AddAllTexturesEvent| AddTextureEvent| DecayTextEvent| EmoteEvent| EnterSceneEvent| ExitSceneEvent| MoveEvent| NarratorEvent| PositionUpdateEvent| PushEvent| RenderInsertEvent| SceneEvent| StageEvent| SwapEvent;

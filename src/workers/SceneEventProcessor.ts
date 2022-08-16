@@ -1,38 +1,10 @@
 import Theatre from "../Theatre";
 import EmotionDefinition from "../types/EmotionDefinition";
 import Stage from "../types/Stage";
-import StageInsert from "../types/StageInsert";
-import { AddAllTexturesEvent, AddTextureEvent, DecayTextEvent, EmoteEvent, EnterSceneEvent, ExitSceneEvent, MoveEvent, NarratorEvent, PositionUpdateEvent, PushEvent, RenderInsertEvent, SceneEvent, StageEvent, SwapEvent } from "./SceneEvents";
+import { AddAllTexturesEvent, AddTextureEvent, AnySceneEvent, DecayTextEvent, EmoteEvent, EnterSceneEvent, ExitSceneEvent, MoveEvent, NarratorEvent, PositionUpdateEvent, PushEvent, RenderInsertEvent, SceneEvent, StageEvent, SwapEvent } from "../types/SceneEvents";
+import { AnySceneEventType, SceneEventTypes } from "../types/SceneEventTypes";
 import Tools from "./Tools";
 
-export class SceneEventTypes {
-    /** an insert was injected remotely */
-    static enterscene = "enterscene";
-    /** an insert was removed remotely */
-    static exitscene = "exitscene";
-    /** an insert was moved removely */
-    static positionupdate = "positionupdate";
-    /** an insert was pushed removely */
-    static push = "push";
-    /** an insert was swapped remotely */
-    static swap = "swap";
-    static move = "move";
-    /** the narrator bar was activated remotely */
-    static emote = "emote";
-    /** a texture asset was added remotely */
-    static addtexture = "addtexture";
-    /** a group of textures were added remotely */
-    static addalltextures = "addalltextures";
-    /** an insert's assets were staged remotely */
-    static stage = "stage";
-    /** the narrator bar was activated remotely */
-    static narrator = "narrator";
-    /** an insert's text was decayed remotely */
-    static decaytext = "decaytext";
-    /** an insert is requesting to be rendered immeidately remotely */
-    static renderinsert = "renderinsert";
-
-}
 
 export default class SceneEventProcessor {
 
@@ -56,8 +28,6 @@ export default class SceneEventProcessor {
         senderId: string,
         type: string,
         data: SceneEvent) {
-
-        let insert: StageInsert;
 
         switch (type) {
             case SceneEventTypes.enterscene:
@@ -105,7 +75,7 @@ export default class SceneEventProcessor {
                 throw new Error(`UNKNOWN SCENE EVENT: ${type} with data: ${data}`);
         }
     }
-    
+
     processEnterSceneEvent(event: EnterSceneEvent) {
 
         const actorId = Tools.toActorId(event.insertid);
@@ -328,15 +298,6 @@ export default class SceneEventProcessor {
             this.theatre.renderInsertById(event.insertid);
     }
 
-
-
-
-
-
-
-
-
-
     /**
      * Send a packet to all clients indicating the event type, and
      * the data relevant to the event. The caller must specify this
@@ -346,11 +307,8 @@ export default class SceneEventProcessor {
      *
      */
     sendSceneEvent(
-        eventType: string,
-        eventData: ExitSceneEvent | PositionUpdateEvent | EnterSceneEvent) {
-
-        // Do we even need verification? There's no User Input outside of 
-        // cookie cutter responses
+        eventType: AnySceneEventType,
+        eventData: AnySceneEvent) {
 
         game.socket.emit(Theatre.SOCKET,
             {

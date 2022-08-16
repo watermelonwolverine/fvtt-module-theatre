@@ -1,6 +1,7 @@
 import Theatre from "../Theatre";
 import StageInsert from "../types/StageInsert";
-import SceneEventProcessor, { SceneEventTypes } from "./SceneEventProcessor";
+import SceneEventProcessor from "./SceneEventProcessor";
+import { SceneEventTypes } from "../types/SceneEventTypes";
 
 type DragPoint = {
     dragStartX: number,

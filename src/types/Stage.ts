@@ -1,7 +1,7 @@
 import TheatreSettings from "../extensions/TheatreSettings";
 import Theatre from "../Theatre";
 import KHelpers from "../workers/KHelpers";
-import { SceneEventTypes } from "../workers/SceneEventProcessor";
+import { SceneEventTypes } from "./SceneEventTypes";
 import Tools from "../workers/Tools";
 import StageInsert from "./StageInsert.js"
 import TheatreActor from "./TheatreActor.js"
