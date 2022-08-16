@@ -40,18 +40,30 @@ export class ExitSceneEvent extends SceneEventDataBase {
 }
 
 export class SceneEventTypes {
+    /** an insert was injected remotely */
     static enterscene = "enterscene";
+    /** an insert was removed remotely */
     static exitscene = "exitscene";
+    /** an insert was moved removely */
     static positionupdate = "positionupdate";
+    /** an insert was pushed removely */
     static push = "push";
+    /** an insert was swapped remotely */
     static swap = "swap";
     static move = "move";
+    /** the narrator bar was activated remotely */
     static emote = "emote";
+    /** a texture asset was added remotely */
     static addtexture = "addtexture";
+    /** a group of textures were added remotely */
     static addalltextures = "addalltextures";
+    /** an insert's assets were staged remotely */
     static stage = "stage";
+    /** the narrator bar was activated remotely */
     static narrator = "narrator";
+    /** an insert's text was decayed remotely */
     static decaytext = "decaytext";
+    /** an insert is requesting to be rendered immeidately remotely */
     static renderinsert = "renderinsert";
 
 }
@@ -73,26 +85,6 @@ export default class SceneEventProcessor {
      * if we receive an event of the same type that is older
      * than one we've already resceived, notify, and drop it.
      *
-     * Scene Events
-     *
-     * enterscene : an insert was injected remotely
-     * exitscene : an insert was removed remotely
-     * positionupdate : an insert was moved removely
-     * push : an insert was pushed removely
-     * swap : an insert was swapped remotely
-     * emote : an emote was triggered removely
-     * addtexture : a texture asset was added remotely
-     * addalltextures : a group of textures were added remotely
-     * state : an insert's assets were staged remotely
-     * narrator : the narrator bar was activated remotely
-     * decaytext : an insert's text was decayed remotely
-     * renderinsert : an insert is requesting to be rendered immeidately remotely
-     *
-     * @params senderId (String) : The userId of the playerId whom sent the scene event
-     * @params type (String) : The scene event subtype to process, and is represented in the data object
-     * @params data (Object) : An object whose properties contain the relevenat data needed for each scene subtype
-     *
-     * @private
      */
     processSceneEvent(
         senderId: string,
@@ -339,29 +331,10 @@ export default class SceneEventProcessor {
      *
      * Scene Event Sub Types
      *
-     * enterscene : an insert was injected remotely
-     * exitscene : an insert was removed remotely
-     * positionupdate : an insert was moved removely
-     * push : an insert was pushed removely
-     * swap : an insert was swapped remotely
-     * emote : an emote was triggered removely
-     * addtexture : a texture asset was added remotely
-     * addalltextures : a group of textures were added remotely
-     * state : an insert's assets were staged remotely
-     * narrator : the narrator bar was activated remotely
-     * decaytext : an insert's text was decayed remotely
-     * renderinsert : an insert is requesting to be rendered immeidately remotely
-
-     *
-     * @param eventType : The scene event subtype
-     * @param evenData  : An Object whose properties are needed for
-     *							the scene event subtype
-     *
      */
     sendSceneEvent(
         eventType: string,
         eventData: SceneEventData | ExitSceneEvent | PositionUpdateEvent) {
-        if (Theatre.DEBUG) console.log("Sending Scene state %s with payload: ", eventType, eventData)
 
         // Do we even need verification? There's no User Input outside of 
         // cookie cutter responses

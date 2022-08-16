@@ -22,6 +22,7 @@
 import Theatre from "../Theatre";
 import ActorExtensions from "../extensions/ActorExtensions";
 import KHelpers from "../workers/KHelpers";
+import { SceneEventTypes } from "../workers/SceneEventProcessor";
 
 export default class TheatreActorConfig extends FormApplication {
 	constructor(object = {}, options = {}) {
@@ -417,11 +418,9 @@ export default class TheatreActorConfig extends FormApplication {
 			if (theatreId == Theatre.instance.speakingAs);
 			Theatre.instance.emoteMenuRenderer.initialize();
 			if (insertDirty)
-				Theatre.instance._sendSceneEvent("renderinsert", { insertid: theatreId });
+				Theatre.instance.sceneEventProcessor.sendSceneEvent(SceneEventTypes.renderinsert, { insertid: theatreId });
 
 		});
-
-
 	}
 
 	/**

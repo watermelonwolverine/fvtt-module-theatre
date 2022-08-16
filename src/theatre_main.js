@@ -27,6 +27,7 @@ import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory";
 import TextStandingAnimationsFactory from "./workers/standing_animations_factory";
 import ActorExtensions from "./extensions/ActorExtensions";
 import TextBoxToCharSplitter from "./workers/TextBoxToCharSplitter"
+import { SceneEventTypes } from "./workers/SceneEventProcessor";
 
 /**
  * Concat helper
@@ -556,7 +557,7 @@ Hooks.once("init", () => {
 			Theatre.instance._addDockTween(insert.imgId, tween, tweenId);
 
 			// send sceneEvent
-			Theatre.instance.sceneEventProcessor.sendSceneEvent("positionupdate", {
+			Theatre.instance.sceneEventProcessor.sendSceneEvent(SceneEventTypes.positionupdate, {
 				insertid: insert.imgId,
 				position: { x: oleft - 50, y: otop, mirror: insert.mirrored }
 			});
@@ -591,7 +592,7 @@ Hooks.once("init", () => {
 			Theatre.instance._addDockTween(insert.imgId, tween, tweenId);
 
 			// send sceneEvent
-			Theatre.instance.sceneEventProcessor.sendSceneEvent("positionupdate", {
+			Theatre.instance.sceneEventProcessor.sendSceneEvent(SceneEventTypes.positionupdate, {
 				insertid: insert.imgId,
 				position: { x: oleft + 50, y: otop, mirror: insert.mirrored }
 			});
@@ -626,7 +627,7 @@ Hooks.once("init", () => {
 			Theatre.instance._addDockTween(insert.imgId, tween, tweenId);
 
 			// send sceneEvent
-			Theatre.instance.sceneEventProcessor.sendSceneEvent("positionupdate", {
+			Theatre.instance.sceneEventProcessor.sendSceneEvent(SceneEventTypes.positionupdate, {
 				insertid: insert.imgId,
 				position: { x: oleft, y: otop - 50, mirror: insert.mirrored }
 			});
@@ -661,7 +662,7 @@ Hooks.once("init", () => {
 			Theatre.instance._addDockTween(insert.imgId, tween, tweenId);
 
 			// send sceneEvent
-			Theatre.instance.sceneEventProcessor.sendSceneEvent("positionupdate", {
+			Theatre.instance.sceneEventProcessor.sendSceneEvent(SceneEventTypes.positionupdate, {
 				insertid: insert.imgId,
 				position: { x: oleft, y: otop + 50, mirror: insert.mirrored }
 			});

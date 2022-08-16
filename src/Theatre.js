@@ -1083,7 +1083,7 @@ export default class Theatre {
 		if (Theatre.DEBUG) console.log("SEND EMOTE PACKET %s,%s ??", this.isDelayEmote, this.delayedSentState);
 		if (!remote && (!this.isDelayEmote || this.delayedSentState == 2) && (insert || theatreId == Theatre.NARRATOR)) {
 			if (Theatre.DEBUG) console.log("SENDING EMOTE PACKET %s,%s", this.isDelayEmote, this.delayedSentState);
-			this._sendSceneEvent("emote", {
+			this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.emote, {
 				insertid: (insert ? insert.imgId : Theatre.NARRATOR),
 				emotions: {
 					emote: (insert ? this._getEmoteFromInsert(insert) : null),
@@ -1734,7 +1734,7 @@ export default class Theatre {
 		// Send to socket
 		if (!remote) {
 			// broadcast change to clients
-			this._sendSceneEvent("addtexture", {
+			this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.addtexture, {
 				insertid: imgId,
 				imgsrc: imgSrc,
 				resname: resName,
@@ -1801,7 +1801,7 @@ export default class Theatre {
 		// Send to socket
 		if (!remote) {
 			// broadcast change to clients
-			this._sendSceneEvent("addalltextures", {
+			this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.addalltextures, {
 				insertid: imgId,
 				imgsrcs: imgSrcs,
 				emote: emote,
@@ -2043,7 +2043,7 @@ export default class Theatre {
 
 		// Send socket event
 		if (!remote)
-			this.sceneEventProcessor.sendSceneEvent("stage", { insertid: theatreId })
+			this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.stage, { insertid: theatreId })
 	}
 
 	/**
@@ -2268,7 +2268,7 @@ export default class Theatre {
 
 		// Push to socket our event
 		if (!remote)
-			this._sendSceneEvent("enterscene", { insertid: imgId, emotions: emotions, isleft: true });
+			this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.enterscene, { insertid: imgId, emotions: emotions, isleft: true });
 	}
 
 	/**
@@ -2311,7 +2311,7 @@ export default class Theatre {
 
 		// Push to socket our event
 		if (!remote)
-			this._sendSceneEvent("enterscene", { insertid: imgId, emotions: emotions, isleft: false });
+			this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.enterscene, { insertid: imgId, emotions: emotions, isleft: false });
 	}
 
 	/**
@@ -2593,7 +2593,7 @@ export default class Theatre {
 
 		// Push to socket our event
 		if (!remote) {
-			this.sceneEventProcessor.sendSceneEvent("swap", {
+			this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.swap, {
 				insertid1: insert1.imgId,
 				insertid2: insert2.imgId,
 			});
@@ -2840,7 +2840,7 @@ export default class Theatre {
 
 		// Push to socket our event
 		if (!remote) {
-			this.sceneEventProcessor.sendSceneEvent("push", {
+			this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.push, {
 				insertid: insert.imgId,
 				tofront: isLeft
 			});
@@ -2931,7 +2931,7 @@ export default class Theatre {
 
 		// Push to socket our event
 		if (!remote && broadcast) {
-			this.sceneEventProcessor.sendSceneEvent("positionupdate", {
+			this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.positionupdate, {
 				insertid: insert.imgId,
 				position: {
 					x: insert.x,
@@ -3002,7 +3002,7 @@ export default class Theatre {
 
 		// Push to socket our event
 		if (!remote) {
-			this.sceneEventProcessor.sendSceneEvent("positionupdate", {
+			this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.positionupdate, {
 				insertid: insert.imgId,
 				position: { x: insert.portrait.width / 2, y: insert.portrait.height / 2, mirror: false }
 			});
@@ -3384,7 +3384,7 @@ export default class Theatre {
 
 		// Push to socket our event
 		if (!remote) {
-			this.sceneEventProcessor.sendSceneEvent("decaytext", { insertid: theatreId });
+			this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.decaytext, { insertid: theatreId });
 		}
 	}
 
@@ -3538,7 +3538,7 @@ export default class Theatre {
 				chatMessage.focus();
 				// send event to triggier the narrator bar
 				if (!remote)
-					this._sendSceneEvent("narrator", { active: true });
+					this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.narrator, { active: true });
 				// re-render the emote menu (expensive)
 				this.emoteMenuRenderer.initialize();
 			}
@@ -3574,7 +3574,7 @@ export default class Theatre {
 				this.usersTyping.get(game.user.id).theatreId = null;
 				// send event to turn off the narrator bar
 				if (!remote)
-					this._sendSceneEvent("narrator", { active: false });
+					this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.narrator, { active: false });
 				// re-render the emote menu (expensive)
 				this.emoteMenuRenderer.initialize();
 			}
