@@ -1,9 +1,8 @@
-import EmoteMenuInitilializer from "../emoteMenu/EmoteMenuRenderer";
-import TheatreSettings from "../extensions/TheatreSettings";
-import Theatre from "../Theatre";
-import KHelpers from "../workers/KHelpers";
 import NavBar from "./NavBar";
-import Stage from "./Stage";
+import Stage from "../stage/Stage";
+import TheatreSettings from "../../extensions/TheatreSettings";
+import Theatre from "../../Theatre";
+import KHelpers from "../../workers/KHelpers";
 
 export default class TheatreControls {
 

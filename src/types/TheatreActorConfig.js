@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
  *
  */
-import Theatre from "../Theatre";
 import ActorExtensions from "../extensions/ActorExtensions";
+import Theatre from "../Theatre";
 import KHelpers from "../workers/KHelpers";
 import { SceneEventTypes } from "./SceneEventTypes";
 

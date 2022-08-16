@@ -1,11 +1,11 @@
-import TheatreSettings from "../extensions/TheatreSettings";
-import Theatre from "../Theatre";
-import KHelpers from "../workers/KHelpers";
-import { SceneEventTypes } from "./SceneEventTypes";
-import Tools from "../workers/Tools";
-import StageInsert from "./StageInsert.js"
-import TheatreActor from "./TheatreActor.js"
-import TheatreStyle from "./TheatreStyle";
+import TheatreSettings from "../../extensions/TheatreSettings";
+import Theatre from "../../Theatre";
+import { SceneEventTypes } from "../../types/SceneEventTypes";
+import TheatreActor from "../../types/TheatreActor.js";
+import TheatreStyle from "../../types/TheatreStyle";
+import KHelpers from "../../workers/KHelpers";
+import Tools from "../../workers/Tools";
+import StageInsert from "./StageInsert.js";
 
 export default class Stage {
 

@@ -1,7 +1,6 @@
+import StageInsert from "../components/stage/StageInsert";
 import ActorExtensions from "../extensions/ActorExtensions";
-import Resources from "../extensions/foundry_extensions";
 import Theatre from "../Theatre";
-import StageInsert from "../types/StageInsert";
 
 export default class EmoteSetter {
 

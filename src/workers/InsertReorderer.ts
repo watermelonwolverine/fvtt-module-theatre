@@ -1,6 +1,6 @@
+import Stage from "../components/stage/Stage";
 import TheatreSettings from "../extensions/TheatreSettings";
 import Theatre from "../Theatre";
-import Stage from "../types/Stage";
 import TheatreStyle from "../types/TheatreStyle";
 import KHelpers from "./KHelpers";
 

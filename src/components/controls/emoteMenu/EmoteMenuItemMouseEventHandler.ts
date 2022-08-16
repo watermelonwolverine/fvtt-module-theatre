@@ -1,6 +1,6 @@
-import Theatre from "../Theatre";
-import ToolTipCanvas from "../types/ToolTipCanvas";
-import KHelpers from "../workers/KHelpers";
+import Theatre from "../../../Theatre";
+import KHelpers from "../../../workers/KHelpers";
+import ToolTipCanvas from "../../ToolTipCanvas";
 
 export default class EmoteMenuItemMouseEventHandler {
 

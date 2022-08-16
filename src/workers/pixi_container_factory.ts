@@ -1,15 +1,14 @@
 /* eslint-disable no-unused-vars */
-import EmotionDefinition from "../types/EmotionDefinition";
+import Portrait from "../components/stage/Portrait";
+import ActorExtensions from "../extensions/ActorExtensions";
 import Resources from "../extensions/foundry_extensions";
-import Params from "../types/Params";
+import TheatreSettings from "../extensions/TheatreSettings";
 import { RiggingResource } from "../resources/resources_types";
 import Theatre from "../Theatre";
-import ActorExtensions from "../extensions/ActorExtensions";
-import _TheatreWorkers from "./workers";
-import Tools from "./Tools";
-import Portrait from "../types/Portrait";
+import EmotionDefinition from "../types/EmotionDefinition";
+import Params from "../types/Params";
 import TheatrePortraitContainerSetupWorker from "./portrait_container_setup";
-import TheatreSettings from "../extensions/TheatreSettings";
+import Tools from "./Tools";
 
 
 export default class _TheatrePixiContainerFactory {

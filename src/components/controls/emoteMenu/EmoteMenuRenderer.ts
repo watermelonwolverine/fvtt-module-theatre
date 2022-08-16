@@ -1,16 +1,16 @@
-import ActorExtensions from "../extensions/ActorExtensions";
-import TheatreSettings from "../extensions/TheatreSettings";
-import { EmoteDictionary } from "../resources/resources_types";
-import Theatre from "../Theatre";
-import StageInsert from "../types/StageInsert";
-import ToolTipCanvas from "../types/ToolTipCanvas";
-import TextFlyInMenuItemMouseEventHandler from "./TextFlyInMenuItemMouseEventHandler";
-import TextFlyinAnimationsFactory, { TextFlyinAnimationDefinitions } from "../workers/flyin_animations_factory";
-import KHelpers from "../workers/KHelpers";
-import TextStandingAnimationsFactory, { TextStandingAnimationDefinitionDictionary } from "../workers/standing_animations_factory";
-import TextStandingMenuItemMouseEventHandler from "./TextStandingMenuItemMouseEventHandler";
-import Tools from "../workers/Tools";
+import ActorExtensions from "../../../extensions/ActorExtensions";
+import TheatreSettings from "../../../extensions/TheatreSettings";
+import { EmoteDictionary } from "../../../resources/resources_types";
+import Theatre from "../../../Theatre";
+import TextFlyinAnimationsFactory, { TextFlyinAnimationDefinitions } from "../../../workers/flyin_animations_factory";
+import KHelpers from "../../../workers/KHelpers";
+import TextStandingAnimationsFactory, { TextStandingAnimationDefinitionDictionary } from "../../../workers/standing_animations_factory";
+import Tools from "../../../workers/Tools";
+import StageInsert from "../../stage/StageInsert";
+import ToolTipCanvas from "../../ToolTipCanvas";
 import EmoteMenuItemMouseEventHandler from "./EmoteMenuItemMouseEventHandler";
+import TextFlyInMenuItemMouseEventHandler from "./TextFlyInMenuItemMouseEventHandler";
+import TextStandingMenuItemMouseEventHandler from "./TextStandingMenuItemMouseEventHandler";
 
 export default class EmoteMenuInitilializer {
 

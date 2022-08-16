@@ -1,5 +1,5 @@
 import Theatre from "../Theatre";
-import StageInsert from "../types/StageInsert";
+import StageInsert from "../components/stage/StageInsert";
 import SceneEventProcessor from "./SceneEventProcessor";
 import { SceneEventTypes } from "../types/SceneEventTypes";
 

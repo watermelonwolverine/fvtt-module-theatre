@@ -1,6 +1,5 @@
-import TheatreSettings from "../extensions/TheatreSettings";
+import TheatreSettings from "../../extensions/TheatreSettings";
 import Stage from "./Stage";
-import StageInsert from "./StageInsert";
 
 type Size = {
     width: number,

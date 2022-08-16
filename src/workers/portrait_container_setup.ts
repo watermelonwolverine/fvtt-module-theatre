@@ -1,12 +1,9 @@
 /* eslint-disable no-unused-vars */
-import Resources from "../extensions/foundry_extensions";
-import Theatre from "../Theatre";
 import ActorExtensions from "../extensions/ActorExtensions";
-import _TheatreWorkers from "./workers";
+import Resources from "../extensions/foundry_extensions";
 import TheatreSettings from "../extensions/TheatreSettings";
+import Theatre from "../Theatre";
 import TheatreStyle from "../types/TheatreStyle";
-import Stage from "../types/Stage";
-import Portrait from "../types/Portrait";
 
 export default class TheatrePortraitContainerSetupWorker {
 

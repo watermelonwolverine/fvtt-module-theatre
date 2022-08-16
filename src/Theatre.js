@@ -21,21 +21,21 @@
  *
  */
 
-import EmoteMenuInitilializer from './emoteMenu/EmoteMenuRenderer';
+import EmoteMenuInitilializer from './components/controls/emoteMenu/EmoteMenuRenderer';
+import NavBar from './components/controls/NavBar';
+import Portrait from './components/stage/Portrait';
+import Stage from './components/stage/Stage';
+import StageInsert from './components/stage/StageInsert';
+import ToolTipCanvas from './components/ToolTipCanvas';
 import ActorExtensions from './extensions/ActorExtensions';
 import TheatreSettings from './extensions/TheatreSettings';
-import { AnimationSyntaxVerifier } from './types/AnimationSyntaxVerifier';
 import EmotionDefinition from "./types/EmotionDefinition";
-import NavBar from './types/NavBar';
-import Portrait from './types/Portrait';
 import { SceneEventTypes } from "./types/SceneEventTypes";
-import Stage from './types/Stage';
-import StageInsert from './types/StageInsert';
 import TheatreActorConfig from './types/TheatreActorConfig';
-import TheatreControls from './types/TheatreControls';
+import TheatreControls from './components/controls/TheatreControls';
 import TheatreStyle from './types/TheatreStyle';
-import ToolTipCanvas from './types/ToolTipCanvas';
 import User from './types/User';
+import { AnimationSyntaxVerifier } from './workers/AnimationSyntaxVerifier';
 import EaseVerifier from './workers/EaseVerifier';
 import EmoteSetter from './workers/EmoteSetter';
 import InsertReorderer from './workers/InsertReorderer';

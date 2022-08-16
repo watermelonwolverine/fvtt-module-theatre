@@ -1,6 +1,6 @@
 import Theatre from "../Theatre";
 import EmotionDefinition from "../types/EmotionDefinition";
-import Stage from "../types/Stage";
+import Stage from "../components/stage/Stage";
 import { AddAllTexturesEvent, AddTextureEvent, AnySceneEvent, DecayTextEvent, EmoteEvent, EnterSceneEvent, ExitSceneEvent, MoveEvent, NarratorEvent, PositionUpdateEvent, PushEvent, RenderInsertEvent, SceneEvent, StageEvent, SwapEvent } from "../types/SceneEvents";
 import { AnySceneEventType, SceneEventTypes } from "../types/SceneEventTypes";
 import Tools from "./Tools";

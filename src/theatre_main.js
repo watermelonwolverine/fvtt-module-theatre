@@ -20,14 +20,14 @@
  *
  */
 
-import Theatre from "./Theatre";
-import KHelpers from "./workers/KHelpers";
-import TheatreSettings from "./extensions/TheatreSettings";
-import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory";
-import TextStandingAnimationsFactory from "./workers/standing_animations_factory";
 import ActorExtensions from "./extensions/ActorExtensions";
-import TextBoxToCharSplitter from "./workers/TextBoxToCharSplitter"
+import TheatreSettings from "./extensions/TheatreSettings";
+import Theatre from "./Theatre";
 import { SceneEventTypes } from "./types/SceneEventTypes";
+import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory";
+import KHelpers from "./workers/KHelpers";
+import TextStandingAnimationsFactory from "./workers/standing_animations_factory";
+import TextBoxToCharSplitter from "./workers/TextBoxToCharSplitter";
 
 /**
  * Concat helper

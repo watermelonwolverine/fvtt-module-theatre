@@ -1,7 +1,7 @@
 import Theatre from "../Theatre";
 import KHelpers from "../workers/KHelpers";
 import Tools from "../workers/Tools";
-import Stage from "./Stage";
+import Stage from "./stage/Stage";
 
 export default class ToolTipCanvas {
 

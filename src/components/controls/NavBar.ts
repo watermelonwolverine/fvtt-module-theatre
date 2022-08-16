@@ -1,9 +1,9 @@
-import Theatre from "../Theatre";
-import KHelpers from "../workers/KHelpers";
-import NavItemMouseEventHandler from "../workers/NavItemMouseEventHandler";
-import Tools from "../workers/Tools";
-import Stage from "./Stage";
-import TheatreActor from "./TheatreActor";
+import Theatre from "../../Theatre";
+import KHelpers from "../../workers/KHelpers";
+import NavItemMouseEventHandler from "../../workers/NavItemMouseEventHandler";
+import Tools from "../../workers/Tools";
+import Stage from "../stage/Stage";
+import TheatreActor from "../../types/TheatreActor";
 
 export default class NavBar {
 
