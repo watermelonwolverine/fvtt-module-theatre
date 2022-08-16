@@ -5,12 +5,12 @@ const THEATRE_PREFIX = "theatre-"
 
 export default class Tools {
 
-    static getTheatreId(actor: Actor) {
+    static getTheatreId(actor: Actor | ActorData): string {
         return THEATRE_PREFIX + actor._id;
     }
 
-    static toActorId(theatreId: string){
-       return theatreId.replace(THEATRE_PREFIX, "");
+    static toActorId(theatreId: string) {
+        return theatreId.replace(THEATRE_PREFIX, "");
     }
 
     /**
@@ -21,7 +21,7 @@ export default class Tools {
      * @return (Object) : An object containing the parameters of the insert given the actor Id
      *					 or null.
         */
-    static getInsertParamsFromActorId(actorId: string) : Params {
+    static getInsertParamsFromActorId(actorId: string): Params {
 
         let actor = game.actors.get(actorId);
 

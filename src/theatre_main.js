@@ -439,7 +439,7 @@ Hooks.on("getActorDirectoryEntryContext", async (html, options) => {
 		name: "Add to Stage",
 		condition: target => !Theatre.instance.stage.isActorStaged(getActorData(target)),
 		icon: '<i class="fas fa-theater-masks"></i>',
-		callback: target => Theatre.instance.addToNavBar(getActorData(target))
+		callback: target => Theatre.instance.navBar.addToNavBar(getActorData(target))
 	}, {
 		name: "Remove from Stage",
 		condition: target => Theatre.instance.stage.isActorStaged(getActorData(target)),
@@ -481,7 +481,7 @@ Hooks.once("init", () => {
 		onDown: () => {
 			const ownedActors = game.actors.filter(a => a.permission === 3);
 			const ownedTokens = ownedActors.map(a => a.getActiveTokens());
-			for (const tokenArray of ownedTokens) tokenArray.forEach(t => Theatre.instance.addToNavBar(t.actor.data));
+			for (const tokenArray of ownedTokens) tokenArray.forEach(t => Theatre.instance.navBar.addToNavBar(t.actor.data));
 		},
 		restricted: false
 	});
@@ -494,7 +494,7 @@ Hooks.once("init", () => {
 			modifiers: ['Shift']
 		}],
 		onDown: () => {
-			for (const tkn of canvas.tokens.controlled) Theatre.instance.addToNavBar(tkn.actor.data);
+			for (const tkn of canvas.tokens.controlled) Theatre.instance.navBar.addToNavBar(tkn.actor.data);
 		},
 		restricted: false
 	});

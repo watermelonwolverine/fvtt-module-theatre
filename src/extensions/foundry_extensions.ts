@@ -25,6 +25,9 @@ declare global {
 	interface TheatreFlags {
 		emotes: EmoteDictionary;
 		rigging: AnimationRigging;
+		baseinsert: string;
+		name: string;
+		optalign: string;
 	}
 
 	interface ActorFlags extends Record<string, unknown> {

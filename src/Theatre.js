@@ -40,6 +40,9 @@ import User from './types/User';
 import StageInsert from './types/StageInsert';
 import NavItemMouseEventHandler from './workers/NavItemMouseEventHandler';
 import EmoteSetter from './workers/EmoteSetter';
+import EaseVerifier from './workers/EaseVerifier';
+import { AnimationSyntaxVerifier } from './types/AnimationSyntaxVerifier';
+import NavBar from './types/NavBar';
 
 export default class Theatre {
 
@@ -81,10 +84,11 @@ export default class Theatre {
 			// render related
 			this.rendering = false;
 			this.renderAnims = 0;
-			// global insert state related
 			this.speakingAs = null;
-			// Map of theatreId to TheatreActor
 			this.stage = new Stage(this);
+			this.navBar = new NavBar(
+				this,
+				this.stage);
 			this.toolTipCanvas = new ToolTipCanvas(this.stage);
 
 			/** @type {Map<String,EmotionDefinition>}*/
@@ -109,7 +113,6 @@ export default class Theatre {
 			this.insertReorderer = new InsertReorderer(
 				this,
 				this.stage);
-			this.navItemMouseEventHandler = new NavItemMouseEventHandler(this);
 			this.emoteSetter = new EmoteSetter(this);
 
 		}
@@ -2337,7 +2340,7 @@ export default class Theatre {
 	}
 
 
-	
+
 	/**
 	 * Add a textBox to the theatreBar
 	 *
@@ -3299,7 +3302,7 @@ export default class Theatre {
 	 *							animation. 
 	 */
 	addTweensFromAnimationSyntax(animName, animSyntax, resMap, insert) {
-		let tweenParams = Theatre.verifyAnimationSyntax(animSyntax);
+		let tweenParams = AnimationSyntaxVerifier.verifyAnimationSyntax(animSyntax);
 
 		let resTarget = resMap.find(e => (e.name == tweenParams[0].resName));
 		let resource = PIXI.Loader.shared.resources[resTarget.path];
@@ -3333,8 +3336,8 @@ export default class Theatre {
 				delay = advOptions.delay ? Number(advOptions.delay) : delay;
 				repeat = advOptions.repeat ? Number(advOptions.repeat) : repeat;
 				repeatDelay = advOptions.repeatDelay ? Number(advOptions.repeatDelay) : repeatDelay;
-				ease = advOptions.ease ? Theatre.verifyEase(advOptions.ease) : ease;
-				yoyoEase = advOptions.yoyoEase ? Theatre.verifyEase(advOptions.yoyoEase) : yoyoEase;
+				ease = advOptions.ease ? EaseVerifier.verifyEase(advOptions.ease) : ease;
+				yoyoEase = advOptions.yoyoEase ? EaseVerifier.verifyEase(advOptions.yoyoEase) : yoyoEase;
 			}
 
 			let pixiParams = {};
@@ -3461,7 +3464,7 @@ export default class Theatre {
 		let navItem = this.getNavItemById(id);
 		if (!navItem) {
 			let actor = game.actors.get(actorId);
-			this.addToNavBar(actor.data);
+			this.navBar.addToNavBar(actor.data);
 			navItem = this.getNavItemById(id);
 		}
 		if (!navItem) return;
@@ -4131,176 +4134,6 @@ export default class Theatre {
 	}
 
 	/**
-	 * Verify the TweenMax ease from the animation syntax shorthand.
-	 *
-	 * @params str (String) : the ease to verify. 
-	 */
-	static verifyEase(str) {
-		switch (str) {
-			case "power1":
-			case "power1Out":
-				return Power1.easeOut;
-			case "power1In":
-				return Power1.easeIn;
-			case "power1InOut":
-				return Power1.easeInOut;
-			case "power2":
-			case "power2Out":
-				return Power2.easeOut;
-			case "power2In":
-				return Power2.easeIn;
-			case "power2InOut":
-				return Power2.easeInOut;
-
-			case "power3":
-			case "power3Out":
-				return Power3.easeOut;
-			case "power3In":
-				return Power3.easeIn;
-			case "power3InOut":
-				return Power3.easeInOut;
-
-			case "power4":
-			case "power4Out":
-				return Power4.easeOut;
-			case "power4In":
-				return Power4.easeIn;
-			case "power4InOut":
-				return Power4.easeInOut;
-
-			case "back":
-			case "backOut":
-				return Back.easeOut;
-			case "backIn":
-				return Back.easeIn;
-			case "backInOut":
-				return Back.easeInOut;
-
-			case "elastic":
-			case "elasticOut":
-				return Elastic.easeOut;
-			case "elasticIn":
-				return Elastic.easeIn;
-			case "elasticInOut":
-				return Elastic.easeInOut;
-
-			case "bounce":
-			case "bounceOut":
-				return Bounce.easeOut;
-			case "bounceIn":
-				return Bounce.easeIn;
-			case "bounceInOut":
-				return Bounce.easeInOut;
-
-			case "circ":
-			case "circOut":
-				return Circ.easeOut;
-			case "circIn":
-				return Circ.easeIn;
-			case "circInOut":
-				return Circ.easeInOut;
-
-			case "expo":
-			case "expoOut":
-				return Expo.easeOut;
-			case "expoIn":
-				return Expo.easeIn;
-			case "expoInOut":
-				return Expo.easeInOut;
-
-			case "sine":
-			case "sineOut":
-				return Sine.easeOut;
-			case "sineIn":
-				return Sine.easeIn;
-			case "sineInOut":
-				return Sine.easeInOut;
-
-			case "power0":
-			default:
-				return Power0.easeNone;
-		}
-	}
-
-	/**
-	 * Return an array of tween params if the syntax is correct,
-	 * else return an empty array if any tweens in the syntax
-	 * are flag as incorrect. 
-	 *
-	 * @param str (String) : The syntax to verify
-	 *
-	 * @return (Array[Object]) : The array of verified tween params, or null
-	 */
-	static verifyAnimationSyntax(str) {
-		if (!str || typeof (str) != "string") return null;
-		if (Theatre.DEBUG) console.log("verifying syntax %s", str);
-		let tweenParams = [];
-
-		try {
-			let sections = str.split('|');
-			let resName = sections[0];
-
-			let verifyTarget = function (target) {
-				// TODO verify each property
-				return true;
-			}
-
-			for (let sdx = 1; sdx < sections.length; ++sdx) {
-				let parts = sections[sdx].split(';');
-				let idx = 0;
-				let duration, advOptions, targets, propDefs;
-
-				duration = Number(parts[idx]) || 1;
-				if (/\([^\)\(]*\)/g.test(parts[++idx])) {
-					advOptions = parts[idx];
-					idx++;
-				}
-				if (advOptions) {
-					advOptions = advOptions.replace(/[\(\)]/g, "");
-					let advParts = advOptions.split(',');
-					advOptions = {};
-					for (let advPart of advParts) {
-						let components = advPart.split(':');
-						if (components.length != 2) throw "component properties definition : " + advPart + " is incorrect";
-						let advPropName = components[0].trim();
-						let advPropValue = components[1].trim();
-						advOptions[advPropName] = advPropValue;
-					}
-				}
-
-				targets = [];
-				propDefs = [];
-				for (idx; idx < parts.length; ++idx)
-					targets.push(parts[idx]);
-
-				for (let target of targets) {
-					let components = target.split(':');
-					if (components.length != 2) throw "component properties definition : " + target + " is incorrect";
-					let propName = components[0];
-					let scomps = components[1].split(',');
-					if (scomps.length != 2) throw "component properties definition : " + target + " is incorrect";
-					let init = scomps[0];
-					let fin = scomps[1];
-					if (verifyTarget(propName, init, fin)) {
-						let propDef = { name: propName, initial: init, final: fin };
-						propDefs.push(propDef);
-					} else
-						throw "component properties definition : " + target + " is incorrect";
-				}
-				if (Theatre.DEBUG) console.log("Animation Syntax breakdown of %s : ", sections[sdx], duration, advOptions, propDefs);
-				tweenParams.push({ resName: resName, duration: duration, advOptions: advOptions, props: propDefs });
-			}
-		} catch (e) {
-			console.log("BAD ANIMATION SYNTAX: %s", e);
-			return tweenParams;
-		}
-
-		if (Theatre.DEBUG) console.log("tween params are valid with: ", tweenParams);
-
-		return tweenParams;
-	}
-
-	/**
 	 *
 	 * ActorSheet Configue Options
 	 *
@@ -4333,88 +4166,21 @@ export default class Theatre {
 		const removeLabelSheetHeader = TheatreSettings.getRemoteLabelSheetHeader();
 
 		if (Theatre.DEBUG) console.log("Click Event on Add to NavBar!!", actorSheet, actorSheet.actor, actorSheet.position);
-		const actor = actorSheet.object.data;
+		const actorData = actorSheet.object.data;
 		const addLabel = removeLabelSheetHeader ? "" : game.i18n.localize("Theatre.UI.Config.AddToStage");
 		const removeLabel = removeLabelSheetHeader ? "" : game.i18n.localize("Theatre.UI.Config.RemoveFromStage");
 		let newText;
-		if (this.stage.isActorStaged(actor)) {
-			this.removeFromNavBar(actor)
+		if (this.stage.isActorStaged(actorData)) {
+			this.removeFromNavBar(actorData)
 			newText = addLabel
 		} else {
-			this.addToNavBar(actor);
+			this.navBar.addToNavBar(actorData);
 			newText = removeLabel;
 		}
-		ev.currentTarget.innerHTML = this.stage.isActorStaged(actor) ? `<i class="fas fa-theater-masks"></i>${newText}` : `<i class="fas fa-mask"></i>${newText}`;
+		ev.currentTarget.innerHTML = this.stage.isActorStaged(actorData) ? `<i class="fas fa-theater-masks"></i>${newText}` : `<i class="fas fa-mask"></i>${newText}`;
 	}
 
 
-	/**
-	 * Add to the NavBar staging area
-	 *
-	 * @params actor (Actor) : The actor from which to add to the NavBar staging area. 
-	 */
-	addToNavBar(actor) {
-		if (!actor) return;
-		if (Theatre.DEBUG) console.log("actor is valid!");
-		// if already on stage, dont add it again
-		// create nav-list-item
-		// set picture as actor.data.img
-		// set attribute "theatre-id" to "theatre" + _id
-		// set attribute "insertImg" to object.data.flags.theatre.baseinsert or img if not specified
-		// add click handler to push it into the theatre bar, if it already exists on the bar, remove it
-		// from the bar
-		// add click handler logic to remove it from the stage
-		let theatreId = Tools.getTheatreId(actor);
-		let portrait = (actor.img ? actor.img : "icons/mystery-man.png");
-		let optAlign = "top";
-		let name = actor.name;
-
-		if (!this.isActorOwner(game.user.id, theatreId)) {
-			ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.DoNotControl"));
-			return;
-		}
-
-		// Use defaults incase the essential flag attributes are missing
-		if (actor.flags.theatre) {
-			if (actor.flags.theatre.name && actor.flags.theatre.name != "")
-				name = actor.flags.theatre.name;
-			if (actor.flags.theatre.baseinsert && actor.flags.theatre.baseinsert != "")
-				portrait = actor.flags.theatre.baseinsert;
-			if (actor.flags.theatre.optalign && actor.flags.theatre.optalign != "")
-				optAlign = actor.flags.theatre.optalign;
-		}
-
-		if (this.stage.actors.get(theatreId)) {
-			ui.notifications.info(actor.name + game.i18n.localize("Theatre.UI.Notification.AlreadyStaged"));
-			return;
-		}
-
-		if (Theatre.DEBUG) console.log("new theatre id: " + theatreId);
-
-		let navItem = document.createElement("img");
-		KHelpers.addClass(navItem, "theatre-control-nav-bar-item");
-		//navItem.setAttribute("draggable",false); 
-		navItem.setAttribute("imgId", theatreId);
-		navItem.setAttribute("src", portrait);
-		navItem.setAttribute("title", name + (name == actor.name ? "" : ` (${actor.name})`));
-		navItem.setAttribute("name", name);
-		navItem.setAttribute("optalign", optAlign);
-
-		// if the theatreId is present, then set our navItem as active!
-		if (this.stage.getInsertById(theatreId))
-			KHelpers.addClass(navItem, "theatre-control-nav-bar-item-active");
-
-		navItem.addEventListener("mouseup", ev => this.navItemMouseEventHandler.handleNavItemMouseUp(ev));
-		navItem.addEventListener("dragstart", ev => this.navItemMouseEventHandler.handleNavItemDragStart(ev));
-		navItem.addEventListener("dragend", ev => this.navItemMouseEventHandler.handleNavItemDragEnd(ev));
-		navItem.addEventListener("dragover", ev => this.navItemMouseEventHandler.handleNavItemDragOver(ev));
-		navItem.addEventListener("drop", ev => this.navItemMouseEventHandler.handleNavItemDragDrop(ev));
-		this.theatreNavBar.appendChild(navItem);
-		// stage event
-		this.stageInsertById(theatreId);
-		// Store reference
-		this.stage.actors.set(theatreId, new TheatreActor(actor, navItem));
-	}
 
 	/**
 	 * Removes the actor from the nav bar.
@@ -4427,7 +4193,7 @@ export default class Theatre {
 			return;
 
 		const theatreId = Tools.getTheatreId(actor);
-		this._removeFromStage(theatreId);
+		this.stage._removeFromStage(theatreId);
 
 	}
 

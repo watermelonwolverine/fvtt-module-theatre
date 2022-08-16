@@ -124,7 +124,7 @@ export default class TextBoxMouseEventHandler {
             ev.stopPropagation();
         } else if (ev.altKey) {
             let actor = game.actors.get(id.replace("theatre-", ""));
-            this.theatre.addToNavBar(actor.data);
+            this.theatre.navBar.addToNavBar(actor.data);
         } else if (this.swapTarget) {
             if (this.swapTarget != id) {
                 this.theatre.moveInsertById(id, this.swapTarget);
