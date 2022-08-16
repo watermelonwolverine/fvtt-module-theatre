@@ -1,6 +1,7 @@
 import TheatreSettings from "../extensions/TheatreSettings";
 import Theatre from "../Theatre";
 import KHelpers from "../workers/KHelpers";
+import { SceneEventTypes } from "../workers/SceneEventProcessor";
 import Tools from "../workers/Tools";
 import StageInsert from "./StageInsert.js"
 import TheatreActor from "./TheatreActor.js"
@@ -192,7 +193,9 @@ export default class Stage {
 
         // Push to socket our event
         if (!remote)
-            this.theatre._sendSceneEvent("exitscene", { insertid: toRemoveInsert.imgId });
+            this.theatre.sceneEventProcessor.sendSceneEvent(
+                SceneEventTypes.exitscene,
+                 { insertid: toRemoveInsert.imgId });
 
         // unactivate from navbar
         for (const navItem of this.theatre.theatreNavBar.children)

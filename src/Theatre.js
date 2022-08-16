@@ -43,7 +43,7 @@ import EmoteSetter from './workers/EmoteSetter';
 import EaseVerifier from './workers/EaseVerifier';
 import { AnimationSyntaxVerifier } from './types/AnimationSyntaxVerifier';
 import NavBar from './types/NavBar';
-import SceneEventProcessor from './workers/SceneEventProcessor';
+import SceneEventProcessor, { SceneEventTypes } from './workers/SceneEventProcessor';
 import TextBoxFactory from './workers/textbox_factory';
 
 export default class Theatre {
@@ -2007,14 +2007,15 @@ export default class Theatre {
 	 * @params remote (Boolean) : Whether this is being invoked remotely or locally. 
 	 */
 	stageInsertById(theatreId, remote) {
+
 		let actorId = theatreId.replace("theatre-", "");
 		let params = Tools.getInsertParamsFromActorId(actorId);
+
 		if (!params) return;
-		//console.log("params: ",params); 
+
 		// kick asset loader to cache the portrait + emotes
 		let imgSrcs = [];
 
-		//imgSrcs.push({imgpath: params.src, resname: `portrait-${theatreId}`}); 
 		// get actor, load all emote images
 		if (!params) {
 			console.log("ERROR: Actor does not exist for %s", actorId);
@@ -2025,8 +2026,6 @@ export default class Theatre {
 
 		// load all rigging assets
 		let rigResources = ActorExtensions.getRiggingResources(actorId);
-
-		if (Theatre.DEBUG) console.log("RigResources for %s :", params.name, rigResources);
 
 		for (let rigResource of rigResources)
 			imgSrcs.push({ imgpath: rigResource.path, resname: rigResource.path });
@@ -2044,7 +2043,7 @@ export default class Theatre {
 
 		// Send socket event
 		if (!remote)
-			Theatre.instance._sendSceneEvent("stage", { insertid: theatreId })
+			this.sceneEventProcessor.sendSceneEvent("stage", { insertid: theatreId })
 	}
 
 	/**
@@ -2594,7 +2593,7 @@ export default class Theatre {
 
 		// Push to socket our event
 		if (!remote) {
-			Theatre.instance._sendSceneEvent("swap", {
+			this.sceneEventProcessor.sendSceneEvent("swap", {
 				insertid1: insert1.imgId,
 				insertid2: insert2.imgId,
 			});
@@ -2646,15 +2645,8 @@ export default class Theatre {
 	 *
 	 * @params remote (Boolean) : Wither this is being invoked remotely, or locally. 
 	 *
-	 * @private
 	 */
 	_moveInsert(insert1, insert2, textBox1, textBox2, remote) {
-		let tsib1n = textBox1.nextSibling,
-			tsib1p = textBox1.previousSibling,
-			tsib2n = textBox2.nextSibling,
-			tsib2p = textBox2.previousSibling;
-		//console.log("SWAP",textBox1,textBox2); 
-		let adjSwap = false;
 
 		// permission check
 		if (!remote && !this.isActorOwner(game.user.id, insert2.imgId)) {
@@ -2704,7 +2696,7 @@ export default class Theatre {
 
 		// Push to socket our event
 		if (!remote) {
-			Theatre.instance._sendSceneEvent("move", {
+			this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.move, {
 				insertid1: insert1.imgId,
 				insertid2: insert2.imgId,
 			});
@@ -2848,7 +2840,7 @@ export default class Theatre {
 
 		// Push to socket our event
 		if (!remote) {
-			Theatre.instance._sendSceneEvent("push", {
+			this.sceneEventProcessor.sendSceneEvent("push", {
 				insertid: insert.imgId,
 				tofront: isLeft
 			});
@@ -2939,7 +2931,7 @@ export default class Theatre {
 
 		// Push to socket our event
 		if (!remote && broadcast) {
-			Theatre.instance._sendSceneEvent("positionupdate", {
+			this.sceneEventProcessor.sendSceneEvent("positionupdate", {
 				insertid: insert.imgId,
 				position: {
 					x: insert.x,
@@ -3010,7 +3002,7 @@ export default class Theatre {
 
 		// Push to socket our event
 		if (!remote) {
-			Theatre.instance._sendSceneEvent("positionupdate", {
+			this.sceneEventProcessor.sendSceneEvent("positionupdate", {
 				insertid: insert.imgId,
 				position: { x: insert.portrait.width / 2, y: insert.portrait.height / 2, mirror: false }
 			});
@@ -3392,7 +3384,7 @@ export default class Theatre {
 
 		// Push to socket our event
 		if (!remote) {
-			Theatre.instance._sendSceneEvent("decaytext", { insertid: theatreId });
+			this.sceneEventProcessor.sendSceneEvent("decaytext", { insertid: theatreId });
 		}
 	}
 

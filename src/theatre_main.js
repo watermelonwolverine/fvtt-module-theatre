@@ -556,7 +556,7 @@ Hooks.once("init", () => {
 			Theatre.instance._addDockTween(insert.imgId, tween, tweenId);
 
 			// send sceneEvent
-			Theatre.instance._sendSceneEvent("positionupdate", {
+			Theatre.instance.sceneEventProcessor.sendSceneEvent("positionupdate", {
 				insertid: insert.imgId,
 				position: { x: oleft - 50, y: otop, mirror: insert.mirrored }
 			});
@@ -591,7 +591,7 @@ Hooks.once("init", () => {
 			Theatre.instance._addDockTween(insert.imgId, tween, tweenId);
 
 			// send sceneEvent
-			Theatre.instance._sendSceneEvent("positionupdate", {
+			Theatre.instance.sceneEventProcessor.sendSceneEvent("positionupdate", {
 				insertid: insert.imgId,
 				position: { x: oleft + 50, y: otop, mirror: insert.mirrored }
 			});
@@ -626,7 +626,7 @@ Hooks.once("init", () => {
 			Theatre.instance._addDockTween(insert.imgId, tween, tweenId);
 
 			// send sceneEvent
-			Theatre.instance._sendSceneEvent("positionupdate", {
+			Theatre.instance.sceneEventProcessor.sendSceneEvent("positionupdate", {
 				insertid: insert.imgId,
 				position: { x: oleft, y: otop - 50, mirror: insert.mirrored }
 			});
@@ -661,7 +661,7 @@ Hooks.once("init", () => {
 			Theatre.instance._addDockTween(insert.imgId, tween, tweenId);
 
 			// send sceneEvent
-			Theatre.instance._sendSceneEvent("positionupdate", {
+			Theatre.instance.sceneEventProcessor.sendSceneEvent("positionupdate", {
 				insertid: insert.imgId,
 				position: { x: oleft, y: otop + 50, mirror: insert.mirrored }
 			});

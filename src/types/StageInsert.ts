@@ -24,7 +24,7 @@ export default class StageInsert {
     order: number;
     renderOrder: number;
     /** If this dock is in the process of being deleted */
-    deleting = false;
+    deleting?= false;
     meta: {}
-    mirrored = false;
+    mirrored?= false;
 }

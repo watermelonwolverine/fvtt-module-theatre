@@ -19,7 +19,6 @@ export class SceneEventData {
     insertid: string;
     emotions: EmotionDefinition;
     isleft: boolean;
-    position: Position;
     insertid1: string;
     insertid2: string;
     tofront: boolean;
@@ -31,9 +30,13 @@ export class SceneEventData {
     active: boolean;
 };
 
-export class PositionUpdateSceneEvent extends SceneEventDataBase {
+export class PositionUpdateEvent extends SceneEventDataBase {
     insertid: string;
     position: Position;
+}
+
+export class ExitSceneEvent extends SceneEventDataBase {
+    insertid: string;
 }
 
 export class SceneEventTypes {
@@ -96,7 +99,6 @@ export default class SceneEventProcessor {
         type: string,
         data: SceneEventData) {
 
-
         let insert: StageInsert;
         let actorId: string;
         let params: Params;
@@ -133,17 +135,21 @@ export default class SceneEventProcessor {
                 this.stage.removeInsertById(data.insertid, true);
                 break;
             case SceneEventTypes.positionupdate:
+
                 insert = this.stage.getInsertById(data.insertid);
+
+                const positionUpdateEvent = data as unknown as PositionUpdateEvent;
+
                 if (insert) {
                     // apply mirror state
-                    if (Theatre.DEBUG) console.log("mirroring desired: %s , current mirror %s", data.position.mirror, insert.mirrored);
-                    if (Boolean(data.position.mirror) != insert.mirrored)
-                        insert.mirrored = data.position.mirror;
+                    if (Theatre.DEBUG) console.log("mirroring desired: %s , current mirror %s", positionUpdateEvent.position.mirror, insert.mirrored);
+                    if (Boolean(positionUpdateEvent.position.mirror) != insert.mirrored)
+                        insert.mirrored = positionUpdateEvent.position.mirror;
                     let tweenId = "portraitMove";
                     let tween = TweenMax.to(insert.portrait, 0.5, {
-                        scaleX: (data.position.mirror ? -1 : 1),
-                        x: data.position.x,
-                        y: data.position.y,
+                        scaleX: (positionUpdateEvent.position.mirror ? -1 : 1),
+                        x: positionUpdateEvent.position.x,
+                        y: positionUpdateEvent.position.y,
                         ease: Power3.easeOut,
                         onComplete: function (ctx, imgId, tweenId) {
                             // decrement the rendering accumulator
@@ -352,9 +358,9 @@ export default class SceneEventProcessor {
      *							the scene event subtype
      *
      */
-    _sendSceneEvent(
+    sendSceneEvent(
         eventType: string,
-        eventData: SceneEventData | PositionUpdateSceneEvent) {
+        eventData: SceneEventData | ExitSceneEvent | PositionUpdateEvent) {
         if (Theatre.DEBUG) console.log("Sending Scene state %s with payload: ", eventType, eventData)
 
         // Do we even need verification? There's no User Input outside of 
