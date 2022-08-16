@@ -3,6 +3,7 @@ import TheatreSettings from "../extensions/TheatreSettings";
 import Theatre from "../Theatre";
 import TheatreStyle from "../types/TheatreStyle";
 import KHelpers from "./KHelpers";
+import SceneEventProcessor from "./SceneEventProcessor";
 import TextBoxMouseEventHandler from "./TextBoxMouseEventHandler";
 
 export default class TextBoxFactory {
@@ -10,13 +11,18 @@ export default class TextBoxFactory {
     mouseEventHandler: TextBoxMouseEventHandler;
     theatre: Theatre;
 
-    constructor(theatre: Theatre) {
+    constructor(
+        theatre: Theatre,
+        sceneEventProcessor: SceneEventProcessor) {
+
         this.theatre = theatre;
 
-        this.mouseEventHandler = new TextBoxMouseEventHandler(theatre);
+        this.mouseEventHandler = new TextBoxMouseEventHandler(
+            theatre,
+            sceneEventProcessor);
     }
 
-    create_textbox(
+    createTextbox(
         portName: string,
         imgId: string) {
 

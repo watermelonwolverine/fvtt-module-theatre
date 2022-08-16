@@ -1,5 +1,6 @@
 import Theatre from "../Theatre";
 import StageInsert from "../types/StageInsert";
+import SceneEventProcessor from "./SceneEventProcessor";
 
 type DragPoint = {
     dragStartX: number,
@@ -9,14 +10,20 @@ type DragPoint = {
 
 export default class TextBoxMouseEventHandler {
 
+    // given
+    theatre: Theatre;
+    sceneEventProcessor: SceneEventProcessor;
+
+    // context
     dragPoint: DragPoint;
     swapTarget: string;
-    theatre: Theatre;
 
     windowMouseButtonUpHandler = (ev: MouseEvent) => this.handleWindowMouseUp(ev);
 
-    constructor(theatre: Theatre) {
+    constructor(theatre: Theatre,
+        sceneEventProcessor: SceneEventProcessor) {
         this.theatre = theatre;
+        this.sceneEventProcessor = sceneEventProcessor;
     }
 
     addListeners(textBox: HTMLElement) {
@@ -162,7 +169,7 @@ export default class TextBoxMouseEventHandler {
         });
         Theatre.instance._addDockTween(insert.imgId, tween, tweenId);
 
-        Theatre.instance._sendSceneEvent("positionupdate", {
+        this.sceneEventProcessor._sendSceneEvent("positionupdate", {
             insertid: insert.imgId,
             position: {
                 x: finalX,

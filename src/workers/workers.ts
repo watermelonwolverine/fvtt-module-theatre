@@ -15,7 +15,6 @@ export default class _TheatreWorkers {
         this.pixi_container_factory = new _TheatrePixiContainerFactory(
             theatre,
             this.portrait_container_setup_worker);
-        this.textbox_factory = new TextBoxFactory(theatre);
     }
 
 }

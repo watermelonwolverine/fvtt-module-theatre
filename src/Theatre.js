@@ -44,6 +44,7 @@ import EaseVerifier from './workers/EaseVerifier';
 import { AnimationSyntaxVerifier } from './types/AnimationSyntaxVerifier';
 import NavBar from './types/NavBar';
 import SceneEventProcessor from './workers/SceneEventProcessor';
+import TextBoxFactory from './workers/textbox_factory';
 
 export default class Theatre {
 
@@ -103,9 +104,6 @@ export default class Theatre {
 				timeoutId: null
 			};
 
-			TheatreSettingsInitializer.initModuleSettings();
-
-
 			// workers
 			this.emoteMenuRenderer = new EmoteMenuInitilializer(
 				this,
@@ -117,6 +115,11 @@ export default class Theatre {
 			this.sceneEventProcessor = new SceneEventProcessor(
 				this,
 				this.stage);
+			this.textBoxFactory = new TextBoxFactory(
+				this,
+				this.sceneEventProcessor);
+
+			TheatreSettingsInitializer.initModuleSettings();
 
 		}
 		return Theatre.instance;
@@ -2258,7 +2261,7 @@ export default class Theatre {
 			emotions,
 			true);
 
-		let textBox = this.workers.textbox_factory.create_textbox(portName, imgId);
+		let textBox = this.textBoxFactory.createTextbox(portName, imgId);
 
 		// NOTE: we leave insert container positioning up to reorderInserts
 		// which will fire when the loader processes it for injection
@@ -2303,7 +2306,7 @@ export default class Theatre {
 			emotions,
 			false);
 
-		let textBox = this.workers.textbox_factory.create_textbox(portName, imgId);
+		let textBox = this.textBoxFactory.createTextbox(portName, imgId);
 
 		this._addTextBoxToTheatreBar(textBox);
 

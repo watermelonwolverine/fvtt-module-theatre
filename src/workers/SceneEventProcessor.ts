@@ -11,6 +11,10 @@ export class Position {
     mirror: boolean;
 }
 
+// TODO split this into several event types
+export class SceneEventDataBase { };
+
+// TODO split this into several event types
 export class SceneEventData {
     insertid: string;
     emotions: EmotionDefinition;
@@ -26,6 +30,11 @@ export class SceneEventData {
     imgsrcs: string[];
     active: boolean;
 };
+
+export class PositionUpdateSceneEvent extends SceneEventDataBase {
+    insertid: string;
+    position: Position;
+}
 
 export class SceneEventTypes {
     static enterscene = "enterscene";
@@ -345,7 +354,7 @@ export default class SceneEventProcessor {
      */
     _sendSceneEvent(
         eventType: string,
-        eventData: SceneEventData) {
+        eventData: SceneEventData | PositionUpdateSceneEvent) {
         if (Theatre.DEBUG) console.log("Sending Scene state %s with payload: ", eventType, eventData)
 
         // Do we even need verification? There's no User Input outside of 
