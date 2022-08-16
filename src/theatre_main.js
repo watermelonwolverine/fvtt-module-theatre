@@ -102,7 +102,7 @@ Hooks.on("preCreateChatMessage", function (chatMessage) {
 	if (!Theatre.instance) return;
 
 	// make the message OOC if needed
-	if (!chatMessage.data.roll && $(Theatre.instance.theatreChatCover).hasClass("theatre-control-chat-cover-ooc")) {
+	if (!chatMessage.data.roll && $(Theatre.instance.theatreControls.theatreChatCover).hasClass("theatre-control-chat-cover-ooc")) {
 		const user = game.users.get(chatMessage.data.user);
 		chatData.speaker.alias = user.data.name;
 		chatData.speaker.actor = null;

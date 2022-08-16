@@ -198,7 +198,7 @@ export default class Stage {
                  { insertid: toRemoveInsert.imgId });
 
         // unactivate from navbar
-        for (const navItem of this.theatre.theatreNavBar.children)
+        for (const navItem of this.theatre.theatreControls.theatreNavBar.children)
             if (navItem.getAttribute("imgId") == toRemoveInsert.imgId) {
                 KHelpers.removeClass(<HTMLElement>navItem, "theatre-control-nav-bar-item-active");
                 if (toRemoveInsert.imgId == this.theatre.speakingAs)

@@ -17,7 +17,7 @@ export default class TextFlyInMenuItemMouseEventHandler {
                 KHelpers.removeClass((<HTMLElement>ev.currentTarget), "textflyin-active");
                 this.theatre.setUserEmote(game.user.id, this.theatre.speakingAs, 'textflyin', null);
             } else {
-                let lastActives = this.theatre.theatreEmoteMenu.getElementsByClassName("textflyin-active");
+                let lastActives = this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName("textflyin-active");
                 for (let lastActive of lastActives)
                     KHelpers.removeClass(<HTMLElement>lastActive, "textflyin-active");
                 //if (insert || this.context.speakingAs == Theatre.NARRATOR) {

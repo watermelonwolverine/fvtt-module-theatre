@@ -72,7 +72,7 @@ export default class TextStandingMenuItemMouseEventHandler {
                     null);
 
             } else {
-                let lastActives = this.theatre.theatreEmoteMenu.getElementsByClassName("textstanding-active");
+                let lastActives = this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName("textstanding-active");
 
                 for (const lastActive of lastActives) {
                     KHelpers.removeClass(

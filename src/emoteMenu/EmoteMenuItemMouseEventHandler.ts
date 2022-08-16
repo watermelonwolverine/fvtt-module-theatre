@@ -32,7 +32,7 @@ export default class EmoteMenuItemMouseEventHandler {
 
             } else {
 
-                let lastActives = this.theatre.theatreEmoteMenu.getElementsByClassName("emote-active");
+                let lastActives = this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName("emote-active");
 
                 for (let la of lastActives) {
                     KHelpers.removeClass(<HTMLElement>la, "emote-active");

@@ -73,8 +73,8 @@ export default class EmoteMenuInitilializer {
         let insert = this.theatre.stage.getInsertById(this.theatre.speakingAs);
 
         if (Theatre.DEBUG) console.log("emote window template rendered");
-        this.theatre.theatreEmoteMenu.style.top = `${this.theatre.theatreControls.offsetTop - 410}px`;
-        this.theatre.theatreEmoteMenu.innerHTML = template;
+        this.theatre.theatreControls.theatreEmoteMenu.style.top = `${this.theatre.theatreControls.root.offsetTop - 410}px`;
+        this.theatre.theatreControls.theatreEmoteMenu.innerHTML = template;
 
         this._initTextAttributeSelectors(insert);
 
@@ -86,8 +86,8 @@ export default class EmoteMenuInitilializer {
             emotes);
     }
     _initTextAttributeSelectors(insert: StageInsert) {
-        const colorSelect = <HTMLSelectElement>this.theatre.theatreEmoteMenu.getElementsByClassName('colorselect')[0];
-        const fontSelect = <HTMLSelectElement>this.theatre.theatreEmoteMenu.getElementsByClassName('fontselect')[0];
+        const colorSelect = <HTMLSelectElement>this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName('colorselect')[0];
+        const fontSelect = <HTMLSelectElement>this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName('fontselect')[0];
 
         this.set_fontSelect_value(insert,
             fontSelect);
@@ -113,8 +113,8 @@ export default class EmoteMenuInitilializer {
 
         // Apply our language specific fonts to the template
         // OR apply the font specified by the insert
-        let headers = this.theatre.theatreEmoteMenu.getElementsByTagName('h2');
-        let textAnims = this.theatre.theatreEmoteMenu.getElementsByClassName('textanim');
+        let headers = this.theatre.theatreControls.theatreEmoteMenu.getElementsByTagName('h2');
+        let textAnims = this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName('textanim');
         for (let e of headers)
             this.theatre.applyFontFamily(e, TheatreSettings.getTitleFont());
         for (let e of textAnims) {
@@ -127,7 +127,7 @@ export default class EmoteMenuInitilializer {
 
     configure_size_select(insert: StageInsert) {
 
-        let sizeSelect = <HTMLSelectElement>this.theatre.theatreEmoteMenu.getElementsByClassName('sizeselect')[0];
+        let sizeSelect = <HTMLSelectElement>this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName('sizeselect')[0];
 
         let sizeIcon = document.createElement("div");
         let sizeValue = 2;
@@ -215,7 +215,7 @@ export default class EmoteMenuInitilializer {
 
     _initTextFlyinColumn(insert: StageInsert) {
 
-        const textflying_box = <HTMLElement>this.theatre.theatreEmoteMenu.getElementsByClassName("textflyin-box")[0];
+        const textflying_box = <HTMLElement>this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName("textflyin-box")[0];
         const theatre_container_column = <HTMLElement>textflying_box.getElementsByClassName("theatre-container-column")[0];
         (<HTMLElement>theatre_container_column).addEventListener("wheel", ev => this.wheelFunc(ev));
 
@@ -256,7 +256,7 @@ export default class EmoteMenuInitilializer {
 
     _initTextStandingColumn(insert: StageInsert) {
 
-        const textStanding_Box = <HTMLElement>this.theatre.theatreEmoteMenu.getElementsByClassName("textstanding-box")[0];
+        const textStanding_Box = <HTMLElement>this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName("textstanding-box")[0];
         const standingBox = <HTMLElement>textStanding_Box.getElementsByClassName("theatre-container-column")[0];
 
         (<HTMLElement>standingBox).addEventListener("wheel", ev => this.wheelFunc(ev))
@@ -300,8 +300,8 @@ export default class EmoteMenuInitilializer {
         emotes: EmoteDictionary) {
 
         // If speaking as theatre, minimize away the emote section
-        const fontSelect = <HTMLSelectElement>this.theatre.theatreEmoteMenu.getElementsByClassName('fontselect')[0];
-        const emoteBox = <HTMLElement>this.theatre.theatreEmoteMenu.getElementsByClassName("emote-box")[0];
+        const fontSelect = <HTMLSelectElement>this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName('fontselect')[0];
+        const emoteBox = <HTMLElement>this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName("emote-box")[0];
         const emContainer = <HTMLElement>emoteBox.getElementsByClassName("theatre-container-tiles")[0];
 
         if (this.theatre.speakingAs == Theatre.NARRATOR) {
@@ -312,7 +312,7 @@ export default class EmoteMenuInitilializer {
             emLabel.style.display = "none";
         } else {
             // configure handles to bind emote selection
-            let emoteBtns = this.theatre.theatreEmoteMenu.getElementsByClassName("emote");
+            let emoteBtns = this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName("emote");
             for (const child_ of emoteBtns) {
 
                 const child = <HTMLElement>child_;

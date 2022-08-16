@@ -22,6 +22,11 @@ export default class NavBar {
         this.navItemMouseEventHandler = new NavItemMouseEventHandler(this.theatre);
     }
 
+    init() {
+
+      
+    }
+
     addToNavBar(actorData: ActorData) {
 
         if (!actorData)
@@ -84,12 +89,11 @@ export default class NavBar {
         navItem.addEventListener("dragover", ev => this.navItemMouseEventHandler.handleNavItemDragOver(ev));
         navItem.addEventListener("drop", ev => this.navItemMouseEventHandler.handleNavItemDragDrop(ev));
 
-        this.theatre.theatreNavBar.appendChild(navItem);
+        this.theatre.theatreControls.theatreNavBar.appendChild(navItem);
         // stage event
         this.theatre.stageInsertById(theatreId);
         // Store reference
         this.stage.actors.set(theatreId, new TheatreActor(actorData, navItem));
     }
-
 
 }

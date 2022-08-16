@@ -21,31 +21,30 @@
  *
  */
 
-import TheatreSettings from './extensions/TheatreSettings';
-import _TheatreWorkers from './workers/workers';
-import KHelpers from "./workers/KHelpers";
-import ActorExtensions from './extensions/ActorExtensions';
-import TheatreActorConfig from './types/TheatreActorConfig';
-import TheatreActor from './types/TheatreActor';
-import Stage from './types/Stage';
-import TheatreSettingsInitializer from './workers/SettingsInitializer';
-import TheatreStyle from './types/TheatreStyle';
-import Tools from "./workers/Tools";
-import EmotionDefinition from "./types/EmotionDefinition";
 import EmoteMenuInitilializer from './emoteMenu/EmoteMenuRenderer';
-import InsertReorderer from './workers/InsertReorderer';
-import ToolTipCanvas from './types/ToolTipCanvas';
-import Portrait from './types/Portrait';
-import User from './types/User';
-import StageInsert from './types/StageInsert';
-import NavItemMouseEventHandler from './workers/NavItemMouseEventHandler';
-import EmoteSetter from './workers/EmoteSetter';
-import EaseVerifier from './workers/EaseVerifier';
+import ActorExtensions from './extensions/ActorExtensions';
+import TheatreSettings from './extensions/TheatreSettings';
 import { AnimationSyntaxVerifier } from './types/AnimationSyntaxVerifier';
+import EmotionDefinition from "./types/EmotionDefinition";
 import NavBar from './types/NavBar';
-import SceneEventProcessor from './workers/SceneEventProcessor';
+import Portrait from './types/Portrait';
 import { SceneEventTypes } from "./types/SceneEventTypes";
+import Stage from './types/Stage';
+import StageInsert from './types/StageInsert';
+import TheatreActorConfig from './types/TheatreActorConfig';
+import TheatreControls from './types/TheatreControls';
+import TheatreStyle from './types/TheatreStyle';
+import ToolTipCanvas from './types/ToolTipCanvas';
+import User from './types/User';
+import EaseVerifier from './workers/EaseVerifier';
+import EmoteSetter from './workers/EmoteSetter';
+import InsertReorderer from './workers/InsertReorderer';
+import KHelpers from "./workers/KHelpers";
+import SceneEventProcessor from './workers/SceneEventProcessor';
+import TheatreSettingsInitializer from './workers/SettingsInitializer';
 import TextBoxFactory from './workers/textbox_factory';
+import Tools from "./workers/Tools";
+import _TheatreWorkers from './workers/workers';
 
 export default class Theatre {
 
@@ -88,11 +87,6 @@ export default class Theatre {
 			this.rendering = false;
 			this.renderAnims = 0;
 			this.speakingAs = null;
-			this.stage = new Stage(this);
-			this.navBar = new NavBar(
-				this,
-				this.stage);
-			this.toolTipCanvas = new ToolTipCanvas(this.stage);
 
 			/** @type {Map<String,EmotionDefinition>}*/
 			this.userEmotes = new Map();
@@ -105,17 +99,34 @@ export default class Theatre {
 				timeoutId: null
 			};
 
+			// Components
+			this.stage = new Stage(this);
+
+			this.navBar = new NavBar(
+				this,
+				this.stage);
+
+			this.toolTipCanvas = new ToolTipCanvas(this.stage);
+
+			this.theatreControls = new TheatreControls(
+				this,
+				this.stage);
+
 			// workers
 			this.emoteMenuRenderer = new EmoteMenuInitilializer(
 				this,
 				this.toolTipCanvas);
+
 			this.insertReorderer = new InsertReorderer(
 				this,
 				this.stage);
+
 			this.emoteSetter = new EmoteSetter(this);
+
 			this.sceneEventProcessor = new SceneEventProcessor(
 				this,
 				this.stage);
+
 			this.textBoxFactory = new TextBoxFactory(
 				this,
 				this.sceneEventProcessor);
@@ -150,7 +161,6 @@ export default class Theatre {
 		 * Theatre Dock + Theatre Bar
 		 */
 		let body = document.getElementsByTagName("body")[0];
-		let chatSidebar = document.getElementById("chat");
 
 		this.theatreGroup = document.createElement("div");
 		this.stage.initTheatreDockCanvas();
@@ -186,153 +196,7 @@ export default class Theatre {
 		const narrHeight = TheatreSettings.getNarratorHeight();
 		this.theatreNarrator.style.top = `calc(${narrHeight} - 50px)`;
 
-		// set dock canvas hard dimensions after CSS has caclulated it
-
-		/**
-		 * Theatre Chat Controls
-		 */
-		let chatControls = document.getElementById("chat-controls");
-		let controlButtons = chatControls.getElementsByClassName("control-buttons")[0];
-		let chatMessage = document.getElementById("chat-message");
-
-		this.theatreControls = document.createElement("div");
-		this.theatreNavBar = document.createElement("div");
-		this.theatreChatCover = document.createElement("div");
-
-		if (!game.user.isGM && TheatreSettings.get(TheatreSettings.GM_ONLY)) {
-			this.theatreControls.style.display = "none";
-		}
-
-		let imgCover = document.createElement("img");
-		let btnSuppress = document.createElement("div");
-		let iconSuppress = document.createElement("div");
-		let btnEmote = document.createElement("div");
-		let iconEmote = document.createElement("div");
-		//let btnCinema = document.createElement("div"); 
-		//let iconCinema = document.createElement("div"); 
-		let btnNarrator;
-		let iconNarrator;
-
-		let btnResync = document.createElement("a");
-		let iconResync = document.createElement("i");
-		let btnQuote = document.createElement("a");
-		let iconQuote = document.createElement("i");
-		let btnDelayEmote = document.createElement("a");
-		let iconDelayEmote = document.createElement("i");
-
-		KHelpers.addClass(this.theatreControls, "theatre-control-group");
-		KHelpers.addClass(this.theatreNavBar, "theatre-control-nav-bar");
-		KHelpers.addClass(this.theatreNavBar, "no-scrollbar");
-		KHelpers.addClass(this.theatreChatCover, "theatre-control-chat-cover");
-		KHelpers.addClass(btnSuppress, "theatre-control-btn");
-		KHelpers.addClass(iconSuppress, "theatre-icon-suppress");
-		KHelpers.addClass(btnEmote, "theatre-control-btn");
-		KHelpers.addClass(iconEmote, "theatre-icon-emote");
-		//KHelpers.addClass(btnCinema,"theatre-control-btn"); 
-		//KHelpers.addClass(iconCinema,"theatre-icon-cinema"); 
-		KHelpers.addClass(btnResync, "button");
-		KHelpers.addClass(btnResync, "resync-theatre");
-		KHelpers.addClass(iconResync, "fas");
-		KHelpers.addClass(iconResync, "fa-sync");
-		KHelpers.addClass(btnQuote, "button");
-		KHelpers.addClass(iconQuote, "fas");
-		KHelpers.addClass(iconQuote, "fa-quote-right");
-		KHelpers.addClass(btnDelayEmote, "button");
-		KHelpers.addClass(iconDelayEmote, "fas");
-		KHelpers.addClass(iconDelayEmote, "fa-comment-alt");
-
-		btnEmote.setAttribute("title", game.i18n.localize("Theatre.UI.Title.EmoteSelector"));
-		btnSuppress.setAttribute("title", game.i18n.localize("Theatre.UI.Title.SuppressTheatre"));
-		btnResync.setAttribute("title", (game.user.isGM ? game.i18n.localize("Theatre.UI.Title.ResyncGM") : game.i18n.localize("Theatre.UI.Title.ResyncPlayer")));
-		btnQuote.setAttribute("title", game.i18n.localize("Theatre.UI.Title.QuoteToggle"));
-		btnDelayEmote.setAttribute("title", game.i18n.localize("Theatre.UI.Title.DelayEmoteToggle"));
-		//btnCinema.setAttribute("title",game.i18n.localize("Theatre.UI.Title.CinemaSelector")); 
-		btnEmote.addEventListener("click", (ev) => this.handleBtnEmoteClick(ev));
-		btnSuppress.addEventListener("click", this.handleBtnSuppressClick);
-		btnResync.addEventListener("click", this.handleBtnResyncClick);
-		btnQuote.addEventListener("click", this.handleBtnQuoteClick);
-		btnDelayEmote.addEventListener("click", this.handleBtnDelayEmoteClick);
-		//btnCinema.addEventListener("click", this.handleBtnCinemaClick); 
-		this.theatreNavBar.addEventListener("wheel", ev => this.handleNavBarWheel(ev));
-
-		btnEmote.appendChild(iconEmote);
-		btnSuppress.appendChild(iconSuppress);
-		btnResync.appendChild(iconResync);
-		btnQuote.appendChild(iconQuote);
-		btnDelayEmote.appendChild(iconDelayEmote);
-		//btnCinema.appendChild(iconCinema); 
-		this.theatreChatCover.appendChild(imgCover);
-
-		this.theatreControls.appendChild(this.theatreNavBar);
-
-		if (game.user.isGM) {
-			btnNarrator = document.createElement("div");
-			iconNarrator = document.createElement("div");
-			KHelpers.addClass(btnNarrator, "theatre-control-btn");
-			KHelpers.addClass(iconNarrator, "theatre-icon-narrator");
-			btnNarrator.setAttribute("title", game.i18n.localize("Theatre.UI.Title.Narrator"));
-			btnNarrator.appendChild(iconNarrator);
-			btnNarrator.addEventListener("click", this.handleBtnNarratorClick);
-			this.theatreControls.appendChild(btnNarrator);
-		}
-
-		this.theatreControls.appendChild(btnEmote);
-		//this.theatreControls.appendChild(btnCinema); 
-		this.theatreControls.appendChild(btnSuppress);
-
-		btnDelayEmote.style["margin"] = "0 4px";
-		btnQuote.style["margin"] = "0 4px";
-		btnResync.style["margin"] = "0 4px";
-
-		if (game.user.isGM || !TheatreSettings.get(TheatreSettings.GM_ONLY)) {
-			if (controlButtons) {
-				controlButtons.style["flex-basis"] = "100%";
-				KHelpers.insertBefore(btnResync, controlButtons.children[0]);
-				KHelpers.insertBefore(btnQuote, btnResync);
-				KHelpers.insertBefore(btnDelayEmote, btnQuote);
-			} else {
-				controlButtons = document.createElement("div");
-				KHelpers.addClass(controlButtons, "control-buttons");
-				controlButtons.style["flex-basis"] = "100%";
-				controlButtons.appendChild(btnDelayEmote);
-				controlButtons.appendChild(btnQuote);
-				controlButtons.appendChild(btnResync);
-				chatControls.appendChild(controlButtons);
-			}
-		}
-
-		KHelpers.insertBefore(this.theatreControls, chatControls);
-		KHelpers.insertAfter(this.theatreChatCover, chatMessage);
-
-		// bind listener to chat message
-		chatMessage.addEventListener("keydown", this.handleChatMessageKeyDown);
-		chatMessage.addEventListener("keyup", this.handleChatMessageKeyUp);
-		chatMessage.addEventListener("focusout", this.handleChatMessageFocusOut);
-
-		/*
-		* Emote Menu
-		*/
-		this.theatreEmoteMenu = document.createElement("div");
-		KHelpers.addClass(this.theatreEmoteMenu, "theatre-emote-menu");
-		KHelpers.addClass(this.theatreEmoteMenu, "app");
-		KHelpers.insertBefore(this.theatreEmoteMenu, this.theatreControls);
-
-		/**
-		 * Tooltip
-		 */
-		this.theatreEmoteMenu.addEventListener("mousemove", ev => this.toolTipCanvas.handleEmoteMenuMouseMove(ev));
-	}
-
-	/**
-	 * Handle naveBar Wheel 
-	 *
-	 * @param ev (Event) : The Event that triggered this handler
-	 */
-	handleNavBarWheel(ev) {
-		ev.preventDefault();
-		let pos = ev.deltaY > 0;
-		ev.currentTarget.scrollLeft += (pos ? 10 : -10);
-		//ev.currentTarget.scrollLeft -= ev.deltaY/4; 	
+		this.theatreControls.initHtml();
 	}
 
 
@@ -496,7 +360,6 @@ export default class Theatre {
 	 * 2. Wither or not we're typing currently
 	 * 3. What typing animations we've chosen
 	 *
-	 * @private
 	 */
 	_sendTypingEvent() {
 		if (Theatre.DEBUG) console.log("Sending Typing Event")
@@ -617,7 +480,6 @@ export default class Theatre {
 	 *
 	 * @param type (String) : The type of resync event, can either be "players" or "gm"
 	 *						indicating wither it's to resync "all players" or to resync with a gm (any GM)
-	 * @private
 	 */
 	_sendResyncRequest(type) {
 		if (Theatre.DEBUG) console.log("Sending RESYNC Request ", type);
@@ -2347,7 +2209,7 @@ export default class Theatre {
 	 * @return (HTMLElement) : The nav item, if found, else undefined. 
 	 */
 	getNavItemByName(name) {
-		for (let navItem of this.theatreNavBar.children) {
+		for (let navItem of this.theatreControls.theatreNavBar.children) {
 			if (navItem.getAttribute("name") == name)
 				return navItem;
 		}
@@ -2408,7 +2270,7 @@ export default class Theatre {
 	 *	chat message area. 
 	 */
 	getTheatreCoverPortrait() {
-		return this.theatreChatCover.getElementsByTagName("img")[0];
+		return this.theatreControls.theatreChatCover.getElementsByTagName("img")[0];
 	}
 
 	/**
@@ -3233,7 +3095,7 @@ export default class Theatre {
 			if (this.speakingAs != id) {
 				this.speakingAs = id;
 				KHelpers.addClass(navItem, "theatre-control-nav-bar-item-speakingas");
-				TweenMax.to(Theatre.instance.theatreNavBar, .4, { scrollTo: { x: navItem.offsetLeft, offsetX: Theatre.instance.theatreNavBar.offsetWidth / 2 } })
+				TweenMax.to(this.theatreControls.theatreNavBar, .4, { scrollTo: { x: navItem.offsetLeft, offsetX: this.theatreNavBar.offsetWidth / 2 } })
 
 				// add label pulse
 				insert.label.tint = 0xFFFFFF;
@@ -3254,8 +3116,7 @@ export default class Theatre {
 
 				// change cover
 				cimg.setAttribute("src", params.src);
-				//cimg.style.left = `calc(100% - ${this.theatreChatCover.offsetHeight}px)`
-				cimg.style.width = `${this.theatreChatCover.offsetHeight}px`
+				cimg.style.width = `${this.theatreControls.theatreChatCover.offsetHeight}px`
 				cimg.style.opacity = "0.3";
 				// push focus to chat-message
 				let chatMessage = document.getElementById("chat-message");
@@ -3297,7 +3158,7 @@ export default class Theatre {
 
 			this.speakingAs = id;
 			KHelpers.addClass(navItem, "theatre-control-nav-bar-item-speakingas");
-			TweenMax.to(Theatre.instance.theatreNavBar, .4, { scrollTo: { x: navItem.offsetLeft, offsetX: Theatre.instance.theatreNavBar.offsetWidth / 2 } })
+			TweenMax.to(this.theatreControls.theatreNavBar, .4, { scrollTo: { x: navItem.offsetLeft, offsetX: this.theatreControls.theatreNavBar.offsetWidth / 2 } })
 
 			window.setTimeout(() => {
 				insert = this.stage.getInsertById(id);
@@ -3325,8 +3186,7 @@ export default class Theatre {
 
 			// change cover
 			cimg.setAttribute("src", src);
-			//cimg.style.left = `calc(100% - ${this.theatreChatCover.offsetHeight}px)`
-			cimg.style.width = `${this.theatreChatCover.offsetHeight}px`
+			cimg.style.width = `${this.theatreControls.theatreChatCover.offsetHeight}px`
 			cimg.style.opacity = "0.3";
 			// push focus to chat-message
 			let chatMessage = document.getElementById("chat-message");
@@ -3492,7 +3352,7 @@ export default class Theatre {
 			// set speakingAs to "narrator" note that this will need heavy regression testing
 			// as it'll be plugging into the insert workflow when it's truely not a real insert
 			if (game.user.isGM) {
-				let btnNarrator = this.theatreControls.getElementsByClassName("theatre-icon-narrator")[0].parentNode;
+				let btnNarrator = this.theatreControls.root.getElementsByClassName("theatre-icon-narrator")[0].parentNode;
 				let oldSpeakingItem = this.getNavItemById(this.speakingAs);
 				let oldSpeakingInsert = this.stage.getInsertById(this.speakingAs);
 				let oldSpeakingLabel = this._getLabelFromInsert(oldSpeakingInsert);
@@ -3567,7 +3427,7 @@ export default class Theatre {
 			narratorContent.textContent = '';
 
 			if (game.user.isGM) {
-				let btnNarrator = this.theatreControls.getElementsByClassName("theatre-icon-narrator")[0].parentNode;
+				let btnNarrator = this.theatreControls.root.getElementsByClassName("theatre-icon-narrator")[0].parentNode;
 				KHelpers.removeClass(btnNarrator, "theatre-control-nav-bar-item-speakingas");
 				// clear narrator
 				this.speakingAs = null;
@@ -3602,8 +3462,8 @@ export default class Theatre {
 			secondBar.style.left = `calc(100% - ${dualWidth}px)`;
 		}
 		// emote menu
-		if (this.theatreEmoteMenu)
-			this.theatreEmoteMenu.style.top = `${this.theatreControls.offsetTop - 410}px`
+		if (this.theatreControls.theatreEmoteMenu)
+			this.theatreControls.theatreEmoteMenu.style.top = `${this.theatreControls.root.offsetTop - 410}px`
 
 
 		this.stage.handleWindowResize()
@@ -3619,196 +3479,6 @@ export default class Theatre {
 			this.reorderTOId = null;
 		}, 250);
 
-	}
-
-	/**
-	 * Handle the emote click
-	 *
-	 * @param ev (Event) : The Event that triggered this handler
-	 */
-	handleBtnEmoteClick(ev) {
-		if (Theatre.DEBUG) console.log("emote click");
-
-		if (KHelpers.hasClass(ev.currentTarget, "theatre-control-btn-down")) {
-			this.theatreEmoteMenu.style.display = "none";
-			KHelpers.removeClass(ev.currentTarget, "theatre-control-btn-down");
-		} else {
-			this.emoteMenuRenderer.initialize();
-			this.theatreEmoteMenu.style.display = "flex";
-			KHelpers.addClass(ev.currentTarget, "theatre-control-btn-down");
-		}
-	}
-
-	/**
-	 * Handle chat-message focusOut
-	 *
-	 * @param ev (Event) : The Event that triggered this handler
-	 */
-	handleChatMessageFocusOut(ev) {
-		KHelpers.removeClass(Theatre.instance.theatreChatCover, "theatre-control-chat-cover-ooc");
-	}
-
-	/**
-	 * Handle chat-message keyUp
-	 *
-	 * @param ev (Event) : The Event that triggered this handler
-	 */
-	handleChatMessageKeyUp(ev) {
-		if (!ev.repeat
-			//&& Theatre.instance.speakingAs
-			&& ev.key == "Control")
-			KHelpers.removeClass(Theatre.instance.theatreChatCover, "theatre-control-chat-cover-ooc");
-	}
-
-	/**
-	 * Handle key-down events in the #chat-message area to fire
-	 * "typing" events to connected clients
-	 *
-	 * @param ev (Event) : The Event that triggered this handler
-	 */
-	handleChatMessageKeyDown(ev) {
-		const context = KeyboardManager.getKeyboardEventContext(ev);
-		const actions = KeyboardManager._getMatchingActions(context);
-		for (const action of actions) {
-			if (!action.action.includes("theatre")) continue;
-			action.onDown.call(context);
-		}
-
-		let now = Date.now();
-
-		if (!ev.repeat
-			//&& Theatre.instance.speakingAs
-			&& ev.key == "Control")
-			KHelpers.addClass(Theatre.instance.theatreChatCover, "theatre-control-chat-cover-ooc");
-
-		if (now - Theatre.instance.lastTyping < 3000) return;
-		if (ev.key == "Enter"
-			|| ev.key == "Alt"
-			|| ev.key == "Shift"
-			|| ev.key == "Control") return;
-		if (Theatre.DEBUG) console.log("keydown in chat-message");
-		Theatre.instance.lastTyping = now;
-		Theatre.instance.setUserTyping(game.user.id, Theatre.instance.speakingAs)
-		Theatre.instance._sendTypingEvent();
-	}
-
-
-	/**
-	 * Handle the narrator click 
-	 *
-	 * NOTE: this has issues with multiple GMs since the narrator bar currently works as a
-	 * "shim" in that it pretends to be a proper insert for text purposes only.
-	 * 
-	 * If another GM activates another charater, it will minimize the bar for a GM that is trying
-	 * to use the bar
-	 *
-	 * @param ev (Event) : The Event that triggered this handler
-	 */
-	handleBtnNarratorClick(ev) {
-		if (Theatre.DEBUG) console.log("narrator click");
-
-		if (KHelpers.hasClass(ev.currentTarget, "theatre-control-nav-bar-item-speakingas")) {
-			Theatre.instance.toggleNarratorBar(false);
-		} else {
-			Theatre.instance.toggleNarratorBar(true);
-		}
-	}
-
-	/**
-	 * Handle the CutIn toggle click
-	 *
-	 * @param ev (Event) : The Event that triggered this handler
-	 */
-	handleBtnCinemaClick(ev) {
-		if (Theatre.DEBUG) console.log("cinema click");
-		ui.notifications.info(game.i18n.localize("Theatre.NotYet"));
-		/*
-		if (KHelpers.hasClass(ev.currentTarget,"theatre-control-small-btn-down")) {
-			KHelpers.removeClass(ev.currentTarget,"theatre-control-small-btn-down"); 
-		} else {
-			KHelpers.addClass(ev.currentTarget,"theatre-control-small-btn-down"); 
-			ui.notifications.info(game.i18n.localize("Theatre.NotYet"));
-		}
-		*/
-	}
-
-	/**
-	 * Handle the Delay Emote toggle click
-	 *
-	 * @param ev (Event) : The Event that triggered this handler
-	 */
-	handleBtnDelayEmoteClick(ev) {
-		if (Theatre.DEBUG) console.log("delay emote click");
-
-		if (Theatre.instance.isDelayEmote) {
-			if (KHelpers.hasClass(ev.currentTarget, "theatre-control-small-btn-down"))
-				KHelpers.removeClass(ev.currentTarget, "theatre-control-small-btn-down");
-			Theatre.instance.isDelayEmote = false;
-		} else {
-			if (!KHelpers.hasClass(ev.currentTarget, "theatre-control-small-btn-down"))
-				KHelpers.addClass(ev.currentTarget, "theatre-control-small-btn-down");
-			Theatre.instance.isDelayEmote = true;
-		}
-		// push focus to chat-message
-		let chatMessage = document.getElementById("chat-message");
-		chatMessage.focus();
-	}
-
-
-	/**
-	 * Handle the Quote toggle click
-	 *
-	 * @param ev (Event) : The Event that triggered this handler
-	 */
-	handleBtnQuoteClick(ev) {
-		if (Theatre.DEBUG) console.log("quote click");
-
-		if (Theatre.instance.isQuoteAuto) {
-			if (KHelpers.hasClass(ev.currentTarget, "theatre-control-small-btn-down"))
-				KHelpers.removeClass(ev.currentTarget, "theatre-control-small-btn-down");
-			Theatre.instance.isQuoteAuto = false;
-		} else {
-			if (!KHelpers.hasClass(ev.currentTarget, "theatre-control-small-btn-down"))
-				KHelpers.addClass(ev.currentTarget, "theatre-control-small-btn-down");
-			Theatre.instance.isQuoteAuto = true;
-		}
-		// push focus to chat-message
-		let chatMessage = document.getElementById("chat-message");
-		chatMessage.focus();
-	}
-
-	/**
-	 * Handle the resync click
-	 *
-	 * @param ev (Event) : The Event that triggered this handler
-	 */
-	handleBtnResyncClick(ev) {
-		if (Theatre.DEBUG) console.log("resync click");
-		if (game.user.isGM) {
-			Theatre.instance._sendResyncRequest("players");
-			ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.ResyncGM"));
-		}
-		else {
-			Theatre.instance._sendResyncRequest("gm");
-		}
-	}
-
-	/**
-	 * Handle the supression click
-	 *
-	 * @param ev (Event) : The Event that triggered this handler
-	 */
-	handleBtnSuppressClick(ev) {
-		if (Theatre.DEBUG) console.log("suppression click");
-		if (Theatre.instance.isSuppressed) {
-			if (KHelpers.hasClass(ev.currentTarget, "theatre-control-btn-down")) {
-				KHelpers.removeClass(ev.currentTarget, "theatre-control-btn-down");
-			}
-		}
-		else {
-			KHelpers.addClass(ev.currentTarget, "theatre-control-btn-down");
-		}
-		Theatre.instance.updateSuppression(!Theatre.instance.isSuppressed);
 	}
 
 	updateSuppression(suppress) {
@@ -3838,25 +3508,6 @@ export default class Theatre {
 
 		// call hooks
 		Hooks.call("theatreSuppression", Theatre.instance.isSuppressed);
-	}
-
-
-
-	/**
-	 * Set wither or not to display or hide theatre debug information. 
-	 *
-	 * @params state (Boolean) : Boolean indicating if we should toggle debug on/off
-	 */
-	static setDebug(state) {
-		if (state) {
-			Theatre.DEBUG = true;
-			for (let insert of Theatre.instance.stage.stageInserts)
-				Theatre.instance.renderInsertById(insert.imgId);
-		} else {
-			Theatre.DEBUG = false;
-			for (let insert of Theatre.instance.stage.stageInserts)
-				Theatre.instance.renderInsertById(insert.imgId);
-		}
 	}
 
 	/**
@@ -3932,7 +3583,7 @@ export default class Theatre {
 		const staged = this.stage.actors.get(theatreId);
 		if (staged) {
 			if (staged.navElement) {
-				this.theatreNavBar.removeChild(staged.navElement);
+				this.theatreControls.theatreNavBar.removeChild(staged.navElement);
 			}
 			this.stage.removeActorFromStage(theatreId)
 		}
