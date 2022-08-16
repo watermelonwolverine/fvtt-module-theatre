@@ -1034,18 +1034,23 @@ export default class Theatre {
 				let tweenId = "typingAppear";
 				insert.typingBubble.scale.x = 0.01;
 				insert.typingBubble.scale.y = 0.01;
-				let tween = TweenMax.to(insert.typingBubble, 0.2, {
-					pixi: { scaleX: 1, scaleY: 1, alpha: 1 },
-					ease: Power0.easeNone,
-					onComplete: function (ctx, imgId, tweenId) {
-						// decrement the rendering accumulator
-						ctx._removeDockTween(imgId, this, tweenId);
-						this.targets()[0].scale.x = 1;
-						this.targets()[0].scale.y = 1;
-						// remove our own reference from the dockContainer tweens
-					},
-					onCompleteParams: [this, insert.imgId, tweenId]
-				});
+				
+				let tween = TweenMax.to(
+					insert.typingBubble,
+					0.2,
+					{
+						pixi: { scaleX: 1, scaleY: 1, alpha: 1 },
+						ease: Power0.easeNone,
+						onComplete: function (ctx, imgId, tweenId) {
+							// decrement the rendering accumulator
+							ctx._removeDockTween(imgId, this, tweenId);
+							this.targets()[0].scale.x = 1;
+							this.targets()[0].scale.y = 1;
+							// remove our own reference from the dockContainer tweens
+						},
+						onCompleteParams: [this, insert.imgId, tweenId]
+					});
+
 				this._addDockTween(insert.imgId, tween, tweenId);
 
 				tweenId = "typingWiggle";
@@ -3095,7 +3100,18 @@ export default class Theatre {
 			if (this.speakingAs != id) {
 				this.speakingAs = id;
 				KHelpers.addClass(navItem, "theatre-control-nav-bar-item-speakingas");
-				TweenMax.to(this.theatreControls.theatreNavBar, .4, { scrollTo: { x: navItem.offsetLeft, offsetX: this.theatreNavBar.offsetWidth / 2 } })
+
+				const navBar = this.theatreControls.theatreNavBar;
+
+				TweenMax.to(
+					navBar,
+					.4,
+					{
+						scrollTo:
+						{
+							x: navItem.offsetLeft, offsetX: navBar.offsetWidth / 2
+						}
+					});
 
 				// add label pulse
 				insert.label.tint = 0xFFFFFF;
@@ -3158,7 +3174,18 @@ export default class Theatre {
 
 			this.speakingAs = id;
 			KHelpers.addClass(navItem, "theatre-control-nav-bar-item-speakingas");
-			TweenMax.to(this.theatreControls.theatreNavBar, .4, { scrollTo: { x: navItem.offsetLeft, offsetX: this.theatreControls.theatreNavBar.offsetWidth / 2 } })
+
+			const navBar = this.theatreControls.theatreNavBar;
+
+			TweenMax.to(
+				navBar,
+				.4,
+				{
+					scrollTo:
+					{
+						x: navItem.offsetLeft, offsetX: navBar.offsetWidth / 2
+					}
+				});
 
 			window.setTimeout(() => {
 				insert = this.stage.getInsertById(id);

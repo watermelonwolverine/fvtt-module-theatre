@@ -9,6 +9,7 @@ import _TheatreWorkers from "./workers";
 import Tools from "./Tools";
 import Portrait from "../types/Portrait";
 import TheatrePortraitContainerSetupWorker from "./portrait_container_setup";
+import TheatreSettings from "../extensions/TheatreSettings";
 
 
 export default class _TheatrePixiContainerFactory {
@@ -73,6 +74,12 @@ export default class _TheatrePixiContainerFactory {
             textColor = emotions.textColor;
         }
 
+        const typingBubble = this.newTypingBubble();
+        const label = this.newLabel(portName);
+
+        dockContainer.addChild(typingBubble);
+        dockContainer.addChild(label)
+
         this.theatre.stage.stageInserts.push({
             imgId: imgId,
             dockContainer: dockContainer,
@@ -84,8 +91,8 @@ export default class _TheatrePixiContainerFactory {
             textSize: textSize,
             textColor: textColor,
             portrait: portrait,
-            label: null,
-            typingBubble: null,
+            label: label,
+            typingBubble: typingBubble,
             exitOrientation: (isLeft ? "left" : "right"),
             nameOrientation: "left",
             optAlign: optAlign,
@@ -149,5 +156,41 @@ export default class _TheatrePixiContainerFactory {
             }
 
         });
+    }
+    newTypingBubble() {
+        const typingBubble = new PIXI.Sprite();
+
+        typingBubble.width = 55;
+        typingBubble.height = 55;
+        typingBubble.theatreComponentName = "typingBubble";
+        typingBubble.alpha = 0;
+
+        return typingBubble;
+    }
+
+    newLabel(name: string) {
+        // setup label if not setup
+        const textStyle = new PIXI.TextStyle({
+            align: "center",
+            fontFamily: TheatreSettings.getTitleFont(),
+            fontSize: 44,
+            lineHeight: 64,
+            fill: ['#ffffff'],
+            stroke: '#000000',
+            strokeThickness: 2,
+            dropShadow: true,
+            dropShadowColor: '#000000',
+            dropShadowBlur: 1,
+            dropShadowAngle: Math.PI / 6,
+            breakWords: true,
+            wordWrap: true
+        });
+        const label = new PIXI.Text(name, textStyle);
+
+        label.theatreComponentName = "label";
+
+        label.x = 20;
+
+        return label;
     }
 }

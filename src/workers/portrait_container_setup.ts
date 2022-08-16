@@ -10,10 +10,10 @@ import Portrait from "../types/Portrait";
 
 export default class TheatrePortraitContainerSetupWorker {
 
-    context: Theatre;
+    theatre: Theatre;
 
-    constructor(context: Theatre) {
-        this.context = context;
+    constructor(theatre: Theatre) {
+        this.theatre = theatre;
     }
 
     /**
@@ -38,7 +38,7 @@ export default class TheatrePortraitContainerSetupWorker {
         reorder = false): void {
 
 
-        const stage = this.context.stage;
+        const stage = this.theatre.stage;
         const insert = stage.getInsertById(imgId);
 
         if (!insert || !insert.dockContainer) {
@@ -65,52 +65,12 @@ export default class TheatrePortraitContainerSetupWorker {
         const portWidth = insert.portrait.width;
         const portHeight = insert.portrait.height;
 
-        // setup label if not setup
-        if (!insert.label) {
-            let textStyle = new PIXI.TextStyle({
-                align: "center",
-                fontFamily: TheatreSettings.getTitleFont(),
-                fontSize: 44,
-                lineHeight: 64,
-                //fontStyle: 'italic',
-                fontWeight: this.context.fontWeight,
-                fill: ['#ffffff'],
-                stroke: '#000000',
-                strokeThickness: 2,
-                dropShadow: true,
-                dropShadowColor: '#000000',
-                dropShadowBlur: 1,
-                dropShadowAngle: Math.PI / 6,
-                breakWords: true,
-                wordWrap: true,
-                wordWrapWidth: portWidth
-            });
-            let label = new PIXI.Text(insert.name, textStyle);
-            // save and stage our label
-            label.theatreComponentName = "label";
-            insert.label = label;
-            dockContainer.addChild(label);
-            // initital positioning
-            insert.label.x = 20;
-        }
+        insert.label.style.fontWeight = this.theatre.fontWeight;
+        insert.label.style.wordWrapWidth = portWidth;
+
         insert.label.y = portHeight - (insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight) - insert.label.style.lineHeight - 20;
 
-
-        // setup typing bubble
-        if (!insert.typingBubble) {
-            let typingBubble = new PIXI.Sprite();
-            typingBubble.texture = resources["modules/theatre/app/graphics/typing.png"].texture;
-            typingBubble.width = 55;
-            typingBubble.height = 55;
-            typingBubble.theatreComponentName = "typingBubble";
-            typingBubble.alpha = 0;
-            typingBubble.y = portHeight -
-                (insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight) - insert.label.style.lineHeight + typingBubble.height / 2;
-
-
-            insert.typingBubble = typingBubble;
-            dockContainer.addChild(typingBubble);
-        }
+        insert.typingBubble.texture = resources["modules/theatre/app/graphics/typing.png"].texture;
 
         // TheatreStyle specific adjustments
         switch (TheatreSettings.getTheatreStyle()) {
@@ -135,13 +95,13 @@ export default class TheatrePortraitContainerSetupWorker {
         // run rigging animations if we have have any
         if (insert.emote) {
             let actorId = insert.imgId.replace("theatre-", "");
-            let defaultDisabled = this.context.isDefaultDisabled(insert.imgId);
+            let defaultDisabled = this.theatre.isDefaultDisabled(insert.imgId);
             if (Theatre.DEBUG) console.log("is default disabled? : %s", defaultDisabled);
             let emotes = ActorExtensions.getEmotesForActor(actorId, defaultDisabled);
             let rigResMap = ActorExtensions.getRiggingResources(actorId);
             if (emotes[insert.emote] && emotes[insert.emote].rigging) {
                 for (let anim of emotes[insert.emote].rigging.animations) {
-                    this.context.addTweensFromAnimationSyntax(anim.name, anim.syntax, rigResMap, insert);
+                    this.theatre.addTweensFromAnimationSyntax(anim.name, anim.syntax, rigResMap, insert);
                 }
             }
         }
@@ -154,18 +114,18 @@ export default class TheatrePortraitContainerSetupWorker {
                 let tb = stage.getTextBoxById(imgId);
                 if (tb) tb.style.opacity = "1";
 
-                window.clearTimeout(this.context.reorderTOId)
-                this.context.reorderTOId = window.setTimeout(() => {
-                    this.context.insertReorderer.reorderInserts();
-                    this.context.reorderTOId = null;
+                window.clearTimeout(this.theatre.reorderTOId)
+                this.theatre.reorderTOId = window.setTimeout(() => {
+                    this.theatre.insertReorderer.reorderInserts();
+                    this.theatre.reorderTOId = null;
                 }, 500);
             }, 100);
         } else {
             dockContainer.alpha = 1;
         }
 
-        if (!this.context.rendering)
-            this.context._renderTheatre(performance.now());
+        if (!this.theatre.rendering)
+            this.theatre._renderTheatre(performance.now());
     }
 
 }

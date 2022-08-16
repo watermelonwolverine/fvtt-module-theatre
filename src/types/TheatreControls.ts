@@ -149,9 +149,9 @@ export default class TheatreControls {
         KHelpers.insertAfter(this.theatreChatCover, chatMessage);
 
         // bind listener to chat message
-        chatMessage.addEventListener("keydown", this.handleChatMessageKeyDown);
-        chatMessage.addEventListener("keyup", this.handleChatMessageKeyUp);
-        chatMessage.addEventListener("focusout", this.handleChatMessageFocusOut);
+        chatMessage.addEventListener("keydown", (ev) => this.handleChatMessageKeyDown(ev));
+        chatMessage.addEventListener("keyup", (ev) => this.handleChatMessageKeyUp(ev));
+        chatMessage.addEventListener("focusout", (ev) => this.handleChatMessageFocusOut(ev));
 
         /*
         * Emote Menu
