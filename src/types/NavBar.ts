@@ -22,9 +22,9 @@ export default class NavBar {
         this.navItemMouseEventHandler = new NavItemMouseEventHandler(this.theatre);
     }
 
-    addToNavBar(actor: ActorData) {
+    addToNavBar(actorData: ActorData) {
 
-        if (!actor)
+        if (!actorData)
             return;
 
         // if already on stage, dont add it again
@@ -36,17 +36,17 @@ export default class NavBar {
         // from the bar
         // add click handler logic to remove it from the stage
 
-        let theatreId = Tools.getTheatreId(actor);
-        let portrait = (actor.img ? actor.img : "icons/mystery-man.png");
+        let theatreId = Tools.getTheatreId(actorData);
+        let portrait = (actorData.img ? actorData.img : "icons/mystery-man.png");
         let optAlign = "top";
-        let name = actor.name;
+        let name = actorData.name;
 
         if (!this.theatre.isActorOwner(game.user.id, theatreId)) {
             ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.DoNotControl"));
             return;
         }
 
-        const flags: TheatreFlags = actor.data.flags.theatre;
+        const flags: TheatreFlags = actorData.flags.theatre;
 
         // Use defaults incase the essential flag attributes are missing
         if (flags) {
@@ -59,7 +59,7 @@ export default class NavBar {
         }
 
         if (this.stage.actors.get(theatreId)) {
-            ui.notifications.info(actor.name + game.i18n.localize("Theatre.UI.Notification.AlreadyStaged"));
+            ui.notifications.info(actorData.name + game.i18n.localize("Theatre.UI.Notification.AlreadyStaged"));
             return;
         }
 
@@ -70,7 +70,7 @@ export default class NavBar {
         //navItem.setAttribute("draggable",false); 
         navItem.setAttribute("imgId", theatreId);
         navItem.setAttribute("src", portrait);
-        navItem.setAttribute("title", name + (name == actor.name ? "" : ` (${actor.name})`));
+        navItem.setAttribute("title", name + (name == actorData.name ? "" : ` (${actorData.name})`));
         navItem.setAttribute("name", name);
         navItem.setAttribute("optalign", optAlign);
 
@@ -88,7 +88,7 @@ export default class NavBar {
         // stage event
         this.theatre.stageInsertById(theatreId);
         // Store reference
-        this.stage.actors.set(theatreId, new TheatreActor(actor, navItem));
+        this.stage.actors.set(theatreId, new TheatreActor(actorData, navItem));
     }
 
 

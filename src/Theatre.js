@@ -43,6 +43,7 @@ import EmoteSetter from './workers/EmoteSetter';
 import EaseVerifier from './workers/EaseVerifier';
 import { AnimationSyntaxVerifier } from './types/AnimationSyntaxVerifier';
 import NavBar from './types/NavBar';
+import SceneEventProcessor from './workers/SceneEventProcessor';
 
 export default class Theatre {
 
@@ -101,12 +102,11 @@ export default class Theatre {
 				type: "any",
 				timeoutId: null
 			};
-			// configurable settings
-			// module settings
+
 			TheatreSettingsInitializer.initModuleSettings();
 
-			// Load in default settings (theatreStyle is loaded on HTML Injection)
 
+			// workers
 			this.emoteMenuRenderer = new EmoteMenuInitilializer(
 				this,
 				this.toolTipCanvas);
@@ -114,6 +114,9 @@ export default class Theatre {
 				this,
 				this.stage);
 			this.emoteSetter = new EmoteSetter(this);
+			this.sceneEventProcessor = new SceneEventProcessor(
+				this,
+				this.stage);
 
 		}
 		return Theatre.instance;
@@ -461,7 +464,7 @@ export default class Theatre {
 			if (Theatre.DEBUG) console.log("Received packet", payload)
 			switch (payload.type) {
 				case "sceneevent":
-					this._processSceneEvent(payload.senderId, payload.subtype, payload.data);
+					this.sceneEventProcessor.processSceneEvent(payload.senderId, payload.subtype, payload.data);
 					break;
 				case "typingevent":
 					this._processTypingEvent(payload.senderId, payload.data);
@@ -480,48 +483,7 @@ export default class Theatre {
 
 	}
 
-	/**
-	 * Send a packet to all clients indicating the event type, and
-	 * the data relevant to the event. The caller must specify this
-	 * data.
-	 *
-	 * Scene Event Sub Types
-	 *
-	 * enterscene : an insert was injected remotely
-	 * exitscene : an insert was removed remotely
-	 * positionupdate : an insert was moved removely
-	 * push : an insert was pushed removely
-	 * swap : an insert was swapped remotely
-	 * emote : an emote was triggered removely
-	 * addtexture : a texture asset was added remotely
-	 * addalltextures : a group of textures were added remotely
-	 * state : an insert's assets were staged remotely
-	 * narrator : the narrator bar was activated remotely
-	 * decaytext : an insert's text was decayed remotely
-	 * renderinsert : an insert is requesting to be rendered immeidately remotely
 
-	 *
-	 * @param eventType (String) : The scene event subtype
-	 * @param evenData (Object) : An Object whose properties are needed for
-	 *							the scene event subtype
-	 *
-	 */
-	_sendSceneEvent(eventType, eventData) {
-		if (Theatre.DEBUG) console.log("Sending Scene state %s with payload: ", eventType, eventData)
-
-		// Do we even need verification? There's no User Input outside of 
-		// cookie cutter responses
-
-		game.socket.emit(Theatre.SOCKET,
-			{
-				senderId: game.user.id,
-				type: "sceneevent",
-				subtype: eventType,
-				data: eventData
-			}
-		);
-
-	}
 
 	/**
 	 * Send a packet to all clients indicating
@@ -868,235 +830,7 @@ export default class Theatre {
 	}
 
 
-	/**
-	 * Process a scene update payload
-	 *
-	 * if we receive an event of the same type that is older
-	 * than one we've already resceived, notify, and drop it.
-	 *
-	 * Scene Events
-	 *
-	 * enterscene : an insert was injected remotely
-	 * exitscene : an insert was removed remotely
-	 * positionupdate : an insert was moved removely
-	 * push : an insert was pushed removely
-	 * swap : an insert was swapped remotely
-	 * emote : an emote was triggered removely
-	 * addtexture : a texture asset was added remotely
-	 * addalltextures : a group of textures were added remotely
-	 * state : an insert's assets were staged remotely
-	 * narrator : the narrator bar was activated remotely
-	 * decaytext : an insert's text was decayed remotely
-	 * renderinsert : an insert is requesting to be rendered immeidately remotely
-	 *
-	 * @params senderId (String) : The userId of the playerId whom sent the scene event
-	 * @params type (String) : The scene event subtype to process, and is represented in the data object
-	 * @params data (Object) : An object whose properties contain the relevenat data needed for each scene subtype
-	 *
-	 * @private
-	 */
-	_processSceneEvent(senderId, type, data) {
-		if (Theatre.DEBUG) console.log("Processing scene event %s", type, data);
-		let insert, actorId, params, emote, port, emotions, resName, app, insertEmote, render;
 
-		switch (type) {
-			case "enterscene":
-				if (Theatre.DEBUG) console.log("enterscene: aid:%s", actorId);
-				actorId = data.insertid.replace("theatre-", "");
-				params = Tools.getInsertParamsFromActorId(actorId);
-				emotions = (data.emotions ? data.emotions : {
-					emote: null,
-					textFlying: null,
-					textStanding: null,
-					textFont: null,
-					textSize: null,
-					textColor: null
-				});
-				if (!params) return;
-				if (Theatre.DEBUG) console.log("params: ", params);
-				if (data.isleft)
-					this.injectLeftPortrait(params.src, params.name, params.imgId, params.optalign, emotions, true);
-				else
-					this.injectRightPortrait(params.src, params.name, params.imgId, params.optalign, emotions, true);
-
-				break;
-			case "exitscene":
-				if (Theatre.DEBUG) console.log("exitscene: tid:%s", data.insertid);
-				this.stage.removeInsertById(data.insertid, true);
-				break;
-			case "positionupdate":
-				if (Theatre.DEBUG) console.log("positionupdate: tid:%s", data.insertid);
-				insert = this.stage.getInsertById(data.insertid);
-				if (insert) {
-					// apply mirror state
-					if (Theatre.DEBUG) console.log("mirroring desired: %s , current mirror %s", data.position.mirror, insert.mirrored);
-					if (Boolean(data.position.mirror) != insert.mirrored)
-						insert.mirrored = data.position.mirror;
-					let tweenId = "portraitMove";
-					let tween = TweenMax.to(insert.portrait, 0.5, {
-						scaleX: (data.position.mirror ? -1 : 1),
-						x: data.position.x,
-						y: data.position.y,
-						ease: Power3.easeOut,
-						onComplete: function (ctx, imgId, tweenId) {
-							// decrement the rendering accumulator
-							ctx._removeDockTween(imgId, this, tweenId);
-							// remove our own reference from the dockContainer tweens
-						},
-						onCompleteParams: [this, insert.imgId, tweenId]
-					});
-					this._addDockTween(insert.imgId, tween, tweenId);
-				}
-				break;
-			case "push":
-				if (Theatre.DEBUG) console.log("insertpush: tid:%s", data.insertid);
-				this.pushInsertById(data.insertid, data.tofront, true);
-				break;
-			case "swap":
-				if (Theatre.DEBUG) console.log("insertswap: tid1:%s tid2:%s", data.insertid1, data.insertid2);
-				this.swapInsertsById(data.insertid1, data.insertid2, true);
-				break;
-			case "move":
-				if (Theatre.DEBUG) console.log("insertmove: tid1:%s tid2:%s", data.insertid1, data.insertid2);
-				this.moveInsertById(data.insertid1, data.insertid2, true);
-				break;
-			case "emote":
-				if (Theatre.DEBUG) console.log("emote:", data);
-				emote = data.emotions.emote;
-				let textFlyin = data.emotions.textflyin;
-				let textStanding = data.emotions.textstanding;
-				let textFont = data.emotions.textfont;
-				let textSize = data.emotions.textsize;
-				let textColor = data.emotions.textcolor;
-				this.setUserEmote(senderId, data.insertid, "emote", emote, true);
-				this.setUserEmote(senderId, data.insertid, "textflyin", textFlyin, true);
-				this.setUserEmote(senderId, data.insertid, "textstanding", textStanding, true);
-				this.setUserEmote(senderId, data.insertid, "textfont", textFont, true);
-				this.setUserEmote(senderId, data.insertid, "textsize", textSize, true);
-				this.setUserEmote(senderId, data.insertid, "textcolor", textColor, true);
-				if (data.insertid == this.speakingAs)
-					this.emoteMenuRenderer.initialize();
-				break;
-			case "addtexture":
-				if (Theatre.DEBUG) console.log("texturereplace:", data);
-				insert = this.stage.getInsertById(data.insertid);
-				actorId = data.insertid.replace("theatre-", "");
-				params = Tools.getInsertParamsFromActorId(actorId);
-				if (!params) return;
-
-				app = this.stage.pixiApplication;
-				insertEmote = this._getEmoteFromInsert(insert);
-				render = false;
-
-				if (insertEmote == data.emote)
-					render = true;
-				else if (!data.emote)
-					render = true;
-
-				this._AddTextureResource(data.imgsrc, data.resname, data.insertid, data.emote, (loader, resources) => {
-					// if oure emote is active and we're replacing the emote texture, or base is active, and we're replacing the base texture
-
-					if (Theatre.DEBUG) console.log("add replacement complete! ", resources[data.resname], insertEmote, data.emote, render);
-					if (render && app && insert && insert.dockContainer) {
-						if (Theatre.DEBUG) console.log("RE-RENDERING with NEW texture resource %s : %s", data.resname, data.imgsrc);
-
-						// bubble up dataum from the update
-						insert.optAlign = params.optalign;
-						insert.name = params.name;
-						insert.label.text = params.name;
-
-						this._clearPortraitContainer(data.insertid);
-						this.workers.portrait_container_setup_worker.setupPortraitContainer(
-							data.insertid,
-							insert.optAlign,
-							data.resname,
-							resources);
-						// re-attach label + typingBubble
-						insert.dockContainer.addChild(insert.label);
-						insert.dockContainer.addChild(insert.typingBubble);
-
-						this._repositionInsertElements(insert);
-
-						if (data.insertid == this.speakingAs);
-						this.emoteMenuRenderer.initialize();
-						if (!this.rendering)
-							this._renderTheatre(performance.now());
-					}
-				}, true);
-				break;
-			case "addalltextures":
-				if (Theatre.DEBUG) console.log("textureallreplace:", data);
-				insert = this.stage.getInsertById(data.insertid);
-				actorId = data.insertid.replace("theatre-", "");
-				params = Tools.getInsertParamsFromActorId(actorId);
-				if (!params) return;
-
-				app = this.stage.pixiApplication;
-				insertEmote = this._getEmoteFromInsert(insert);
-				render = false;
-
-				if (insertEmote == data.emote)
-					render = true;
-				else if (!data.emote)
-					render = true;
-
-				this._AddAllTextureResources(data.imgsrcs, data.insertid, data.emote, data.eresname, (loader, resources) => {
-					// if oure emote is active and we're replacing the emote texture, or base is active, and we're replacing the base texture
-
-					if (Theatre.DEBUG) console.log("add all textures complete! ", data.emote, data.eresname, params.emotes[data.emote]);
-					if (render
-						&& app
-						&& insert
-						&& insert.dockContainer
-						&& data.eresname) {
-						if (Theatre.DEBUG) console.log("RE-RENDERING with NEW texture resource %s", data.eresname);
-
-						// bubble up dataum from the update
-						insert.optAlign = params.optalign;
-						insert.name = params.name;
-						insert.label.text = params.name;
-
-						this._clearPortraitContainer(data.insertid);
-						this.workers.portrait_container_setup_worker.setupPortraitContainer(
-							data.insertid,
-							insert.optAlign,
-							data.eresname,
-							resources);
-						// re-attach label + typingBubble
-						insert.dockContainer.addChild(insert.label);
-						insert.dockContainer.addChild(insert.typingBubble);
-
-						this._repositionInsertElements(insert);
-
-						if (data.insertid == this.speakingAs);
-						this.emoteMenuRenderer.initialize();
-						if (!this.rendering)
-							this._renderTheatre(performance.now());
-					}
-				}, true);
-
-				break;
-			case "stage":
-				if (Theatre.DEBUG) console.log("staging insert", data.insertid);
-				this.stageInsertById(data.insertid, true);
-				break;
-			case "narrator":
-				if (Theatre.DEBUG) console.log("toggle narrator bar", data.active);
-				this.toggleNarratorBar(data.active, true);
-				break;
-			case "decaytext":
-				if (Theatre.DEBUG) console.log("decay textbox", data.insertid);
-				this.decayTextBoxById(data.insertid, true);
-				break;
-			case "renderinsert":
-				insert = this.stage.getInsertById(data.insertid);
-				if (insert)
-					this.renderInsertById(data.insertid);
-				break;
-			default:
-				console.log("UNKNOWN SCENE EVENT: %s with data: ", type, data);
-		}
-	}
 
 
 	/**
@@ -1219,7 +953,6 @@ export default class Theatre {
 	 *
 	 * @return (String) The emote active for the insert.
 	 *
-	 * @private
 	 */
 	_getEmoteFromInsert(insert) {
 		if (!insert) return null;
@@ -1351,11 +1084,11 @@ export default class Theatre {
 				insertid: (insert ? insert.imgId : Theatre.NARRATOR),
 				emotions: {
 					emote: (insert ? this._getEmoteFromInsert(insert) : null),
-					textflyin: (insert ? this._getTextFlyinFromInsert(insert) : this.theatreNarrator.getAttribute("textflyin")),
-					textstanding: (insert ? this._getTextStandingFromInsert(insert) : this.theatreNarrator.getAttribute("textstanding")),
-					textfont: (insert ? this._getTextFontFromInsert(insert) : this.theatreNarrator.getAttribute("textfont")),
-					textsize: (insert ? this._getTextSizeFromInsert(insert) : this.theatreNarrator.getAttribute("textsize")),
-					textcolor: (insert ? this._getTextColorFromInsert(insert) : this.theatreNarrator.getAttribute("textcolor")),
+					textFlyin: (insert ? this._getTextFlyinFromInsert(insert) : this.theatreNarrator.getAttribute("textflyin")),
+					textStanding: (insert ? this._getTextStandingFromInsert(insert) : this.theatreNarrator.getAttribute("textstanding")),
+					textFont: (insert ? this._getTextFontFromInsert(insert) : this.theatreNarrator.getAttribute("textfont")),
+					textSize: (insert ? this._getTextSizeFromInsert(insert) : this.theatreNarrator.getAttribute("textsize")),
+					textColor: (insert ? this._getTextColorFromInsert(insert) : this.theatreNarrator.getAttribute("textcolor")),
 				}
 			});
 		}
@@ -1953,7 +1686,6 @@ export default class Theatre {
 	 * @params cb (Function) : The callback to invoke once we're done replacing the resource
 	 * @params remote (Boolean) : Boolean indicating if thist call is being done remotely or locally.
 	 *
-	 * @private
 	 */
 	async _AddTextureResource(imgSrc, resName, imgId, emote, cb, remote) {
 		// First we pull the insert,canvas,and pixi app from the imgId.
@@ -2021,8 +1753,6 @@ export default class Theatre {
 	 * @param cb (Function) : The function callback to invoke when the resources are loaded.
 	 * @param remote (Boolean) : Wither or not this function is being invoked remotely, if not, then
 	 *						   we want to broadcast to all other clients to perform the action as well. 
-	 *
-	 * @private
 	 */
 	async _AddAllTextureResources(imgSrcs, imgId, emote, eresName, cb, remote) {
 		// First we pull the insert,canvas,and pixi app from the imgId.
