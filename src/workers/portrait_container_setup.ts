@@ -89,14 +89,14 @@ export default class TheatrePortraitContainerSetupWorker {
         }
 
         // run rigging animations if we have have any
-        if (insert.emote) {
+        if (insert.emotion.emote) {
             let actorId = insert.imgId.replace("theatre-", "");
             let defaultDisabled = this.theatre.isDefaultDisabled(insert.imgId);
             if (Theatre.DEBUG) console.log("is default disabled? : %s", defaultDisabled);
             let emotes = ActorExtensions.getEmotesForActor(actorId, defaultDisabled);
             let rigResMap = ActorExtensions.getRiggingResources(actorId);
-            if (emotes[insert.emote] && emotes[insert.emote].rigging) {
-                for (let anim of emotes[insert.emote].rigging.animations) {
+            if (emotes[insert.emotion.emote] && emotes[insert.emotion.emote].rigging) {
+                for (let anim of emotes[insert.emotion.emote].rigging.animations) {
                     this.theatre.addTweensFromAnimationSyntax(anim.name, anim.syntax, rigResMap, insert);
                 }
             }

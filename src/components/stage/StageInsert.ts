@@ -1,4 +1,8 @@
+import Theatre from "../../Theatre";
+import EmotionDefinition from "../../types/EmotionDefinition";
 import Portrait from "./Portrait";
+import Stage from "./Stage";
+import StageInsertClearer from "./StageInsertCleaner";
 
 export default class StageInsert {
     /** Id of the image, usually theatre-<actorId> */
@@ -6,14 +10,9 @@ export default class StageInsert {
     // contains label and portraitContainer
     // sits right on top the textBox
     dockContainer: PIXI.Container;
-    decayTOId?: string;
+
     name: string;
-    emote: string;
-    textFlyin: string;
-    textStanding: string;
-    textFont: string;
-    textSize: number;
-    textColor: string;
+    emotion: EmotionDefinition
     portrait: Portrait;
     label: PIXI.Text;
     typingBubble: PIXI.Sprite;
@@ -28,4 +27,20 @@ export default class StageInsert {
     meta: {}
     mirrored?= false;
     delayedOldEmote?: string = null;
+    decayTOId?: string;
+    // given
+    theatre: Theatre;
+
+    // workers
+    clearer: StageInsertClearer;
+
+    constructor(theatre: Theatre) {
+        this.theatre = theatre;
+
+        this.clearer = new StageInsertClearer(theatre);
+    }
+
+    clear() {
+        this.clearer.clearPortraitContainer(this);
+    }
 }

@@ -199,7 +199,8 @@ export default class SceneEventProcessor {
                     insert.name = params.name;
                     insert.label.text = params.name;
 
-                    this.theatre._clearPortraitContainer(event.insertid);
+                    insert.clear();
+
                     this.theatre.workers.portrait_container_setup_worker.setupPortraitContainer(
                         event.insertid,
                         insert.optAlign,
@@ -262,7 +263,8 @@ export default class SceneEventProcessor {
                     insert.name = params.name;
                     insert.label.text = params.name;
 
-                    this.theatre._clearPortraitContainer(event.insertid);
+                    insert.clear();
+                    
                     this.theatre.workers.portrait_container_setup_worker.setupPortraitContainer(
                         event.insertid,
                         insert.optAlign,

@@ -720,11 +720,11 @@ export default class Theatre {
 								insert.portrait.x = dat.position.x;
 								insert.portrait.y = dat.position.y;
 								// apply texyflyin/textstanding data
-								insert.textFlyin = dat.emotions.textFlyin;
-								insert.textStanding = dat.emotions.textStanding;
-								insert.textFont = dat.emotions.textFont;
-								insert.textSize = dat.emotions.textSize;
-								insert.textColor = dat.emotions.textColor;
+								insert.emotion.textFlyin = dat.emotions.textFlyin;
+								insert.emotion.textStanding = dat.emotions.textStanding;
+								insert.emotion.textFont = dat.emotions.textFont;
+								insert.emotion.textSize = dat.emotions.textSize;
+								insert.emotion.textColor = dat.emotions.textColor;
 							}
 						}
 						// apply Narrator bar last
@@ -798,7 +798,7 @@ export default class Theatre {
 	 */
 	_getTextColorFromInsert(insert: StageInsert) {
 		if (!insert) return null;
-		return insert.textColor;
+		return insert.emotion.textColor;
 	}
 	/**
 	 * Get the text size given the insert
@@ -811,7 +811,7 @@ export default class Theatre {
 	 */
 	_getTextSizeFromInsert(insert: StageInsert) {
 		if (!insert) return null;
-		return insert.textSize;
+		return insert.emotion.textSize;
 	}
 	/**
 	 * Get the text font given the insert
@@ -824,7 +824,7 @@ export default class Theatre {
 	 */
 	_getTextFontFromInsert(insert: StageInsert) {
 		if (!insert) return null;
-		return insert.textFont;
+		return insert.emotion.textFont;
 	}
 	/**
 	 * Get the text fly-in animation given the insert
@@ -837,7 +837,7 @@ export default class Theatre {
 	 */
 	_getTextFlyinFromInsert(insert: StageInsert) {
 		if (!insert) return null;
-		return insert.textFlyin;
+		return insert.emotion.textFlyin;
 	}
 	/**
 	 * Get the text standing animation given the insert
@@ -850,7 +850,7 @@ export default class Theatre {
 	 */
 	_getTextStandingFromInsert(insert: StageInsert) {
 		if (!insert) return null;
-		return insert.textStanding;
+		return insert.emotion.textStanding;
 	}
 
 	/**
@@ -865,7 +865,7 @@ export default class Theatre {
 		if (!insert) return null;
 		if (this.isDelayEmote)
 			return insert.delayedOldEmote;
-		return insert.emote;
+		return insert.emotion.emote;
 	}
 
 	/**
@@ -906,8 +906,8 @@ export default class Theatre {
 		switch (subType) {
 			case "textfont":
 				if (insert) {
-					if (value) insert.textFont = value;
-					else insert.textFont = null;
+					if (value) insert.emotion.textFont = value;
+					else insert.emotion.textFont = null;
 				} else if (theatreId == Theatre.NARRATOR) {
 					if (value) this.theatreNarrator.setAttribute("textfont", value);
 					else this.theatreNarrator.removeAttribute("textfont");
@@ -917,8 +917,8 @@ export default class Theatre {
 				break;
 			case "textsize":
 				if (insert) {
-					if (value) insert.textSize = parseInt(value);
-					else insert.textSize = null;
+					if (value) insert.emotion.textSize = parseInt(value);
+					else insert.emotion.textSize = null;
 				} else if (theatreId == Theatre.NARRATOR) {
 					if (value) this.theatreNarrator.setAttribute("textsize", value);
 					else this.theatreNarrator.removeAttribute("textsize");
@@ -929,8 +929,8 @@ export default class Theatre {
 				break;
 			case "textcolor":
 				if (insert) {
-					if (value) insert.textColor = value;
-					else insert.textColor = null;
+					if (value) insert.emotion.textColor = value;
+					else insert.emotion.textColor = null;
 				} else if (theatreId == Theatre.NARRATOR) {
 					if (value) this.theatreNarrator.setAttribute("textcolor", value);
 					else this.theatreNarrator.removeAttribute("textcolor");
@@ -940,8 +940,8 @@ export default class Theatre {
 				break;
 			case "textflyin":
 				if (insert) {
-					if (value) insert.textFlyin = value;
-					else insert.textFlyin = null;
+					if (value) insert.emotion.textFlyin = value;
+					else insert.emotion.textFlyin = null;
 				} else if (theatreId == Theatre.NARRATOR) {
 					if (value) this.theatreNarrator.setAttribute("textflyin", value);
 					else this.theatreNarrator.removeAttribute("textflyin");
@@ -951,8 +951,8 @@ export default class Theatre {
 				break;
 			case "textstanding":
 				if (insert) {
-					if (value) insert.textStanding = value;
-					else insert.textStanding = null;
+					if (value) insert.emotion.textStanding = value;
+					else insert.emotion.textStanding = null;
 				} else if (theatreId == Theatre.NARRATOR) {
 					if (value) this.theatreNarrator.setAttribute("textstanding", value);
 					else this.theatreNarrator.removeAttribute("textstanding");
@@ -968,16 +968,16 @@ export default class Theatre {
 						&& userId == game.user.id
 						&& (this.delayedSentState == 0 || this.delayedSentState == 1)) {
 						if (this.delayedSentState == 0) {
-							insert.delayedOldEmote = insert.emote;
+							insert.delayedOldEmote = insert.emotion.emote;
 							this.delayedSentState = 1;
 						}
 						if (Theatre.DEBUG) console.log("DELAYING EMOTE %s, 'showing' %s", value, insert.delayedOldEmote);
 					} else {
-						insert.delayedOldEmote = insert.emote;
+						insert.delayedOldEmote = insert.emotion.emote;
 						this.setEmoteForInsertById(value, theatreId, remote);
 					}
-					if (value) insert.emote = value;
-					else insert.emote = null;
+					if (value) insert.emotion.emote = value;
+					else insert.emotion.emote = null;
 				} else {
 					userEmoting.emote = value;
 				}
@@ -1330,10 +1330,10 @@ export default class Theatre {
 		let params = Tools.getInsertParamsFromActorId(actorId);
 		if (!insert || !params) return;
 
-		if (insert.emote
-			&& params.emotes[insert.emote].insert
-			&& params.emotes[insert.emote].insert != "")
-			resName = params.emotes[insert.emote].insert;
+		if (insert.emotion.emote
+			&& params.emotes[insert.emotion.emote].insert
+			&& params.emotes[insert.emotion.emote].insert != "")
+			resName = params.emotes[insert.emotion.emote].insert;
 		else
 			resName = params.src;
 
@@ -1342,7 +1342,7 @@ export default class Theatre {
 		insert.name = params.name;
 		insert.label.text = params.name;
 
-		this._clearPortraitContainer(id);
+		insert.clear();
 		this.workers.portrait_container_setup_worker.setupPortraitContainer(id, params.optalign, resName, PIXI.Loader.shared.resources);
 		// re attach label + typing bubble
 		insert.dockContainer.addChild(insert.label);
@@ -1756,87 +1756,7 @@ export default class Theatre {
 	}
 
 
-	/**
-	 * Clear the container by ending all animations, and removing all sprites
-	 *
-	 * @param imgId : The theatreId of the insert whose dockContainer we should
-	 *				clear. 
-	 *
-	 */
-	_clearPortraitContainer(imgId: string) {
-		let insert = this.stage.getInsertById(imgId);
-		if (!insert || !insert.dockContainer || !insert.portrait) return;
-
-		// preserve position without portrait offset
-		let ox = insert.portrait.x;
-		let oy = insert.portrait.y;
-		let ocx = insert.dockContainer.x;
-		let ocy = insert.dockContainer.y;
-		let oLabelAnim = insert.tweens["nameSpeakingPulse"];
-		let oTypingBounceAnim = insert.tweens["typingBounce"];
-		let oTypingWiggleAnim = insert.tweens["typingWiggle"];
-		let oTypingAppearAnim = insert.tweens["typingAppear"];
-		let oTypingVanishAnim = insert.tweens["typingVanish"];
-		// kill and release all tweens, except for label or typingBubble
-		// animation
-		for (let tweenId in insert.tweens) {
-			if (tweenId == "nameSpeakingPulse"
-				|| tweenId == "typingBounce"
-				|| tweenId == "typingAppear"
-				|| tweenId == "typingVanish"
-				|| tweenId == "typingWiggle")
-				continue;
-			this._removeDockTween(imgId, null, tweenId);
-		}
-		insert.tweens = {};
-		if (oLabelAnim)
-			insert.tweens["nameSpeakingPulse"] = oLabelAnim;
-		if (oTypingBounceAnim)
-			insert.tweens["typingBounce"] = oTypingBounceAnim;
-		if (oTypingWiggleAnim)
-			insert.tweens["typingWiggle"] = oTypingWiggleAnim;
-		if (oTypingAppearAnim)
-			insert.tweens["typingAppear"] = oTypingAppearAnim;
-		if (oTypingVanishAnim)
-			insert.tweens["typingVanish"] = oTypingVanishAnim;
-
-		insert.portrait.destroy();
-
-		// attempt to preserve label + typingBubble
-		for (let idx = insert.dockContainer.children.length - 1; idx >= 0; --idx) {
-			let child = insert.dockContainer.children[idx];
-			if (child.theatreComponentName && child.theatreComponentName == "label")
-				insert.dockContainer.removeChildAt(idx);
-			else if (child.theatreComponentName && child.theatreComponentName == "typingBubble")
-				insert.dockContainer.removeChildAt(idx);
-			else
-				child.destroy();
-		}
-
-
-		insert.portrait = null;
-		// destroy self
-		insert.dockContainer.destroy();
-		insert.dockContainer = null;
-		// re-generate the container
-		const newDockContainer = new PIXI.Container();
-		const newPortrait = new Portrait(this.stage);
-		newPortrait.init();
-		newDockContainer.addChild(newPortrait.root);
-		insert.portrait = newPortrait;
-		// initial positioning
-		newDockContainer.x = ocx;
-		newDockContainer.y = ocy
-		newPortrait.x = ox;
-		newPortrait.y = oy;
-		// assignment
-		insert.dockContainer = newDockContainer;
-		if (Theatre.DEBUG) console.log("saving ox: %s, oy: %s", ox, oy);
-		// label is NOT re-attached, must be done by the clearer
-		// typingBubble is NOT re-attached, must be done by the clearer
-		// mirror-state is NOT restored, must be done by the clearer
-
-	}
+	
 
 	/**
 	 * Add sprites to the PIXI Loader
@@ -3066,6 +2986,9 @@ export default class Theatre {
 		animSyntax: string,
 		resMap: RiggingResource[],
 		insert: StageInsert) {
+
+		// TODO fix: This isn't right right any more and needs fixing
+
 		let tweenParams = AnimationSyntaxVerifier.verifyAnimationSyntax(animSyntax);
 
 		let resTarget = resMap.find(e => (e.name == tweenParams[0].resName));
@@ -3138,6 +3061,12 @@ export default class Theatre {
 						break;
 					case "rotation":
 						sprite.rotation = initial * (Math.PI / 180);
+						break;
+					case "x":
+						sprite.x = initial;
+						break;
+					case "y":
+						sprite.y = initial;
 						break;
 					default:
 						throw new Error("Not Implemented");
@@ -3221,14 +3150,13 @@ export default class Theatre {
 
 		const emotes = this.userEmotes.get(game.user.id);
 
-
 		return {
-			emote: emotes.emote,
-			textFlyin: (emotes ? emotes.textFlyin : null),
-			textStanding: (emotes ? emotes.textStanding : null),
-			textFont: (emotes ? emotes.textFont : null),
-			textSize: (emotes ? emotes.textSize : null),
-			textColor: (emotes ? emotes.textColor : null)
+			emote: emotes ? emotes.emote : null,
+			textFlyin: emotes ? emotes.textFlyin : null,
+			textStanding: emotes ? emotes.textStanding : null,
+			textFont: emotes ? emotes.textFont : null,
+			textSize: emotes ? emotes.textSize : null,
+			textColor: emotes ? emotes.textColor : null
 		}
 
 

@@ -153,7 +153,7 @@ export default class InsertReorderer {
             // Based on the number of active inserts, space, and user /desired/ font size, we'll set the font size
             let insertFontSize = fontSize;
             textBox.setAttribute('osize', insertFontSize.toString());
-            switch (Number(insert.textSize)) {
+            switch (Number(insert.emotion.textSize)) {
                 case 3:
                     insertFontSize *= 1.5
                     break;

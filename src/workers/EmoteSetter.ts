@@ -34,7 +34,7 @@ export default class EmoteSetter {
         // insert, do nothing
 
         if (!insert) return;
-        let aEmote = insert.emote;
+        let aEmote = insert.emotion.emote;
         let actorId = insert.imgId.replace("theatre-", "");
         let actor = game.actors.get(actorId);
         if (!actor) return;
@@ -55,7 +55,7 @@ export default class EmoteSetter {
             && emotes[ename].insert
             && emotes[ename].insert != "") {
             // clear the pixi container
-            this.theatre._clearPortraitContainer(insert.imgId)
+            insert.clear();
             // set this sprite to span the PIXI Container via setupPortraitCanvas
             let imgSrcs = [];
             // emote base image
@@ -74,7 +74,7 @@ export default class EmoteSetter {
                 }
 
                 // flag our insert with our emote state
-                insert.emote = ename;
+                insert.emotion.emote = ename;
                 // now fix up the PIXI Container and make it pretty
                 this.theatre.workers.portrait_container_setup_worker.setupPortraitContainer(
                     insert.imgId,
@@ -96,14 +96,14 @@ export default class EmoteSetter {
             let loader = PIXI.Loader.shared;
             let baseExists = false;
 
-            this.theatre._clearPortraitContainer(insert.imgId)
+            insert.clear();
 
             // flag our insert with our emote state, unless we're "actually" no emote rather
             // than just emoting with no insert available
             if (ename)
-                insert.emote = ename;
+                insert.emotion.emote = ename;
             else
-                insert.emote = null;
+                insert.emotion.emote = null;
 
             // if baseInsert is not present, put it in
             if (!loader.resources[baseInsert]) {

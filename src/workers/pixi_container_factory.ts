@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import Portrait from "../components/stage/Portrait";
+import StageInsert from "../components/stage/StageInsert";
 import ActorExtensions from "../extensions/ActorExtensions";
 import TheatreSettings from "../extensions/TheatreSettings";
 import { RiggingResource } from "../resources/resources_types";
@@ -78,27 +79,32 @@ export default class _TheatrePixiContainerFactory {
         dockContainer.addChild(typingBubble);
         dockContainer.addChild(label)
 
-        this.theatre.stage.stageInserts.push({
-            imgId: imgId,
-            dockContainer: dockContainer,
-            name: portName,
+        const emotion: EmotionDefinition = {
             emote: ename,
             textFlyin: textFlyin,
             textStanding: textStanding,
             textFont: textFont,
             textSize: textSize,
             textColor: textColor,
-            portrait: portrait,
-            label: label,
-            typingBubble: typingBubble,
-            exitOrientation: (isLeft ? "left" : "right"),
-            nameOrientation: "left",
-            optAlign: optAlign,
-            tweens: {},
-            order: 0,
-            renderOrder: 0,
-            meta: {}
-        });
+        }
+
+        const insert = new StageInsert(this.theatre);
+        insert.imgId = imgId;
+        insert.dockContainer = dockContainer;
+        insert.name = portName;
+        insert.emotion = emotion;
+        insert.portrait = portrait;
+        insert.label = label;
+        insert.typingBubble = typingBubble;
+        insert.exitOrientation = (isLeft ? "left" : "right");
+        insert.nameOrientation = "left";
+        insert.optAlign = optAlign;
+        insert.tweens = {};
+        insert.order = 0;
+        insert.renderOrder = 0;
+        insert.meta = {}
+
+        this.theatre.stage.stageInserts.push(insert);
 
         let imgSrcs = [];
 

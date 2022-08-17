@@ -92,11 +92,11 @@ export default class EmoteMenuInitilializer {
         this.set_fontSelect_value(insert,
             fontSelect);
         // assign color from insert
-        if (insert && insert.textColor) {
-            colorSelect.value = insert.textColor;
+        if (insert && insert.emotion.textColor) {
+            colorSelect.value = insert.emotion.textColor;
         } else if (this.theatre.userEmotes.get(game.user.id) && this.theatre.userEmotes.get(game.user.id).textColor) {
             colorSelect.value = this.theatre.userEmotes.get(game.user.id).textColor;
-            if (insert) insert.textColor = colorSelect.value;
+            if (insert) insert.emotion.textColor = colorSelect.value;
         }
         // assgin font size
         this.configure_size_select(insert);
@@ -132,7 +132,7 @@ export default class EmoteMenuInitilializer {
         let sizeIcon = document.createElement("div");
         let sizeValue = 2;
         if (insert)
-            sizeValue = insert.textSize;
+            sizeValue = insert.emotion.textSize;
         else if (this.theatre.userEmotes.get(game.user.id))
             sizeValue = this.theatre.userEmotes.get(game.user.id).textSize;
 
@@ -163,12 +163,12 @@ export default class EmoteMenuInitilializer {
     set_fontSelect_value(insert: StageInsert,
         fontSelect: HTMLSelectElement) {
         // assign font from insert
-        if (insert && insert.textFont) {
-            fontSelect.value = insert.textFont;
+        if (insert && insert.emotion.textFont) {
+            fontSelect.value = insert.emotion.textFont;
         } else if (this.theatre.userEmotes.get(game.user.id) && this.theatre.userEmotes.get(game.user.id).textFont) {
 
             fontSelect.value = this.theatre.userEmotes.get(game.user.id).textFont;
-            if (insert) insert.textFont = fontSelect.value;
+            if (insert) insert.emotion.textFont = fontSelect.value;
         } else {
             fontSelect.value = this.theatre.textFont;
         }
@@ -180,7 +180,7 @@ export default class EmoteMenuInitilializer {
         let icon = <HTMLElement>(<HTMLElement>ev.currentTarget).children[0];
         let value = 2;
         if (insert)
-            value = insert.textSize;
+            value = insert.emotion.textSize;
         else if (this.theatre.userEmotes.get(game.user.id))
             value = this.theatre.userEmotes.get(game.user.id).textSize;
 
@@ -234,7 +234,7 @@ export default class EmoteMenuInitilializer {
             // check if this child is our configured 'text style' 
             let childTextMode = child.getAttribute("name");
             if (insert) {
-                let insertTextMode = insert.textFlyin;
+                let insertTextMode = insert.emotion.textFlyin;
                 if (insertTextMode && insertTextMode == childTextMode) {
                     KHelpers.addClass(child, "textflyin-active");
                     // scroll to
@@ -276,7 +276,7 @@ export default class EmoteMenuInitilializer {
             let childTextMode = child.getAttribute("name");
 
             if (insert) {
-                let insertTextMode = insert.textStanding;
+                let insertTextMode = insert.emotion.textStanding;
                 if (insertTextMode && insertTextMode == childTextMode) {
                     KHelpers.addClass(child, "textstanding-active");
                     //TweenMax.to(standingBox,.4,{scrollTo:{y:child.offsetTop, offsetY:standingBox.offsetHeight/2}})
@@ -329,7 +329,7 @@ export default class EmoteMenuInitilializer {
                 if (insert) {
                     // if we have an insert we're speaking through, we should get that emote state instead
                     // if the insert has no emote state, neither should we despite user settings
-                    let insertEmote = insert.emote;
+                    let insertEmote = insert.emotion.emote;
                     if (insertEmote && insertEmote == childEmote) {
                         KHelpers.addClass(child, "emote-active");
                         //emContainer.scrollTop = child.offsetTop-Math.max(emContainer.offsetHeight/2,0); 
