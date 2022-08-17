@@ -2,7 +2,6 @@ import { AnyTheatreStyle } from "../types/TheatreStyle";
 
 export default class TheatreSettings {
 
-
 	static NAMESPACE = "theatre";
 
 	// keys
@@ -73,5 +72,10 @@ export default class TheatreSettings {
 	static getAutoDecay(): boolean {
 		return true;
 	}
+
+	static getSuppressOpacity(): any {
+		return this.get<number>(this.SUPPRESS_OPACITY);
+	}
+
 
 }

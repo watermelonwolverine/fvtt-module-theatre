@@ -7,4 +7,7 @@ export default class EmotionDefinition {
     textSize: number = null;
     textColor: string = null;
 
+    // no idea what this is
+    insert?: string;
+
 }

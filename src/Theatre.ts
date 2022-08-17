@@ -90,7 +90,7 @@ export default class Theatre {
 	textBoxFactory: TextBoxFactory;
 	theatreGroup: HTMLDivElement;
 	theatreNarrator: HTMLDivElement;
-	theatreBar: any;
+	theatreBar: HTMLElement;
 	offsetHeight: any;
 	label: any;
 
@@ -1286,17 +1286,23 @@ export default class Theatre {
 	 *
 	 * @return (Boolean) : True if the insert is player controlled, False otherwise
 	 */
-	isPlayerOwned(theatreId: string) {
-		if (game.user.isGM) return true;
+	isPlayerOwned(theatreId: string): boolean {
+
+		if (game.user.isGM) {
+			return true;
+		}
+
 		let actorId = theatreId.replace("theatre-", "");
 		let actor = game.actors.get(actorId);
 		let user;
 
 		if (!actor) {
 			console.log("ERROR, ACTOR %s DOES NOT EXIST!", actorId);
-			return;
+			return false;
 		}
+
 		actor = actor.data;
+		
 		for (let perm in actor.permission) {
 			if (perm != "default") {
 				user = game.users.get(perm);
@@ -1307,6 +1313,7 @@ export default class Theatre {
 					return true;
 			}
 		}
+
 		return false;
 	}
 
@@ -2956,8 +2963,8 @@ export default class Theatre {
 			this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.positionupdate, {
 				insertid: insert.imgId,
 				position: {
-					x: insert.x,
-					y: insert.y,
+					x: insert.portrait.x,
+					y: insert.portrait.y,
 					mirror: insert.mirrored
 				}
 			});
@@ -3233,7 +3240,9 @@ export default class Theatre {
 	 * @params id (String) : The theatreId of the insert to activate.
 	 * @params ev (Event) : The event that possibly triggered this activation. 
 	 */
-	activateInsertById(id, ev) {
+	activateInsertById(
+		id: string,
+		ev: MouseEvent) {
 		let actorId = id.replace("theatre-", "");
 		let navItem = this.getNavItemById(id);
 		if (!navItem) {
@@ -3414,7 +3423,10 @@ export default class Theatre {
 	 * @params theatreId (String) : The theatreId of the textBox we want to decay.
 	 * @params remote (Boolean) : Wether this is being invoked remotely, or locally. 
 	 */
-	decayTextBoxById(theatreId, remote) {
+	decayTextBoxById(
+		theatreId: string,
+		remote: boolean = false) {
+
 		let insert = this.stage.getInsertById(theatreId);
 		let textBox = this.stage.getTextBoxById(theatreId);
 		if (!textBox || !insert) return;
@@ -3426,7 +3438,7 @@ export default class Theatre {
 		// clear last speaking if present
 		KHelpers.removeClass(textBox, "theatre-text-box-lastspeaking");
 		textBox.style.background = "";
-		textBox.style["box-shadow"] = "";
+		textBox.style.setProperty("box-shadow", "");
 
 		// clear decay Timout if present
 		if (insert.decayTOId) {
@@ -3436,10 +3448,10 @@ export default class Theatre {
 		// kill tweens
 		for (let c of textBox.children) {
 			for (let sc of c.children)
-				TweenMax.killTweensOf(sc);
-			TweenMax.killTweensOf(c);
+				gsap.killTweensOf(sc);
+			gsap.killTweensOf(c);
 		}
-		TweenMax.killTweensOf(textBox);
+		gsap.killTweensOf(textBox);
 
 		// decay
 		TweenMax.to(textBox.children, 0.5, {
@@ -3465,9 +3477,11 @@ export default class Theatre {
 	 * @params userId (String) : The User's Id. 
 	 * @params color (String) : The CSS color string to use if available. 
 	 */
-	applyPlayerColorToTextBox(textBox, userId, color) {
-		//let user = game.users.get(userId); 
-		//let userColor = user.color.replace("#",""); 
+	applyPlayerColorToTextBox(
+		textBox: HTMLElement,
+		userId: string,
+		color: string) {
+
 		color = color ? color.replace("#", "") : null || "FFFFFF";
 
 		// break into radix
@@ -3508,7 +3522,9 @@ export default class Theatre {
 	 *
 	 * @return (String) : The CSS color to be used for the color flash. 
 	 */
-	getPlayerFlashColor(userId, color) {
+	getPlayerFlashColor(
+		userId: string,
+		color: string) {
 		//let user = game.users.get(userId); 
 		//let userColor = user.color.replace("#",""); 
 		color = color ? color.replace("#", "") : null || "FFFFFF";
@@ -3523,12 +3539,12 @@ export default class Theatre {
 		green = Math.min(green + 75, 255);
 		blue = Math.min(blue + 75, 255);
 
-		red = red.toString(16);
-		green = green.toString(16);
-		blue = blue.toString(16);
+		const redStr = red.toString(16);
+		const greenStr = green.toString(16);
+		const blueStr = blue.toString(16);
 
-		if (Theatre.DEBUG) console.log(`#${red}${green}${blue}`);
-		return `#${red}${green}${blue}`;
+		if (Theatre.DEBUG) console.log(`#${redStr}${greenStr}${blueStr}`);
+		return `#${redStr}${greenStr}${blueStr}`;
 	}
 
 	/**
@@ -3537,9 +3553,17 @@ export default class Theatre {
 	 * @params elem (HTMLElement) : The HTMLElement to apply the font family to.
 	 * @params fontFamily (String) : The name of the font family to add. 
 	 */
-	applyFontFamily(elem, fontFamily) {
-		elem.style["font-family"] = `"${fontFamily}", "SignikaBold", "Palatino Linotype", serif`;
-		elem.style["font-weight"] = this.fontWeight;
+	applyFontFamily(
+		elem: HTMLElement,
+		fontFamily: string) {
+
+		elem.style.setProperty(
+			"font-family",
+			`"${fontFamily}", "SignikaBold", "Palatino Linotype", serif`);
+
+		elem.style.setProperty(
+			"font-weight",
+			this.fontWeight);
 	}
 
 	/**
@@ -3554,7 +3578,7 @@ export default class Theatre {
 
 		if (active) {
 			// spawn it
-			let narratorBackdrop = this.theatreNarrator.getElementsByClassName("theatre-narrator-backdrop")[0];
+			let narratorBackdrop = <HTMLElement>this.theatreNarrator.getElementsByClassName("theatre-narrator-backdrop")[0];
 			if (Theatre.DEBUG) console.log("NarratorBackdrop ", narratorBackdrop, this.theatreNarrator);
 			narratorBackdrop.style.width = "100%";
 			this.theatreNarrator.style.opacity = "1";
@@ -3563,7 +3587,7 @@ export default class Theatre {
 			// set speakingAs to "narrator" note that this will need heavy regression testing
 			// as it'll be plugging into the insert workflow when it's truely not a real insert
 			if (game.user.isGM) {
-				let btnNarrator = this.theatreControls.root.getElementsByClassName("theatre-icon-narrator")[0].parentNode;
+				let btnNarrator = <HTMLElement>this.theatreControls.root.getElementsByClassName("theatre-icon-narrator")[0].parentNode;
 				let oldSpeakingItem = this.getNavItemById(this.speakingAs);
 				let oldSpeakingInsert = this.stage.getInsertById(this.speakingAs);
 				let oldSpeakingLabel = this._getLabelFromInsert(oldSpeakingInsert);
@@ -3591,7 +3615,7 @@ export default class Theatre {
 				this.theatreNarrator.setAttribute("textfont", textFont ? textFont
 					: (emotes ? emotes.textFont : null))
 				this.theatreNarrator.setAttribute("textsize", textSize ? textSize
-					: (emotes ? emotes.textSize : null))
+					: (emotes ? emotes.textSize.toString() : null))
 				this.theatreNarrator.setAttribute("textcolor", textColor ? textColor
 					: (emotes ? emotes.textColor : null))
 
@@ -3616,8 +3640,8 @@ export default class Theatre {
 			}
 		} else {
 			// remove it
-			let narratorBackdrop = this.theatreNarrator.getElementsByClassName("theatre-narrator-backdrop")[0];
-			let narratorContent = this.theatreNarrator.getElementsByClassName("theatre-narrator-content")[0];
+			let narratorBackdrop = <HTMLElement>this.theatreNarrator.getElementsByClassName("theatre-narrator-backdrop")[0];
+			let narratorContent = <HTMLElement>this.theatreNarrator.getElementsByClassName("theatre-narrator-content")[0];
 			if (Theatre.DEBUG) console.log("NarratorBackdrop ", narratorBackdrop, this.theatreNarrator);
 			narratorBackdrop.style.width = "0%";
 			this.theatreNarrator.style.opacity = "0";
@@ -3625,20 +3649,19 @@ export default class Theatre {
 			// kill animations
 			for (let c of narratorContent.children) {
 				for (let sc of c.children)
-					TweenMax.killTweensOf(sc);
-				TweenMax.killTweensOf(c);
+					gsap.killTweensOf(sc);
+				gsap.killTweensOf(c);
 			}
 			for (let c of narratorContent.children)
 				c.parentNode.removeChild(c);
-			TweenMax.killTweensOf(narratorContent);
-			narratorContent.style["overflow-y"] = "scroll";
-			narratorContent.style["overflow-x"] = "hidden";
+			gsap.killTweensOf(narratorContent);
+			narratorContent.style.setProperty("overflow-y", "scroll");
+			narratorContent.style.setProperty("overflow-x", "hidden");
 
-			if (Theatre.DEBUG) console.log("all tweens", TweenMax.getAllTweens());
 			narratorContent.textContent = '';
 
 			if (game.user.isGM) {
-				let btnNarrator = this.theatreControls.root.getElementsByClassName("theatre-icon-narrator")[0].parentNode;
+				let btnNarrator = <HTMLElement>this.theatreControls.root.getElementsByClassName("theatre-icon-narrator")[0].parentNode;
 				KHelpers.removeClass(btnNarrator, "theatre-control-nav-bar-item-speakingas");
 				// clear narrator
 				this.speakingAs = null;
@@ -3661,8 +3684,10 @@ export default class Theatre {
 	 * - SideBar collapse
 	 */
 	updateGeometry() {
-		let sideBar = document.getElementById("sidebar");
+		let sideBar = <HTMLElement>document.getElementById("sidebar");
+		// @ts-ignore ts2445
 		this.stage.theatreBar.style.width = (ui.sidebar._collapsed ? "100%" : `calc(100% - ${sideBar.offsetWidth + 2}px)`);
+		// @ts-ignore ts2445
 		this.theatreNarrator.style.width = (ui.sidebar._collapsed ? "100%" : `calc(100% - ${sideBar.offsetWidth + 2}px)`);
 		let primeBar = this.stage.primeBar;
 		let secondBar = this.stage.secondBar;
@@ -3692,30 +3717,30 @@ export default class Theatre {
 
 	}
 
-	updateSuppression(suppress) {
+	updateSuppression(suppress: boolean) {
 		Theatre.instance.isSuppressed = suppress;
 
 		let primeBar = this.stage.primeBar;
 		let secondBar = this.stage.secondBar;
-		let opacity = null
+		let opacity: number = null
 
 		if (Theatre.instance.isSuppressed) {
 
-			opacity = game.settings.get(TheatreSettings.NAMESPACE, TheatreSettings.SUPPRESS_OPACITY)
+			opacity = TheatreSettings.getSuppressOpacity();
 
-			primeBar.style["pointer-events"] = "none";
-			secondBar.style["pointer-events"] = "none";
+			primeBar.style.setProperty("pointer-events", "none");
+			secondBar.style.setProperty("pointer-events", "none");
 		} else {
 
-			opacity = "1"
+			opacity = 1;
 
-			primeBar.style["pointer-events"] = "all";
-			secondBar.style["pointer-events"] = "all";
+			primeBar.style.setProperty("pointer-events", "all");
+			secondBar.style.setProperty("pointer-events", "all");
 		}
 
-		this.stage.theatreDock.style.opacity = opacity;
-		Theatre.instance.theatreBar.style.opacity = opacity;
-		Theatre.instance.theatreNarrator.style.opacity = opacity;
+		this.stage.theatreDock.style.opacity = opacity.toString();
+		Theatre.instance.theatreBar.style.opacity = opacity.toString();
+		Theatre.instance.theatreNarrator.style.opacity = opacity.toString();
 
 		// call hooks
 		Hooks.call("theatreSuppression", Theatre.instance.isSuppressed);
@@ -3729,7 +3754,9 @@ export default class Theatre {
 	 * @params actorSheet (Object ActorSheet) : The ActorSheet Object to spawn a configure
 	 *										  window from. 
 	 */
-	static onConfigureInsert(ev, actorSheet) {
+	static onConfigureInsert(
+		ev: MouseEvent,
+		actorSheet: ActorSheet) {
 		ev.preventDefault();
 		if (Theatre.DEBUG) console.log("Click Event on Configure Theatre!!!", actorSheet, actorSheet.actor, actorSheet.position);
 
@@ -3749,7 +3776,9 @@ export default class Theatre {
 	 *
 	 * @params ev (Event) : The event that triggered adding to the NavBar staging area.
 	 */
-	onAddToNavBar(ev, actorSheet) {
+	onAddToNavBar(
+		ev: MouseEvent,
+		actorSheet: ActorSheet) {
 
 		const removeLabelSheetHeader = TheatreSettings.getRemoteLabelSheetHeader();
 
@@ -3765,32 +3794,24 @@ export default class Theatre {
 			this.navBar.addToNavBar(actorData);
 			newText = removeLabel;
 		}
-		ev.currentTarget.innerHTML = this.stage.isActorStaged(actorData) ? `<i class="fas fa-theater-masks"></i>${newText}` : `<i class="fas fa-mask"></i>${newText}`;
+		(<HTMLElement>ev.currentTarget).innerHTML = this.stage.isActorStaged(actorData) ? `<i class="fas fa-theater-masks"></i>${newText}` : `<i class="fas fa-mask"></i>${newText}`;
 	}
 
 
 
-	/**
-	 * Removes the actor from the nav bar.
-	 *
-	 * @params actor (Actor) : The actor to remove from the NavBar staging area. 
-	 */
-	removeFromNavBar(actor) {
+	/** Removes the actor from the nav bar and from stage. */
+	removeFromNavBar(actor: Actor) {
 
 		if (!actor)
 			return;
 
 		const theatreId = Tools.getTheatreId(actor);
-		this.stage._removeFromStage(theatreId);
+		this._removeFromStage(theatreId);
 
 	}
 
-	/**
-	 * Removes the actor from the stage.
-	 *
-	 * @params id (string) : The theatreId to remove from the stage.
-	 */
-	_removeFromStage(theatreId) {
+	/** Removes the actor from the nav bar and from stage. */
+	_removeFromStage(theatreId: string) {
 		const staged = this.stage.actors.get(theatreId);
 		if (staged) {
 			if (staged.navElement) {
