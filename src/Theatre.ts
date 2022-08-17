@@ -1302,7 +1302,7 @@ export default class Theatre {
 		}
 
 		actor = actor.data;
-		
+
 		for (let perm in actor.permission) {
 			if (perm != "default") {
 				user = game.users.get(perm);
@@ -1451,7 +1451,7 @@ export default class Theatre {
 	 */
 	_removeDockTween(
 		imgId: string,
-		tween: TweenMax,
+		tween: gsap.TweenVars,
 		tweenId: string): void {
 		if (tween) tween.kill();
 

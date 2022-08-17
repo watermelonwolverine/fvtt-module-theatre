@@ -195,7 +195,7 @@ export default class Stage {
         if (!remote)
             this.theatre.sceneEventProcessor.sendSceneEvent(
                 SceneEventTypes.exitscene,
-                 { insertid: toRemoveInsert.imgId });
+                { insertid: toRemoveInsert.imgId });
 
         // unactivate from navbar
         for (const navItem of this.theatre.theatreControls.theatreNavBar.children)
@@ -246,7 +246,10 @@ export default class Stage {
             ease: Power4.easeOut,
             onComplete: function (imgId, tweenId) {
                 // decrement the rendering accumulator
-                theatre._removeDockTween(imgId, this, tweenId);
+                theatre._removeDockTween(
+                    imgId,
+                    this,
+                    tweenId);
                 // remove our own reference from the dockContainer tweens
             },
             onCompleteParams: [toRemoveInsert.imgId, tweenId],

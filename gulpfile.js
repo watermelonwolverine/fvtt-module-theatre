@@ -20,7 +20,7 @@ const GRAPHICS = 'app/graphics/';
 const METAFILES = ['LICENSE.txt', 'README.md', 'CHANGELOG.md'];
 
 var PACKAGE = JSON.parse(fs.readFileSync('package.json'));
-var SETTINGS = JSON.parse(fs.readFileSync('./.vscode/settings.json'))
+var SETTINGS = JSON.parse(fs.readFileSync('./.vscode/settings.json'));
 
 function reloadPackage(cb) { PACKAGE = JSON.parse(fs.readFileSync('package.json')); cb(); }
 function DEV_DIST() { return SETTINGS["local-foundry-data-dir"] + '/Data/modules/' + PACKAGE.name + '/'; }

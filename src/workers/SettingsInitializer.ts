@@ -1,6 +1,6 @@
 import TheatreSettings from "../extensions/TheatreSettings";
 import Theatre from "../Theatre";
-import TheatreStyle from "../types/TheatreStyle";
+import TheatreStyle, { AnyTheatreStyle } from "../types/TheatreStyle";
 
 export default class TheatreSettingsInitializer {
 
@@ -54,7 +54,7 @@ export default class TheatreSettingsInitializer {
             default: TheatreStyle.TEXTBOX,
             type: String,
             choices: choices,
-            onChange: theatreStyle => Theatre.instance.configTheatreStyle(theatreStyle)
+            onChange: theatreStyle => Theatre.instance.configTheatreStyle(theatreStyle as AnyTheatreStyle)
         });
 
         this.register(TheatreSettings.THEATRE_IMAGE_SIZE, {

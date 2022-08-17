@@ -193,7 +193,10 @@ export default class InsertReorderer {
                 ease: Power4.easeOut,
                 onComplete: function (imgId, tweenId) {
                     // decrement the rendering accumulator
-                    context._removeDockTween(imgId, this, tweenId);
+                    context._removeDockTween(
+                        imgId,
+                        this,
+                        tweenId);
                     // remove our own reference from the dockContainer tweens
                 },
                 onCompleteParams: [insert.imgId, tweenId]

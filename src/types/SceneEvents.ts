@@ -1,3 +1,4 @@
+import { ImageSource } from "../Theatre";
 import EmotionDefinition from "./EmotionDefinition";
 import { Position } from "./Position";
 
@@ -39,7 +40,7 @@ export class AddTextureEvent extends SingleTargetEvent {
 
 export class AddAllTexturesEvent extends SingleTargetEvent {
     emote: string;
-    imgsrcs: string[];
+    imgsrcs: ImageSource[];
     eresname: string;
 }
 

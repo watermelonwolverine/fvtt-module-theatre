@@ -152,7 +152,7 @@ export default class SceneEventProcessor {
         this.theatre.setUserEmote(senderId, data.insertid, "textflyin", emotions.textFlyin, true);
         this.theatre.setUserEmote(senderId, data.insertid, "textstanding", emotions.textStanding, true);
         this.theatre.setUserEmote(senderId, data.insertid, "textfont", emotions.textFont, true);
-        this.theatre.setUserEmote(senderId, data.insertid, "textsize", emotions.textSize, true);
+        this.theatre.setUserEmote(senderId, data.insertid, "textsize", emotions.textSize.toString(), true);
         this.theatre.setUserEmote(senderId, data.insertid, "textcolor", emotions.textColor, true);
 
         if (data.insertid == this.theatre.speakingAs)

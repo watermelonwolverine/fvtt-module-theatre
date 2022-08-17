@@ -117,10 +117,10 @@ export default class EmoteMenuInitilializer {
         let textAnims = this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName('textanim');
         for (let e of headers)
             this.theatre.applyFontFamily(e, TheatreSettings.getTitleFont());
-        for (let e of textAnims) {
+        for (let element of textAnims) {
             let font = fontSelect.value;
-            this.theatre.applyFontFamily(e, font);
-            (<HTMLElement>e).addEventListener("wheel", ev => this.wheelFunc2(ev));
+            this.theatre.applyFontFamily(<HTMLElement>element, font);
+            (<HTMLElement>element).addEventListener("wheel", ev => this.wheelFunc2(ev));
         }
     }
 
@@ -202,7 +202,11 @@ export default class EmoteMenuInitilializer {
                 value = 1;
                 break;
         }
-        this.theatre.setUserEmote(game.user.id, this.theatre.speakingAs, 'textsize', value);
+        this.theatre.setUserEmote(
+            game.user.id,
+            this.theatre.speakingAs,
+            'textsize',
+            value.toString());
     }
 
     wheelFunc(wheelEvent: WheelEvent) {
