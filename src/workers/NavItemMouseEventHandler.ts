@@ -1,4 +1,5 @@
 import Theatre from "../Theatre";
+import EmotionDefinition from "../types/EmotionDefinition";
 import KHelpers from "./KHelpers";
 import Tools from "./Tools";
 
@@ -76,7 +77,7 @@ export default class NavItemMouseEventHandler {
                     let src = params.src;
                     let name = params.name;
                     let optAlign = params.optalign;
-                    let emotions;
+                    let emotions : EmotionDefinition;
 
                     // determine if to launch with actor saves or default settings
                     if (ev.altKey)

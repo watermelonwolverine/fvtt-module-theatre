@@ -1,5 +1,6 @@
 import { ActorData as ActorData_ } from "@league-of-foundry-developers/foundry-vtt-types/src/foundry/common/data/module.mjs";
 import { AnimationRigging, EmoteDictionary } from "../resources/resources_types";
+import EmotionDefinition from "../types/EmotionDefinition";
 
 declare global {
 	interface LenientGlobalVariableTypes {
@@ -28,6 +29,7 @@ declare global {
 		baseinsert: string;
 		name: string;
 		optalign: string;
+		settings: EmotionDefinition;
 	}
 
 	interface ActorFlags extends Record<string, unknown> {

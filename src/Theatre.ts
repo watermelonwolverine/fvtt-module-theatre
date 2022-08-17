@@ -3097,8 +3097,12 @@ export default class Theatre {
 				yoyoEase = advOptions.yoyoEase ? EaseVerifier.verifyEase(advOptions.yoyoEase) : yoyoEase;
 			}
 
-			let pixiParams = {};
+			let pixiParams: PixiPlugin.Vars = {};
 			for (let prop of tweenParams[idx].props) {
+
+				let final: number;
+				let initial: number;
+
 				// special case of x/y/scale
 				if (prop.name == "x"
 					|| prop.name == "y"
@@ -3106,13 +3110,13 @@ export default class Theatre {
 					|| prop.name == "scaleX"
 					|| prop.name == "scaleY") {
 					if ((prop.initial as string).includes("%")) {
-						prop.initial = Number((prop.initial as string).match(/-*\d+\.*\d*/)[0] || 0) / 100
+						initial = Number(prop.initial.match(/-*\d+\.*\d*/)[0] || 0) / 100
 							* (prop.name == "x" ? insert.portrait.width : insert.portrait.height);
-						prop.final = Number((prop.final as string).match(/-*\d+\.*\d*/)[0] || 0) / 100
+						final = Number(prop.final.match(/-*\d+\.*\d*/)[0] || 0) / 100
 							* (prop.name == "x" ? insert.portrait.width : insert.portrait.height);
 					} else if (["scaleX", "scaleY", "rotation"].some(e => e == prop.name)) {
-						prop.initial = Number((prop.initial as string).match(/-*\d+\.*\d*/)[0] || 0);
-						prop.final = Number((prop.final as string).match(/-*\d+\.*\d*/)[0] || 0);
+						initial = Number(prop.initial.match(/-*\d+\.*\d*/)[0] || 0);
+						final = Number(prop.final.match(/-*\d+\.*\d*/)[0] || 0);
 					}
 					if (Theatre.DEBUG) console.log("new %s : %s,%s : w:%s,h:%s", prop.name, prop.initial, prop.final, insert.portrait.width, insert.portrait.height);
 				}
@@ -3120,18 +3124,19 @@ export default class Theatre {
 				// special case for some GSAP -> PIXI names
 				switch (prop.name) {
 					case "scaleX":
-						sprite.scale.x = prop.initial as number;
+						sprite.scale.x = initial;
 						break;
 					case "scaleY":
-						sprite.scale.y = prop.initial;
+						sprite.scale.y = initial;
 						break;
 					case "rotation":
-						sprite.rotation = (prop.initial as number) * (Math.PI / 180);
+						sprite.rotation = initial * (Math.PI / 180);
 						break;
 					default:
-						sprite[prop.name] = prop.initial;
+						throw new Error("Not Implemented");
 						break;
 				}
+
 				pixiParams.setProperty(prop.name, prop.final);
 			}
 
@@ -3178,36 +3183,48 @@ export default class Theatre {
 	 * @return (Object) : The object containing the emotion properties to be used. 
 	 *
 	 */
-	_getInitialEmotionSetFromInsertParams(params, useDefault) {
-		if (Theatre.DEBUG) console.log("use default? %s", !useDefault);
+	_getInitialEmotionSetFromInsertParams(
+		params: Params,
+		useDefault: boolean = false): EmotionDefinition {
+
+		const emote = params.settings.emote;
+		const emotionDefinition = emote ? params.emotes[emote] : undefined;
+
+		if (!useDefault && emotionDefinition) {
+			return {
+				emote: emote,
+				textFlyin: emotionDefinition.textFlyin,
+				textStanding: emotionDefinition.textStanding,
+				textFont: emotionDefinition.textFont,
+				textSize: emotionDefinition.textSize,
+				textColor: emotionDefinition.textColor
+			}
+		}
+
+		if (!useDefault && emote) {
+			return {
+				emote: emote,
+				textFlyin: params.settings.textFlyin,
+				textStanding: params.settings.textStanding,
+				textFont: params.settings.textFont,
+				textSize: params.settings.textSize,
+				textColor: params.settings.textColor
+			}
+		}
 
 		const emotes = this.userEmotes.get(game.user.id);
 
-		let emotions = {
-			emote: (!useDefault && params.settings.emote ? params.settings.emote : null)
-				|| (emotes ? emotes.emote : null),
-			textFlyin: (!useDefault && params.settings.emote && params.emotes[params.settings.emote] && params.emotes[params.settings.emote].settings
-				? params.emotes[params.settings.emote].settings.textflyin : null)
-				|| (!useDefault ? params.settings.textflyin : null)
-				|| (emotes ? emotes.textFlyin : null),
-			textStanding: (!useDefault && params.settings.emote && params.emotes[params.settings.emote] && params.emotes[params.settings.emote].settings
-				? params.emote.settings.textstanding : null)
-				|| (!useDefault ? params.settings.textstanding : null)
-				|| (emotes ? emotes.textStanding : null),
-			textFont: (!useDefault && params.settings.emote && params.emotes[params.settings.emote] && params.emotes[params.settings.emote].settings
-				? params.emote.settings.textfont : null)
-				|| (!useDefault ? params.settings.textfont : null)
-				|| (emotes ? emotes.textFont : null),
-			textSize: (!useDefault && params.settings.emote && params.emotes[params.settings.emote] && params.emotes[params.settings.emote].settings
-				? params.emote.settings.textsize : null)
-				|| (!useDefault ? params.settings.textsize : null)
-				|| (emotes ? emotes.textSize : null),
-			textColor: (!useDefault && params.settings.emote && params.emotes[params.settings.emote] && params.emotes[params.settings.emote].settings
-				? params.emote.settings.textcolor : null)
-				|| (!useDefault ? params.settings.textcolor : null)
-				|| (emotes ? emotes.textColor : null)
+
+		return {
+			emote: emotes.emote,
+			textFlyin: (emotes ? emotes.textFlyin : null),
+			textStanding: (emotes ? emotes.textStanding : null),
+			textFont: (emotes ? emotes.textFont : null),
+			textSize: (emotes ? emotes.textSize : null),
+			textColor: (emotes ? emotes.textColor : null)
 		}
-		return emotions;
+
+
 	}
 
 	/**

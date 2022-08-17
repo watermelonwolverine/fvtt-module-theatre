@@ -1,8 +1,8 @@
 
 export type PropDef = {
     name: string;
-    initial: string | number;
-    final: string | number;
+    initial: string;
+    final: string;
 }
 
 export type TweenParams = {

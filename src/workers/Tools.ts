@@ -1,4 +1,5 @@
 import ActorExtensions from "../extensions/ActorExtensions";
+import EmotionDefinition from "../types/EmotionDefinition";
 import Params from "../types/Params";
 
 const THEATRE_PREFIX = "theatre-"
@@ -23,35 +24,34 @@ export default class Tools {
         */
     static getInsertParamsFromActorId(actorId: string): Params {
 
-        let actor = game.actors.get(actorId);
+        let actor: Actor = game.actors.get(actorId);
 
         if (!actor) {
             console.log("ERROR, ACTOR %s DOES NOT EXIST!", actorId);
             return null;
         }
 
-        actor = actor.data;
-        //console.log("getting params from actor: ",actor); 
+        const actorData : ActorData= actor.data;
 
-        let theatreId = `theatre-${actor._id}`;
-        let portrait = (actor.img ? actor.img : "icons/mystery-man.png");
+        let theatreId = `theatre-${actorData._id}`;
+        let portrait = (actorData.img ? actorData.img : "icons/mystery-man.png");
         let optAlign = "top";
-        let name = ActorExtensions.getDisplayName(actor._id);
+        let name = ActorExtensions.getDisplayName(actorData._id);
         let emotes = {};
-        let settings = {};
+        let settings = new EmotionDefinition();
 
         // Use defaults incase the essential flag attributes are missing
-        if (actor.flags.theatre) {
-            if (actor.flags.theatre.name && actor.flags.theatre.name != "")
-                name = actor.flags.theatre.name;
-            if (actor.flags.theatre.baseinsert && actor.flags.theatre.baseinsert != "")
-                portrait = actor.flags.theatre.baseinsert;
-            if (actor.flags.theatre.optalign && actor.flags.theatre.optalign != "")
-                optAlign = actor.flags.theatre.optalign;
-            if (actor.flags.theatre.emotes)
-                emotes = actor.flags.theatre.emotes;
-            if (actor.flags.theatre.settings)
-                settings = actor.flags.theatre.settings;
+        if (actorData.flags.theatre) {
+            if (actorData.flags.theatre.name && actorData.flags.theatre.name != "")
+                name = actorData.flags.theatre.name;
+            if (actorData.flags.theatre.baseinsert && actorData.flags.theatre.baseinsert != "")
+                portrait = actorData.flags.theatre.baseinsert;
+            if (actorData.flags.theatre.optalign && actorData.flags.theatre.optalign != "")
+                optAlign = actorData.flags.theatre.optalign;
+            if (actorData.flags.theatre.emotes)
+                emotes = actorData.flags.theatre.emotes;
+            if (actorData.flags.theatre.settings)
+                settings = actorData.flags.theatre.settings;
         }
 
         return {
