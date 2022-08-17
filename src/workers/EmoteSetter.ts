@@ -63,7 +63,7 @@ export default class EmoteSetter {
             imgSrcs.push({ imgpath: emotes[ename].insert, resname: emoteResName });
             // add sprites
             this.theatre._addSpritesToPixi(imgSrcs, (loader, resources) => {
-                if (Theatre.DEBUG) console.log("emote insert loaded", resources);
+
                 // Error loading the sprite
                 if (!resources[emoteResName] || resources[emoteResName].error) {
                     console.error("ERROR loading resource %s : %s : %s", insert.imgId, emoteResName, emotes[ename].insert);
@@ -111,7 +111,7 @@ export default class EmoteSetter {
                 // clear the PIXI Container
                 imgSrcs.push({ imgpath: baseInsert, resname: baseInsert });
                 this.theatre._addSpritesToPixi(imgSrcs, (loader, resources) => {
-                    if (Theatre.DEBUG) console.log("base insert re-loaded", resources);
+
                     // Error loading the sprite
                     if (!resources[baseInsert] || resources[baseInsert].error) {
                         console.error("ERROR loading resource %s : %s : %s", insert.imgId, baseInsert, baseInsert);

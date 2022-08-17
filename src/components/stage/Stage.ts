@@ -175,7 +175,6 @@ export default class Stage {
         //         skel["flags.theatre.settings.textsize"] = toRemoveInsert.textSize;
         //         skel["flags.theatre.settings.textcolor"] = toRemoveInsert.textColor;
         //         actor.update(skel).then((response) => {
-        //             if (Theatre.DEBUG) console.log("updated with resp: ", response);
         //         });
         //     }
         // }

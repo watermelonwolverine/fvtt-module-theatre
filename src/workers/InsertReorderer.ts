@@ -23,7 +23,7 @@ export default class InsertReorderer {
         let containerWidth = this.stage.theatreDock.offsetWidth;
         // Min 22px, max 32px, scale for all values inbetween
         let fontSize = Math.floor(Math.max((Math.min(containerWidth / boxes.length, 500) / 500) * 28, 18));
-        if (Theatre.DEBUG) console.log("Reorder CALCUALTED FONT SIZE: ", fontSize);
+
 
         for (let textBox_ of boxes) {
 
@@ -38,7 +38,6 @@ export default class InsertReorderer {
             // if somehow the containers are not setup, skip and hope the next re-order has them ready
 
             if (!insert.portrait || !insert.label) {
-                if (Theatre.DEBUG) console.log("WARN: %s : %s was not ready!", insert.name, insert.imgId);
                 continue;
             }
             // if the insert/textBox pair is in the process of being removed.
@@ -57,16 +56,12 @@ export default class InsertReorderer {
             //insert.dockContainer.width = textBox.offsetWidth; 
 
             if (insert.exitOrientation == "left") {
-                if (Theatre.DEBUG) console.log("LEFT (name: %s): ", insert.nameOrientation, leftPos, insert.name, this.stage.theatreBar.offsetWidth / 2);
                 if (leftPos + (insert.dockContainer.width / 2) > this.stage.theatreBar.offsetWidth / 2) {
-                    if (Theatre.DEBUG) console.log("swapping " + insert.name + " to right alignment from left");
                     insert.exitOrientation = "right";
                 }
             } else {
-                if (Theatre.DEBUG) console.log("RIGHT (name: %s): ", insert.nameOrientation, leftPos, insert.name, this.stage.theatreBar.offsetWidth / 2);
                 //right
                 if (leftPos + (insert.dockContainer.width / 2) <= this.stage.theatreBar.offsetWidth / 2) {
-                    if (Theatre.DEBUG) console.log("swapping " + insert.name + " to left alignment from right");
                     insert.exitOrientation = "left";
                 }
             }

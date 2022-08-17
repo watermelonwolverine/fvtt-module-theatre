@@ -236,7 +236,6 @@ export default class TextFlyinAnimationsFactory {
                 top: -100,
                 ease: Power4.easeOut,
                 onComplete: () => {
-                    if (Theatre.DEBUG) console.log("completeAll");
                     if (textBox) {
                         textBox.style.setProperty("overflow-y", "scroll");
                         textBox.style.setProperty("overflow-x", "hidden");
@@ -318,7 +317,6 @@ export default class TextFlyinAnimationsFactory {
                 left: 150,
                 ease: Power4.easeOut,
                 onComplete: () => {
-                    if (Theatre.DEBUG) console.log("completeAll");
                     if (textBox) {
                         textBox.style.setProperty("overflow-y", "scroll");
                         textBox.style.setProperty("overflow-x", "hidden");
@@ -375,7 +373,6 @@ export default class TextFlyinAnimationsFactory {
                 rotation: -1080,
                 ease: Power4.easeOut,
                 onComplete: () => {
-                    if (Theatre.DEBUG) console.log("completeAll");
                     if (textBox) {
                         textBox.style.setProperty("overflow-y", "scroll");
                         textBox.style.setProperty("overflow-x", "hidden");
@@ -433,12 +430,10 @@ export default class TextFlyinAnimationsFactory {
         }
 
         if (textBox) {
-            if (Theatre.DEBUG) console.log("vortext all start");
             TweenMax.from(textBox, 0.1, {
                 delay: (speed * charSpans.length) + animTime,
                 //opacity: 1,
                 onComplete: function () {
-                    if (Theatre.DEBUG) console.log("vortex all complete");
                     if (this.targets().length) {
                         this.targets()[0].style.setProperty("overflow-y", "scroll");
                         this.targets()[0].style.setProperty("overflow-x", "visible");

@@ -60,7 +60,6 @@ export default class NavItemMouseEventHandler {
             return;
         }
 
-        if (Theatre.DEBUG) console.log("Button UP on nav add?", ev.button);
 
         switch (ev.button) {
             case 0:

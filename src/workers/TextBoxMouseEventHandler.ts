@@ -81,7 +81,6 @@ export default class TextBoxMouseEventHandler {
     }
 
     handleTextBoxMouseDoubleClick(ev: MouseEvent) {
-        if (Theatre.DEBUG) console.log("MOUSE DOUBLE CLICK");
         let id = (ev.currentTarget as HTMLElement).getAttribute("imgId");
         this.theatre.resetInsertById(id);
     }

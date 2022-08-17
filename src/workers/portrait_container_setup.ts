@@ -92,7 +92,6 @@ export default class TheatrePortraitContainerSetupWorker {
         if (insert.emotion.emote) {
             let actorId = insert.imgId.replace("theatre-", "");
             let defaultDisabled = this.theatre.isDefaultDisabled(insert.imgId);
-            if (Theatre.DEBUG) console.log("is default disabled? : %s", defaultDisabled);
             let emotes = ActorExtensions.getEmotesForActor(actorId, defaultDisabled);
             let rigResMap = ActorExtensions.getRiggingResources(actorId);
             if (emotes[insert.emotion.emote] && emotes[insert.emotion.emote].rigging) {

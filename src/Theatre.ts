@@ -21,7 +21,6 @@
 import EmoteMenuInitilializer from './components/controls/emoteMenu/EmoteMenuRenderer';
 import NavBar from './components/controls/NavBar';
 import TheatreControls from './components/controls/TheatreControls';
-import Portrait from './components/stage/Portrait';
 import Stage from './components/stage/Stage';
 import StageInsert from './components/stage/StageInsert';
 import ToolTipCanvas from './components/ToolTipCanvas';
@@ -57,7 +56,6 @@ export default class Theatre {
 	static SOCKET = "module.theatre";
 	static NARRATOR = "Narrator";
 	static ICONLIB = "modules/theatre/app/graphics/emotes";
-	static DEBUG = false;
 	static instance: Theatre = undefined;
 
 	workers: _TheatreWorkers;
@@ -238,9 +236,6 @@ export default class Theatre {
 
 	configTheatreStyle(theatreStyle: AnyTheatreStyle) {
 
-		if (Theatre.DEBUG) console.log("SWITCHING THEATRE BAR MODE : %s from %s", theatreStyle, this.currentTheatreStyle);
-
-
 		this._removeCurrentTheatreStyle();
 
 		this._addNewTheatreStyle(theatreStyle);
@@ -359,7 +354,7 @@ export default class Theatre {
 	_initSocket() {
 		// module socket
 		game.socket.on(Theatre.SOCKET, payload => {
-			if (Theatre.DEBUG) console.log("Received packet", payload)
+
 			switch (payload.type) {
 				case "sceneevent":
 					this.sceneEventProcessor.processSceneEvent(payload.senderId, payload.subtype, payload.data);
@@ -392,7 +387,6 @@ export default class Theatre {
 	 *
 	 */
 	_sendTypingEvent() {
-		if (Theatre.DEBUG) console.log("Sending Typing Event")
 
 		let insert = this.stage.getInsertById(this.speakingAs);
 		let insertEmote = this._getEmoteFromInsert(insert);
@@ -441,7 +435,6 @@ export default class Theatre {
 	_sendResyncEvent(targetId: string): void {
 
 		let insertData = this._buildResyncData();
-		if (Theatre.DEBUG) console.log("Sending RESYNC Event (isGM)%s (to)%s: ", game.user.isGM, targetId, insertData)
 
 		game.socket.emit(Theatre.SOCKET,
 			{
@@ -512,7 +505,6 @@ export default class Theatre {
 	 *						indicating Wether it's to resync "all players" or to resync with a gm (any GM)
 	 */
 	_sendResyncRequest(type: AnyResyncType): void {
-		if (Theatre.DEBUG) console.log("Sending RESYNC Request ", type);
 
 		// If there's a GM, request to resync from them
 		let data = new ResyncData();
@@ -559,7 +551,7 @@ export default class Theatre {
 		type: AnyResyncType,
 		senderId: string,
 		data: ResyncData): void {
-		if (Theatre.DEBUG) console.log("Processing resync request");
+
 		// If the dock is not active, no need to send anything
 		if (type == "any" && this.dockActive <= 0 && !this.isNarratorActive) {
 			console.log("OUR DOCK IS NOT ACTIVE, Not responding to reqresync")
@@ -624,9 +616,9 @@ export default class Theatre {
 				theatreId = dat.insertid;
 				actorId = theatreId.replace("theatre-", "");
 				params = Tools.getInsertParamsFromActorId(actorId);
-				if (!params) continue;
+				if (!params)
+					continue;
 
-				if (Theatre.DEBUG) console.log("params + emotions: ", params, dat.emotions);
 				toInject.push({ params: params, emotions: dat.emotions });
 			}
 
@@ -704,15 +696,8 @@ export default class Theatre {
 							insert = this.stage.getInsertById(dat.insertid);
 							//console.log("attempting to apply position to ",insert,dat.insertid,dat); 
 							if (insert) {
-								if (Theatre.DEBUG) console.log("insert active post resync add, appying position");
 								// apply mirror state
-								/*
-								if (Boolean(dat.position.mirror) != insert.mirrored)
-									this._mirrorInsert(port,true); 
-								*/
-								if (Theatre.DEBUG) console.log("Mirror ? %s : %s", dat.position.mirror, insert.mirrored);
 								if (Boolean(dat.position.mirror) != insert.mirrored) {
-									if (Theatre.DEBUG) console.log("no match!");
 									insert.mirrored = Boolean(dat.position.mirror);
 								}
 								// apply positioning data
@@ -971,7 +956,6 @@ export default class Theatre {
 							insert.delayedOldEmote = insert.emotion.emote;
 							this.delayedSentState = 1;
 						}
-						if (Theatre.DEBUG) console.log("DELAYING EMOTE %s, 'showing' %s", value, insert.delayedOldEmote);
 					} else {
 						insert.delayedOldEmote = insert.emotion.emote;
 						this.setEmoteForInsertById(value, theatreId, remote);
@@ -983,10 +967,9 @@ export default class Theatre {
 				}
 				break;
 		}
-		// Send to socket
-		if (Theatre.DEBUG) console.log("SEND EMOTE PACKET %s,%s ??", this.isDelayEmote, this.delayedSentState);
+
 		if (!remote && (!this.isDelayEmote || this.delayedSentState == 2) && (insert || theatreId == Theatre.NARRATOR)) {
-			if (Theatre.DEBUG) console.log("SENDING EMOTE PACKET %s,%s", this.isDelayEmote, this.delayedSentState);
+
 			this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.emote, {
 				insertid: (insert ? insert.imgId : Theatre.NARRATOR),
 				emotions: {
@@ -1154,7 +1137,6 @@ export default class Theatre {
 		}
 
 		userTyping.timeoutId = window.setTimeout(() => {
-			if (Theatre.DEBUG) console.log("%s typing timeout", userId);
 			this.removeUserTyping(userId);
 		}, 6000);
 	}
@@ -1166,7 +1148,7 @@ export default class Theatre {
 	 * @param userId (String) : The userId to remove as 'typing'.
 	 */
 	removeUserTyping(userId: string) {
-		if (Theatre.DEBUG) console.log("removeUserTyping: ", this.usersTyping.get(userId));
+
 		if (!this.usersTyping.get(userId)) {
 			this.usersTyping.set(userId, new User());
 			return;
@@ -1220,7 +1202,6 @@ export default class Theatre {
 			}
 		}
 
-		if (Theatre.DEBUG) console.log("%s is no longer typing (removed)", userId);
 		window.clearTimeout(this.usersTyping.get(userId).timeoutId);
 		this.usersTyping.get(userId).timeoutId = null;
 	}
@@ -1243,7 +1224,6 @@ export default class Theatre {
 			return null;
 		}
 
-		if (Theatre.DEBUG) console.log('isDefaultDisabled ', actor);
 
 		if (actor.data.flags.theatre && actor.data.flags.theatre.disabledefault)
 			return true;
@@ -1372,7 +1352,6 @@ export default class Theatre {
 		// this.stage.pixiCTX.renderer.clear(); // PIXI.v6 does not respect transparency for clear
 		for (let insert of this.stage.stageInserts) {
 			if (insert.dockContainer) {
-				if (Theatre.DEBUG) this.updateTheatreDebugInfo(insert);
 				// PIXI.v6 The renderer should not clear the canvas on rendering
 				this.stage.pixiApplication.renderer.render(
 					insert.dockContainer,
@@ -1387,12 +1366,8 @@ export default class Theatre {
 		if (this.renderAnims > 0) {
 			requestAnimationFrame(this._renderTheatre.bind(this));
 		} else {
-			if (Theatre.DEBUG) console.log("RENDERING LOOP STOPPED");
 			this.rendering = false;
 		}
-	}
-	updateTheatreDebugInfo(insert: any) {
-		throw new Error('Method not implemented.');
 	}
 
 	/**
@@ -1433,7 +1408,6 @@ export default class Theatre {
 
 			// Kick renderer if we need to
 			if (!this.rendering) {
-				if (Theatre.DEBUG) console.log("RENDERING LOOP STARTED");
 				this.rendering = true;
 				this._renderTheatre(performance.now());
 			}
@@ -1666,7 +1640,6 @@ export default class Theatre {
 		}
 
 		let imgSrcs = [{ resname: resName, imgpath: imgSrc }];
-		if (Theatre.DEBUG) console.log("replace textures", imgSrcs);
 		this._addSpritesToPixi(imgSrcs, cb);
 
 		// Send to socket
@@ -1737,7 +1710,6 @@ export default class Theatre {
 			return;
 		}
 
-		if (Theatre.DEBUG) console.log("replace textures", imgSrcs);
 		this._addSpritesToPixi(imgSrcs, (loader, resources) => {
 			cb.call(this, loader, resources);
 		});
@@ -1756,7 +1728,7 @@ export default class Theatre {
 	}
 
 
-	
+
 
 	/**
 	 * Add sprites to the PIXI Loader
@@ -1778,7 +1750,6 @@ export default class Theatre {
 		// if loader is running, we will stick a timeout and wait,
 		// possibly fighting with others on the event looop for the loader
 		if (!loader.loading) {
-			if (Theatre.DEBUG) console.log("resources", loader);
 			for (let imgTuple of imgSrcs) {
 				let resName = imgTuple.resname;
 				if (!loader.resources[resName])
@@ -1790,7 +1761,6 @@ export default class Theatre {
 			});
 		} else {
 			window.setTimeout(() => {
-				if (Theatre.DEBUG) console.log("loader not done, waiting");
 				this._getLoaderChainWait(imgSrcs, cb).call(this);
 			}, 200);
 		}
@@ -1812,7 +1782,6 @@ export default class Theatre {
 		let loader = PIXI.Loader.shared;
 		let func = () => {
 			if (!loader.loading) {
-				if (Theatre.DEBUG) console.log("delayed loading resources", loader);
 				for (let imgTuple of imgSrcs) {
 					let resName = imgTuple.resname;
 					if (!loader.resources[resName])
@@ -1822,7 +1791,6 @@ export default class Theatre {
 				loader.load(cb);
 			} else {
 				window.setTimeout(() => {
-					if (Theatre.DEBUG) console.log("loader not done, waiting");
 					this._getLoaderChainWait(imgSrcs, cb).call(this);
 				}, 200);
 			}
@@ -1852,8 +1820,6 @@ export default class Theatre {
 
 			// load all rigging assets
 			let rigResources = ActorExtensions.getRiggingResources(actorId);
-
-			if (Theatre.DEBUG) console.log("RigResources for %s :", params.name, rigResources);
 
 			for (let rigResource of rigResources)
 				imgSrcs.push({ imgpath: rigResource.path, resname: rigResource.path });
@@ -1908,9 +1874,7 @@ export default class Theatre {
 					imgSrcs.push({ imgpath: params.emotes[emName].insert, resname: params.emotes[emName].insert });
 
 		// load in the sprites
-		this._addSpritesToPixi(imgSrcs, ((loader, resources) => {
-			if (Theatre.DEBUG) console.log("staging complete for %s", theatreId, resources);
-		}));
+		this._addSpritesToPixi(imgSrcs, ((loader, resources) => {}));
 
 		// Send socket event
 		if (!remote)
@@ -2491,7 +2455,6 @@ export default class Theatre {
 			if (tsib1n) KHelpers.insertBefore(textBox2, tsib1n);
 			else if (tsib1p && (tsib1p != textBox2)) KHelpers.insertAfter(textBox2, tsib1p);
 			else {
-				if (Theatre.DEBUG) console.log("NO TSIB1 and PRIOR");
 				KHelpers.insertAfter(textBox2, textBox1);
 				adjSwap = true;
 			}
@@ -2500,7 +2463,6 @@ export default class Theatre {
 				if (tsib2n) KHelpers.insertBefore(textBox1, tsib2n);
 				else if (tsib2p && (tsib2p != textBox1)) KHelpers.insertAfter(textBox1, tsib2p);
 				else {
-					if (Theatre.DEBUG) console.log("NO TSIB2 and PRIOR");
 					KHelpers.insertAfter(textBox1, textBox2);
 				}
 			}
@@ -2948,7 +2910,6 @@ export default class Theatre {
 			ease: Power3.easeOut,
 			onComplete: function (ctx, imgId, tweenId) {
 				// decrement the rendering accumulator
-				if (Theatre.DEBUG) console.log("portrait move onComplete %s", tweenId);
 				ctx._removeDockTween(imgId, this, tweenId);
 			},
 			onCompleteParams: [this, insert.imgId, tweenId]
@@ -2994,8 +2955,6 @@ export default class Theatre {
 		let resTarget = resMap.find(e => (e.name == tweenParams[0].resName));
 		let resource = PIXI.Loader.shared.resources[resTarget.path];
 
-		if (Theatre.DEBUG) console.log("Adding tweens for animation '%s' from syntax: %s with params: ", animName, animSyntax, tweenParams);
-		//console.log("Resource path is %s, resource: ", resTarget.path, resource); 
 		if (!resource) {
 			console.log('ERROR: resource name : "%s" with path "%s" does not exist!', tweenParams[0].resName, resTarget.path);
 			return;
@@ -3017,7 +2976,6 @@ export default class Theatre {
 			let yoyoEase = null;
 			let noMirror = false; // Not Implemented
 			if (advOptions) {
-				if (Theatre.DEBUG) console.log("adv options arg: ", advOptions);
 				yoyo = advOptions.yoyo ? true : false;
 				noMirror = advOptions.noMirror ? true : false;
 				delay = advOptions.delay ? Number(advOptions.delay) : delay;
@@ -3048,32 +3006,38 @@ export default class Theatre {
 						initial = Number(prop.initial.match(/-*\d+\.*\d*/)[0] || 0);
 						final = Number(prop.final.match(/-*\d+\.*\d*/)[0] || 0);
 					}
-					if (Theatre.DEBUG) console.log("new %s : %s,%s : w:%s,h:%s", prop.name, prop.initial, prop.final, insert.portrait.width, insert.portrait.height);
 				}
 
 				// special case for some GSAP -> PIXI names
 				switch (prop.name) {
 					case "scaleX":
 						sprite.scale.x = initial;
+						pixiParams.scaleX = final;
 						break;
 					case "scaleY":
 						sprite.scale.y = initial;
+						pixiParams.scaleY = final;
 						break;
 					case "rotation":
 						sprite.rotation = initial * (Math.PI / 180);
+						pixiParams.rotation = final;
 						break;
 					case "x":
 						sprite.x = initial;
+						pixiParams.x = final;
 						break;
 					case "y":
 						sprite.y = initial;
+						pixiParams.y = final;
+						break;
+					case "alpha":
+						sprite.alpha = initial;
+						pixiParams.alpha = final;
 						break;
 					default:
-						throw new Error("Not Implemented");
+						throw new Error("Not Implemented: " + prop.name);
 						break;
 				}
-
-				pixiParams.setProperty(prop.name, prop.final);
 			}
 
 			let tweenId = animName + idx;
@@ -3089,7 +3053,6 @@ export default class Theatre {
 					console.log("ANIMATION tween is repeating!",this); 
 				}, */
 				onComplete: function (ctx, imgId, tweenId) {
-					if (Theatre.DEBUG) console.log("ANIMATION tween complete!");
 					// decrement the rendering accumulator
 					ctx._removeDockTween(imgId, this, tweenId);
 					// remove our own reference from the dockContainer tweens
@@ -3183,7 +3146,6 @@ export default class Theatre {
 
 		let params = Tools.getInsertParamsFromActorId(actorId);
 
-		if (Theatre.DEBUG) console.log(" set as active");
 		// set as user active
 		// If the insert does not exist in the dock, add it,
 		// If it does, then simply toggle it as active if it isn't already
@@ -3279,8 +3241,6 @@ export default class Theatre {
 				emotions = Theatre.instance._getInitialEmotionSetFromInsertParams(params, true);
 			else
 				emotions = Theatre.instance._getInitialEmotionSetFromInsertParams(params);
-
-			if (Theatre.DEBUG) console.log("ACTIVATING AND INJECTING with Emotions: ", emotions);
 
 			if (ev && !ev.shiftKey) {
 				if (game.user.isGM)
@@ -3425,8 +3385,6 @@ export default class Theatre {
 		green = Math.min(green + 75, 255);
 		blue = Math.min(blue + 75, 255);
 
-		if (Theatre.DEBUG) console.log("color %s : red: %s:%s, green %s:%s, blue %s:%s", color, red, darkred, green, darkgreen, blue, darkblue);
-
 		// style specific settings
 		switch (TheatreSettings.getTheatreStyle()) {
 			case TheatreStyle.CLEARBOX:
@@ -3471,7 +3429,6 @@ export default class Theatre {
 		const greenStr = green.toString(16);
 		const blueStr = blue.toString(16);
 
-		if (Theatre.DEBUG) console.log(`#${redStr}${greenStr}${blueStr}`);
 		return `#${redStr}${greenStr}${blueStr}`;
 	}
 
@@ -3507,7 +3464,6 @@ export default class Theatre {
 		if (active) {
 			// spawn it
 			let narratorBackdrop = <HTMLElement>this.theatreNarrator.getElementsByClassName("theatre-narrator-backdrop")[0];
-			if (Theatre.DEBUG) console.log("NarratorBackdrop ", narratorBackdrop, this.theatreNarrator);
 			narratorBackdrop.style.width = "100%";
 			this.theatreNarrator.style.opacity = "1";
 			this.isNarratorActive = true;
@@ -3570,7 +3526,6 @@ export default class Theatre {
 			// remove it
 			let narratorBackdrop = <HTMLElement>this.theatreNarrator.getElementsByClassName("theatre-narrator-backdrop")[0];
 			let narratorContent = <HTMLElement>this.theatreNarrator.getElementsByClassName("theatre-narrator-content")[0];
-			if (Theatre.DEBUG) console.log("NarratorBackdrop ", narratorBackdrop, this.theatreNarrator);
 			narratorBackdrop.style.width = "0%";
 			this.theatreNarrator.style.opacity = "0";
 			this.isNarratorActive = false;
@@ -3686,7 +3641,6 @@ export default class Theatre {
 		ev: MouseEvent,
 		actorSheet: ActorSheet) {
 		ev.preventDefault();
-		if (Theatre.DEBUG) console.log("Click Event on Configure Theatre!!!", actorSheet, actorSheet.actor, actorSheet.position);
 
 		if (!actorSheet.actor.data.flags.theatre) {
 			actorSheet.actor.data.flags.theatre = { baseinsert: "", name: "" };
@@ -3710,7 +3664,6 @@ export default class Theatre {
 
 		const removeLabelSheetHeader = TheatreSettings.getRemoteLabelSheetHeader();
 
-		if (Theatre.DEBUG) console.log("Click Event on Add to NavBar!!", actorSheet, actorSheet.actor, actorSheet.position);
 		const actorData = actorSheet.object.data;
 		const addLabel = removeLabelSheetHeader ? "" : game.i18n.localize("Theatre.UI.Config.AddToStage");
 		const removeLabel = removeLabelSheetHeader ? "" : game.i18n.localize("Theatre.UI.Config.RemoveFromStage");

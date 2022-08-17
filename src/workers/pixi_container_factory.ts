@@ -110,7 +110,6 @@ export default class _TheatrePixiContainerFactory {
 
         imgSrcs.push({ imgpath: "modules/theatre/app/graphics/typing.png", resname: "modules/theatre/app/graphics/typing.png" });
         imgSrcs.push({ imgpath: imgPath, resname: imgPath });
-        if (Theatre.DEBUG) console.log("Adding %s with src %s", portName, imgPath);
         // get actor, load all emote images
         let actorId = imgId.replace("theatre-", "");
         let params: Params = Tools.getInsertParamsFromActorId(actorId);
@@ -122,8 +121,6 @@ export default class _TheatrePixiContainerFactory {
         }
         // load all rigging assets
         let rigResources: RiggingResource[] = ActorExtensions.getRiggingResources(actorId);
-
-        if (Theatre.DEBUG) console.log("RigResources for %s :", portName, rigResources);
 
         for (let rigResource of rigResources)
             imgSrcs.push({ imgpath: rigResource.path, resname: rigResource.path });
@@ -138,7 +135,6 @@ export default class _TheatrePixiContainerFactory {
         this.theatre._addSpritesToPixi(imgSrcs, (loader, resources) => {
             // PIXI Container is ready!
             // Setup the dockContainer to display the base insert
-            if (Theatre.DEBUG) console.log("Sprites added to PIXI createPortraitPIXIContainer", resources);
             let portWidth = (ename && params.emotes[ename] && params.emotes[ename].insert) ?
                 resources[params.emotes[ename].insert].texture.width : resources[imgPath].texture.width;
             let initX = isLeft ? (-1 * portWidth) : (this.theatre.stage.theatreDock.offsetWidth + portWidth);

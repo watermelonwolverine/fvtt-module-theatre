@@ -68,8 +68,6 @@ export default class NavBar {
             return;
         }
 
-        if (Theatre.DEBUG) console.log("new theatre id: " + theatreId);
-
         let navItem = document.createElement("img");
         KHelpers.addClass(navItem, "theatre-control-nav-bar-item");
         //navItem.setAttribute("draggable",false); 

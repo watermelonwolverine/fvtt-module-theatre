@@ -94,7 +94,6 @@ export default class TheatreSettingsInitializer {
             default: 30,
             type: Number,
             onChange: textDecayMin => {
-                if (Theatre.DEBUG) console.log("Text decay minimum set to %s", textDecayMin);
                 const textDecayMinValue = textDecayMin.toNearest();
                 if (isNaN(textDecayMinValue) || textDecayMinValue <= 0) {
                     ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.InvalidDecayMin"));
@@ -115,7 +114,6 @@ export default class TheatreSettingsInitializer {
             default: 1,
             type: Number,
             onChange: textDecayRate => {
-                if (Theatre.DEBUG) console.log("Text decay rate set to %s", textDecayRate);
                 let textDecayRateValue = textDecayRate.toNearest();
                 if (isNaN(textDecayRateValue) || textDecayRateValue <= 0) {
                     textDecayRateValue = 1;

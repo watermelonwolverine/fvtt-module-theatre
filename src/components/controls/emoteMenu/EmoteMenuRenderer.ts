@@ -72,7 +72,6 @@ export default class EmoteMenuInitilializer {
 
         let insert = this.theatre.stage.getInsertById(this.theatre.speakingAs);
 
-        if (Theatre.DEBUG) console.log("emote window template rendered");
         this.theatre.theatreControls.theatreEmoteMenu.style.top = `${this.theatre.theatreControls.root.offsetTop - 410}px`;
         this.theatre.theatreControls.theatreEmoteMenu.innerHTML = template;
 

@@ -101,7 +101,6 @@ export default class SceneEventProcessor {
 
         if (insert) {
             // apply mirror state
-            if (Theatre.DEBUG) console.log("mirroring desired: %s , current mirror %s", event.position.mirror, insert.mirrored);
             if (Boolean(event.position.mirror) != insert.mirrored)
                 insert.mirrored = event.position.mirror;
             let tweenId = "portraitMove";
@@ -250,13 +249,11 @@ export default class SceneEventProcessor {
             (loader: PIXI.Loader, resources: PIXI.IResourceDictionary) => {
                 // if oure emote is active and we're replacing the emote texture, or base is active, and we're replacing the base texture
 
-                if (Theatre.DEBUG) console.log("add all textures complete! ", event.emote, event.eresname, params.emotes[event.emote]);
                 if (render
                     && app
                     && insert
                     && insert.dockContainer
                     && event.eresname) {
-                    if (Theatre.DEBUG) console.log("RE-RENDERING with NEW texture resource %s", event.eresname);
 
                     // bubble up dataum from the update
                     insert.optAlign = params.optalign;

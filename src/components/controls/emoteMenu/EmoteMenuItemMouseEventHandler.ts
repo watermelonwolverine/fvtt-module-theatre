@@ -20,7 +20,6 @@ export default class EmoteMenuItemMouseEventHandler {
 
         if (ev.button == 0) {
             let emName = currentTarget.getAttribute("name");
-            if (Theatre.DEBUG) console.log("em name: %s was clicked", emName);
             if (KHelpers.hasClass(currentTarget, "emote-active")) {
                 KHelpers.removeClass(currentTarget, "emote-active");
 

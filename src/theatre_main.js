@@ -97,7 +97,6 @@ Hooks.on("preCreateChatMessage", function (chatMessage) {
 	let chatData = {
 		speaker: {}
 	};
-	if (Theatre.DEBUG) console.log("preCreateChatMessage", chatMessage.data);
 	// If theatre isn't even ready, then just no
 	if (!Theatre.instance) return;
 
@@ -121,29 +120,22 @@ Hooks.on("preCreateChatMessage", function (chatMessage) {
 		let theatreId = Theatre.instance.usersTyping.get(chatMessage.data.user).theatreId;
 		let insert = Theatre.instance.stage.getInsertById(theatreId);
 		let actorId = theatreId.replace("theatre-", "");
-		let actor = game.actors.get(actorId) || null;
-		if (Theatre.DEBUG) console.log("speakingAs %s", theatreId);
 
 		if (insert && chatMessage.data.speaker) {
 			let label = Theatre.instance._getLabelFromInsert(insert);
 			let name = label.text;
-			let theatreColor = Theatre.instance.getPlayerFlashColor(
-				chatMessage.data.user,
-				insert.textColor
-			);
-			if (Theatre.DEBUG) console.log("name is %s", name);
+
 			chatData.speaker.alias = name;
 			chatData.speaker.actor = null;
 			chatData.speaker.scene = null;
-			//chatData.flags.theatreColor = theatreColor;
+
 			chatData.type = CONST.CHAT_MESSAGE_TYPES.IC;
 			// if delay emote is active
 			if (
 				Theatre.instance.isDelayEmote &&
 				Theatre.instance.delayedSentState == 1
 			) {
-				if (Theatre.DEBUG)
-					console.log("setting emote now! as %s", insert.emote);
+
 				Theatre.instance.delayedSentState = 2;
 				Theatre.instance.setUserEmote(
 					game.user._id,
@@ -157,10 +149,7 @@ Hooks.on("preCreateChatMessage", function (chatMessage) {
 		} else if (insert) {
 			let label = Theatre.instance._getLabelFromInsert(insert);
 			let name = label.text;
-			let theatreColor = Theatre.instance.getPlayerFlashColor(
-				chatData.user,
-				insert.textColor
-			);
+
 			chatData.speaker = {};
 			chatData.speaker.alias = name;
 			chatData.speaker.actor = null;
@@ -172,8 +161,6 @@ Hooks.on("preCreateChatMessage", function (chatMessage) {
 				Theatre.instance.isDelayEmote &&
 				Theatre.instance.delayedSentState == 1
 			) {
-				if (Theatre.DEBUG)
-					console.log("setting emote now! as %s", insert.emote);
 				Theatre.instance.delayedSentState = 2;
 				Theatre.instance.setUserEmote(
 					game.user._id,
@@ -194,7 +181,6 @@ Hooks.on("preCreateChatMessage", function (chatMessage) {
 	}
 	// alter message data
 	// append chat emote braces TODO make a setting
-	if (Theatre.DEBUG) console.log("speaker? ", chatMessage.data.speaker);
 	if (
 		Theatre.instance.isQuoteAuto &&
 		!chatMessage.data.roll &&
@@ -217,7 +203,6 @@ Hooks.on("preCreateChatMessage", function (chatMessage) {
  * Chat message Binding
  */
 Hooks.on("createChatMessage", function (chatEntity, _, userId) {
-	if (Theatre.DEBUG) console.log("createChatMessage");
 	let theatreId = null;
 
 	// If theatre isn't even ready, then just no
@@ -263,7 +248,6 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 		textBox.style["overflow-y"] = "scroll";
 		textBox.style["overflow-x"] = "hidden";
 
-		if (Theatre.DEBUG) console.log("all tweens", TweenMax.getAllTweens());
 		textBox.textContent = "";
 
 		if (insert) {
@@ -371,8 +355,6 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 			default:
 				break;
 		}
-		if (Theatre.DEBUG)
-			console.log("font size is (%s): ", insertFontSize, fontSize);
 		Theatre.instance.applyFontFamily(
 			textBox,
 			insertFontType || Theatre.instance.textFont
@@ -383,8 +365,6 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 		textBox.scrollTop = 0;
 
 		charSpans = TextBoxToCharSplitter.splitTextBoxToChars(textContent, textBox);
-
-		if (Theatre.DEBUG) console.log("animating text: " + textContent);
 
 		TextFlyinAnimationsFactory.getForName(insertFlyinMode || "typewriter")(
 			charSpans,

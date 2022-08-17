@@ -198,7 +198,6 @@ export default class TheatreControls {
             || ev.key == "Alt"
             || ev.key == "Shift"
             || ev.key == "Control") return;
-        if (Theatre.DEBUG) console.log("keydown in chat-message");
         this.theatre.lastTyping = now;
         this.theatre.setUserTyping(game.user.id, this.theatre.speakingAs)
         this.theatre._sendTypingEvent();
@@ -226,7 +225,6 @@ export default class TheatreControls {
     }
 
     handleBtnCinemaClick(ev: MouseEvent) {
-        if (Theatre.DEBUG) console.log("cinema click");
         ui.notifications.info(game.i18n.localize("Theatre.NotYet"));
 
         // WMW TODO check  
