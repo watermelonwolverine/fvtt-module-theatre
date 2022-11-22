@@ -1,9 +1,9 @@
 {
-  "name": "final-blow",
-  "title": "Final Blow",
-  "description": "",
-  "version": "1.0.11",
-  "main": "final-blow.js",
+	"name": "theatre",
+	"title": "Theatre Insert",
+	"version": "3.0.0",
+	"description": "Theater Inserts with a visual novel style made for heavy roleplay scenes",
+	"main": "src/theatre_main.js",
   "scripts": {
     "publish": "gulp publish --update",
     "package": "gulp package",
