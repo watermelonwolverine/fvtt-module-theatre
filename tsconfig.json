@@ -36,6 +36,7 @@
         "jest",
         "node",
         "handlebars",
+        "gsap",
         "@league-of-foundry-developers/foundry-vtt-types/index-lenient"
     ],                                      /* Specify type package names to be included without being referenced in a source file. */
     // "allowUmdGlobalAccess": true,                     /* Allow accessing UMD globals from modules. */
@@ -80,7 +81,7 @@
 
     /* Type Checking */
     "strict": true,                                      /* Enable all strict type-checking options. */
-    "noImplicitAny": false,                            /* Enable error reporting for expressions and declarations with an implied `any` type.. */
+    "noImplicitAny": true,                            /* Enable error reporting for expressions and declarations with an implied `any` type.. */
     "strictNullChecks": true,                         /* When type checking, take into account `null` and `undefined`. */
     // "strictFunctionTypes": true,                      /* When assigning functions, check to ensure parameters and the return values are subtype-compatible. */
     // "strictBindCallApply": true,                      /* Check that the arguments for `bind`, `call`, and `apply` methods match the original function. */
@@ -108,7 +109,10 @@
     "sourceMap": true,
     "baseUrl": ".",
     "allowUnusedLabels": false,
-    "removeComments": false
+    "removeComments": false,
+    /* Advanced Options */
+		"newLine": "lf",
+		// "outDir": "./dist/src", /* Redirect output structure to the directory. */
   },
   "ts-node": {
     "files": true

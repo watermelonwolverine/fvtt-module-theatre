@@ -236,6 +236,7 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 	textContent = textContent.replace(/&gt;/g, ">");
 	textContent = textContent.replace(/&lt;/g, "<");
 	textContent = textContent.replace(/&amp;/g, "&");
+  textContent = textContent.replace(/<br>/g, "\n");
 
 	if (textBox) {
 		// kill all tweens
@@ -391,7 +392,8 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 	}
 });
 
-Hooks.on("renderChatLog", function () {
+Hooks.on("renderChatLog", function(app, html, data) {
+  if (data.cssId === "chat-popout") return;
 	Theatre.instance.initialize();
 	// window may not be ready?
 	console.log(
