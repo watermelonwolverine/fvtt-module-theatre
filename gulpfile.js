@@ -4,7 +4,7 @@
 /**
  * This is important for the bundle.js
  */
-// const mainFilePath = `app/main.js`;
+const mainFilePath = `src/final-blow.ts`; // MOD 4535992
 
 const gulp = require(`gulp`);
 const fs = require(`fs`);
@@ -27,24 +27,25 @@ const loadJson = (path) => {
     }
 };
 
-// const typescript = require(`typescript`);
-// // const createLiteral = typescript.createLiteral;
-// const createLiteral = typescript.factory.createStringLiteral;
-// const factory = typescript.factory;
-// const isExportDeclaration = typescript.isExportDeclaration;
-// const isImportDeclaration = typescript.isImportDeclaration;
-// const isStringLiteral = typescript.isStringLiteral;
-// const LiteralExpression = typescript.LiteralExpression;
-// const Node = typescript.Node;
-// const TransformationContext = typescript.TransformationContext;
-// const TSTransformer = typescript.Transformer;
-// const TransformerFactory = typescript.TransformerFactory;
-// const visitEachChild = typescript.visitEachChild;
-// const visitNode = typescript.visitNode;
+const typescript = require(`typescript`);
+// const createLiteral = typescript.createLiteral;
+const createLiteral = typescript.factory.createStringLiteral;
+const factory = typescript.factory;
+const isExportDeclaration = typescript.isExportDeclaration;
+const isImportDeclaration = typescript.isImportDeclaration;
+const isStringLiteral = typescript.isStringLiteral;
+const LiteralExpression = typescript.LiteralExpression;
+const Node = typescript.Node;
+const TransformationContext = typescript.TransformationContext;
+const TSTransformer = typescript.Transformer;
+const TransformerFactory = typescript.TransformerFactory;
+const visitEachChild = typescript.visitEachChild;
+const visitNode = typescript.visitNode;
 
 const less = require(`gulp-less`);
 const sass = require(`gulp-sass`)(require(`sass`));
 
+// import type {ModuleData} from `@league-of-foundry-developers/foundry-vtt-types/src/foundry/common/packages.mjs`; // MOD 4535992
 const browserify = require(`browserify`);
 const tsify = require(`tsify`);
 
@@ -66,6 +67,13 @@ function getConfig() {
     }
 }
 
+/* MOD 4535992
+interface Manifest {
+    root: string;
+    file: ModuleData;
+    name: string;
+}
+*/
 const getManifest = () => {
     const json = {
         root: ``,
@@ -74,8 +82,8 @@ const getManifest = () => {
         name: ``
     };
 
-    if (fs.existsSync(`app`)) {
-        json.root = `app`;
+    if (fs.existsSync(`src`)) {
+        json.root = `src`;
     } else {
         json.root = `dist`;
     }
@@ -150,26 +158,37 @@ const tsConfig = ts.createProject(`tsconfig.json`, {
 /**
  * Build TypeScript
  */
+function buildTS() {
+
+    return (
+      gulp
+        .src(`src/**/*.ts`)
+        .pipe(tsConfig())
+
+
+        // // eslint() attaches the lint output to the `eslint` property
+        // // of the file object so it can be used by other modules.
+        // .pipe(eslint())
+        // // eslint.format() outputs the lint results to the console.
+        // // Alternatively use eslint.formatEach() (see Docs).
+        // .pipe(eslint.format())
+        // // To have the process exit with an error code (1) on
+        // // lint error, return the stream and pipe to failAfterError last.
+        // .pipe(eslint.failAfterError())
+
+        .pipe(gulp.dest(`dist`))
+    );
+}
+
 // function buildTS() {
+//     const debug = process.env.npm_lifecycle_event !== `package`;
+//     const res = tsConfig.src()
+//         .pipe(sourcemaps.init())
+//         .pipe(tsConfig());
 
-//     return (
-//       gulp
-//         .src(`app/**/*.ts`)
-//         .pipe(tsConfig())
-
-
-//         // // eslint() attaches the lint output to the `eslint` property
-//         // // of the file object so it can be used by other modules.
-//         // .pipe(eslint())
-//         // // eslint.format() outputs the lint results to the console.
-//         // // Alternatively use eslint.formatEach() (see Docs).
-//         // .pipe(eslint.format())
-//         // // To have the process exit with an error code (1) on
-//         // // lint error, return the stream and pipe to failAfterError last.
-//         // .pipe(eslint.failAfterError())
-
-//         .pipe(gulp.dest(`dist`))
-//     );
+//     return res.js
+//         .pipe(sourcemaps.write(``, { debug: debug, includeContent: true, sourceRoot: `./ts/src` }))
+//         .pipe(gulp.dest(`dist`));
 // }
 
 /**
@@ -178,7 +197,7 @@ const tsConfig = ts.createProject(`tsconfig.json`, {
 function buildJS() {
   return (
     gulp
-      .src(`app/**/*.js`)
+      .src(`src/**/*.js`)
 
       // // eslint() attaches the lint output to the `eslint` property
       // // of the file object so it can be used by other modules.
@@ -200,7 +219,7 @@ function buildJS() {
 function buildMJS() {
   return (
     gulp
-      .src(`app/**/*.mjs`)
+      .src(`src/**/*.mjs`)
 
       // // eslint() attaches the lint output to the `eslint` property
       // // of the file object so it can be used by other modules.
@@ -220,23 +239,23 @@ function buildMJS() {
  * Build Css
  */
 function buildCSS() {
-  return gulp.src(`app/**/*.css`).pipe(gulp.dest(`dist`));
+  return gulp.src(`src/**/*.css`).pipe(gulp.dest(`dist`));
 }
 
 /**
  * Build Less
  */
 function buildLess() {
-  return gulp.src(`app/**/*.less`).pipe(less()).pipe(gulp.dest(`dist`));
+  return gulp.src(`src/**/*.less`).pipe(less()).pipe(gulp.dest(`dist`));
 }
 
 /**
  * Build SASS
  */
 function buildSASS() {
-  return gulp.src(`app/**/*.scss`).pipe(sass().on(`error`, sass.logError)).pipe(gulp.dest(`dist`));
+  return gulp.src(`src/**/*.scss`).pipe(sass().on(`error`, sass.logError)).pipe(gulp.dest(`dist`));
 }
-/*
+
 const bundleModule = async () => {
     const debug = argv.dbg || argv.debug;
     const bsfy = browserify(path.join(__dirname, mainFilePath), { debug: debug });
@@ -252,7 +271,6 @@ const bundleModule = async () => {
 
     // await Promise.resolve(`bundleModule done`);
 }
-*/
 
 const copyFiles = async() => {
     const statics = [`lang`, `languages`, `fonts`, `assets`, `icons`, `templates`, `packs`, `module.json`, `system.json`, `template.json`];
@@ -292,7 +310,15 @@ const copyFiles = async() => {
     try {
         for (const entity of statics) {
 
-            const p = path.join(`app`, entity);
+            const p = path.join(`src`, entity);
+            /* MOD 4535992
+            let p:string|null = null;
+            if (entity.endsWith(`module.json`) || entity.endsWith(`templates`) || entity.endsWith(`lang`)) {
+              p = path.join(`src`, entity);
+            } else {
+              p = path.join(`assets`, entity);
+            }
+            */
             if (fs.existsSync(p)) {
                 if (fs.lstatSync(p).isDirectory())
                     recursiveFileSearch(p, (err, res) => {
@@ -300,7 +326,7 @@ const copyFiles = async() => {
                             throw err;
 
                         for (const file of res) {
-                            const newFile = path.join(`dist`, path.relative(process.cwd(), file.replace(/app[\/\\]/g, ``)));
+                            const newFile = path.join(`dist`, path.relative(process.cwd(), file.replace(/src[\/\\]/g, ``)));
                             console.log(`Copying file: ` + newFile);
                             const folder = path.parse(newFile).dir;
                             if (!fs.existsSync(folder)) {
@@ -343,6 +369,17 @@ const cleanDist = async () => {
 
     await getFiles(path.resolve(`./dist`));
     for(const file of files) {
+        /* MOD 4535992
+        if (file.endsWith(`bundle.js`) ||
+            file.endsWith(`.css`) ||
+            file.endsWith(`module.json`) ||
+            file.endsWith(`templates`) ||
+            file.endsWith(`lang`)||
+            file.endsWith(`.json`) ||
+            file.endsWith(`.html`)){
+            continue;
+        }
+        */
         console.warn(`Cleaning ` + path.relative(process.cwd(), file));
         await fs.promises.unlink(file);
     }
@@ -352,11 +389,11 @@ const cleanDist = async () => {
  * Watch for changes for each build step
  */
 const buildWatch = () => {
-    // gulp.watch(`app/**/*.ts`, { ignoreInitial: false }, gulp.series(buildTS, bundleModule));
-    // gulp.watch(`app/**/*.ts`, { ignoreInitial: false }, gulp.series(buildTS));
-    gulp.watch(`app/**/*.less`, { ignoreInitial: false }, buildLess);
-    gulp.watch(`app/**/*.sass`, { ignoreInitial: false }, buildSASS);
-    gulp.watch([`app/fonts`, `app/lang`, `app/languages`, `app/templates`, `app/*.json`], { ignoreInitial: false }, copyFiles);
+    // gulp.watch(`src/**/*.ts`, { ignoreInitial: false }, gulp.series(buildTS, bundleModule));
+    gulp.watch(`src/**/*.ts`, { ignoreInitial: false }, gulp.series(buildTS));
+    gulp.watch(`src/**/*.less`, { ignoreInitial: false }, buildLess);
+    gulp.watch(`src/**/*.sass`, { ignoreInitial: false }, buildSASS);
+    gulp.watch([`src/fonts`, `src/lang`, `src/languages`, `src/templates`, `src/*.json`], { ignoreInitial: false }, copyFiles);
 }
 
 /********************/
@@ -376,7 +413,7 @@ const clean = async () => {
     const files = [];
 
     // If the project uses TypeScript
-    // if (fs.existsSync(path.join(`app`, mainFilePath))) {
+    // if (fs.existsSync(path.join(`src`, mainFilePath))) { // MOD 4535992
         files.push(
             `lang`,
             `languages`,
@@ -391,12 +428,19 @@ const clean = async () => {
             `system.json`,
             `template.json`
         );
-    // }
+    // } // MOD 4535992
 
+    // If the project uses Less
+    /* MOD 4535992
+    // if (fs.existsSync(path.join(`src/styles/`, `${name}.less`))) {
+    //     files.push(`fonts`, `${name}.css`);
+    // }
+    */
     // Attempt to remove the files
     try {
         for (const filePath of files) {
             if (fs.existsSync(path.join(`dist`, filePath))){
+              // fs.unlinkSync(path.join(`dist`, filePath)); // MOD 4535992
               fs.rmSync(path.join(`dist`, filePath), { recursive: true, force: true });
             }
         }
@@ -412,7 +456,7 @@ const linkUserData = async () => {
 
     let destDir;
     try {
-        if (fs.existsSync(path.resolve(`.`, `dist`, `module.json`)) || fs.existsSync(path.resolve(`.`, `app`, `module.json`))) {
+        if (fs.existsSync(path.resolve(`.`, `dist`, `module.json`)) || fs.existsSync(path.resolve(`.`, `src`, `module.json`))) {
             destDir = `modules`;
         } else {
             throw Error(`Could not find module.json or system.json`);
@@ -473,7 +517,7 @@ async function packageBuild() {
             }
 
             // Initialize the zip file
-            const zipName = `module.zip`; // `${manifest.file.name}-v${manifest.file.version}.zip`;
+            const zipName = `module.zip`; // `${manifest.file.name}-v${manifest.file.version}.zip`; // MOD 4535992
             const zipFile = fs.createWriteStream(path.join(`package`, zipName));
             //@ts-ignore
             const zip = archiver(`zip`, { zlib: { level: 9 } });
@@ -492,8 +536,15 @@ async function packageBuild() {
 
             // Add the directory with the final code
             // zip.directory(`dist/`, manifest.file.name);
-            const moduleJson = JSON.parse(fs.readFileSync('./module.json'));
+            const moduleJson = JSON.parse(fs.readFileSync('./src/module.json'));
             zip.directory(`dist/`, moduleJson.id);
+            /* MOD 4535992
+            zip.file(`dist/module.json`, { name: `module.json` });
+            zip.file(`dist/bundle.js`, { name: `bundle.js` });
+            zip.glob(`dist/*.css`, {cwd:__dirname});
+            zip.directory(`dist/lang`, `lang`);
+            zip.directory(`dist/templates`, `templates`);
+            */
             console.log(`Zip files`);
 
             zip.finalize();
@@ -594,7 +645,7 @@ const updateManifest = (cb) => {
     }
 }
 const test = () => {
-    return gulp.src(`app/__tests__`).pipe(jest({
+    return gulp.src(`src/__tests__`).pipe(jest({
         "preprocessorIgnorePatterns": [
             `dist/`, `node_modules/`
         ],
@@ -603,14 +654,14 @@ const test = () => {
 }
 
 
-// const execBuild = gulp.parallel(buildTS, buildLess, copyFiles);
-// const execBuild = gulp.parallel(buildTS, buildJS, buildMJS, buildCSS, buildLess, buildSASS, copyFiles);
-const execBuild = gulp.parallel(buildJS, buildMJS, buildCSS, buildLess, buildSASS, copyFiles);
+// const execBuild = gulp.parallel(buildTS, buildLess, copyFiles); // MOD 4535992
+const execBuild = gulp.parallel(buildTS, buildJS, buildMJS, buildCSS, buildLess, buildSASS, copyFiles);
+
 exports.build = gulp.series(clean, execBuild);
-//exports.bundle = gulp.series(clean, execBuild, bundleModule, cleanDist);
+exports.bundle = gulp.series(clean, execBuild, bundleModule, cleanDist);
 exports.watch = buildWatch;
 exports.clean = clean;
 exports.link = linkUserData;
 exports.package = packageBuild;
 exports.update = updateManifest;
-//exports.publish = gulp.series(clean, updateManifest, execBuild, bundleModule, cleanDist, packageBuild);
+exports.publish = gulp.series(clean, updateManifest, execBuild, bundleModule, cleanDist, packageBuild);
