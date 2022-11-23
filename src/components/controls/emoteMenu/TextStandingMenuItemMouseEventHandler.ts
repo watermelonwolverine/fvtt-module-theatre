@@ -66,7 +66,7 @@ export default class TextStandingMenuItemMouseEventHandler {
                     "textstanding-active");
 
                 this.theatre.setUserEmote(
-                    game.user.id,
+                    game.user?.id,
                     this.theatre.speakingAs,
                     'textstanding',
                     null);
@@ -85,7 +85,7 @@ export default class TextStandingMenuItemMouseEventHandler {
                     "textstanding-active");
 
                 this.theatre.setUserEmote(
-                    game.user.id,
+                    game.user?.id,
                     this.theatre.speakingAs,
                     'textstanding',
                     currentTarget.getAttribute("name"));

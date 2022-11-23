@@ -16,7 +16,7 @@ export class AnimationSyntaxVerifier {
     /**
          * Return an array of tween params if the syntax is correct,
          * else return an empty array if any tweens in the syntax
-         * are flag as incorrect. 
+         * are flag as incorrect.
          *
          * @param str (String) : The syntax to verify
          *
@@ -31,8 +31,8 @@ export class AnimationSyntaxVerifier {
         let tweenParams: TweenParams[] = [];
 
         try {
-            const sections = str.split('|');
-            const resName = sections[0];
+            const sections:string[] = str.split('|');
+            const resName = <string>sections[0];
 
             let verifyTarget = (...args: any[]) => {
                 // TODO verify each property
@@ -40,16 +40,23 @@ export class AnimationSyntaxVerifier {
             }
 
             for (let sdx = 1; sdx < sections.length; ++sdx) {
-                let parts = sections[sdx].split(';');
+                // if(!sections[sdx]){
+                //   continue;
+                // }
+                let parts = sections[sdx]?.split(';');
+                if(!parts || parts.length == 0){
+                  continue;
+                }
                 let idx = 0;
 
                 const duration = Number(parts[idx]) || 1;
 
-                let advOptionsStr: string;
+                let advOptionsStr: string = "";
                 const advOptions: { [key: string]: string } = {};
+                let optionToCheck = <string>parts[++idx];
 
-                if (/\([^\)\(]*\)/g.test(parts[++idx])) {
-                    advOptionsStr = parts[idx];
+                if (/\([^\)\(]*\)/g.test(optionToCheck)) {
+                    advOptionsStr = <string>parts[idx];
                     idx++;
                 }
                 if (advOptions) {
@@ -57,28 +64,40 @@ export class AnimationSyntaxVerifier {
                     let advParts = advOptionsStr.split(',');
                     for (let advPart of advParts) {
                         let components = advPart.split(':');
-                        if (components.length != 2) throw "component properties definition : " + advPart + " is incorrect";
-                        let advPropName = components[0].trim();
-                        let advPropValue = components[1].trim();
-                        advOptions[advPropName] = advPropValue;
+                        if (components.length != 2) {
+                          throw "component properties definition : " + advPart + " is incorrect";
+                        }
+                        let advPropName = <string>components[0]?.trim();
+                        let advPropValue = <string>components[1]?.trim();
+                        if(advPropName) {
+                          advOptions[advPropName] = advPropValue;
+                        }
                     }
                 }
 
                 const targets: string[] = [];
                 const propDefs: PropDef[] = [];
-                for (idx; idx < parts.length; ++idx)
-                    targets.push(parts[idx]);
-
+                for (let jdx = 0; jdx < parts.length; ++jdx) {
+                    targets.push(<string>parts[jdx]);
+                }
                 for (let target of targets) {
                     let components = target.split(':');
-                    if (components.length != 2) throw "component properties definition : " + target + " is incorrect";
-                    let propName = components[0];
-                    let scomps = components[1].split(',');
-                    if (scomps.length != 2) throw "component properties definition : " + target + " is incorrect";
-                    let init = scomps[0];
-                    let fin = scomps[1];
+                    if (components.length != 2) {
+                      throw "component properties definition : " + target + " is incorrect";
+                    }
+                    let propName = <string>components[0];
+                    let scomps = <string[]>components[1]?.split(',');
+                    if (scomps.length != 2) {
+                      throw "component properties definition : " + target + " is incorrect";
+                    }
+                    let init = <string>scomps[0];
+                    let fin = <string>scomps[1];
                     if (verifyTarget(propName, init, fin)) {
-                        let propDef = { name: propName, initial: init, final: fin };
+                        let propDef = {
+                          name: propName,
+                          initial: init,
+                          final: fin
+                        };
                         propDefs.push(propDef);
                     } else
                         throw "component properties definition : " + target + " is incorrect";

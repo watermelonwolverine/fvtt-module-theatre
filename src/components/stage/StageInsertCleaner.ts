@@ -1,6 +1,6 @@
-import Theatre from "../../Theatre";
+import type Theatre from "../../Theatre";
 import Portrait from "./Portrait";
-import StageInsert from "./StageInsert";
+import type StageInsert from "./StageInsert";
 
 export default class StageInsertClearer {
 
@@ -18,8 +18,9 @@ export default class StageInsertClearer {
 
         // TODO refactor
 
-        if (!insert || !insert.dockContainer || !insert.portrait) return;
-
+        if (!insert || !insert.dockContainer || !insert.portrait) {
+            return;
+        }
         // preserve position without portrait offset
         let ox = insert.portrait.x;
         let oy = insert.portrait.y;
@@ -45,28 +46,33 @@ export default class StageInsertClearer {
                 tweenId);
         }
         insert.tweens = {};
-        if (oLabelAnim)
+        if (oLabelAnim) {
             insert.tweens["nameSpeakingPulse"] = oLabelAnim;
-        if (oTypingBounceAnim)
+        }
+        if (oTypingBounceAnim) {
             insert.tweens["typingBounce"] = oTypingBounceAnim;
-        if (oTypingWiggleAnim)
+        }
+        if (oTypingWiggleAnim) {
             insert.tweens["typingWiggle"] = oTypingWiggleAnim;
-        if (oTypingAppearAnim)
+        }
+        if (oTypingAppearAnim) {
             insert.tweens["typingAppear"] = oTypingAppearAnim;
-        if (oTypingVanishAnim)
+        }
+        if (oTypingVanishAnim) {
             insert.tweens["typingVanish"] = oTypingVanishAnim;
-
+        }
         insert.portrait.destroy();
 
         // attempt to preserve label + typingBubble
         for (let idx = insert.dockContainer.children.length - 1; idx >= 0; --idx) {
-            let child = insert.dockContainer.children[idx];
-            if (child.theatreComponentName && child.theatreComponentName == "label")
+            let child = <any>insert.dockContainer.children[idx];
+            if (child.theatreComponentName && child.theatreComponentName == "label") {
                 insert.dockContainer.removeChildAt(idx);
-            else if (child.theatreComponentName && child.theatreComponentName == "typingBubble")
+            } else if (child.theatreComponentName && child.theatreComponentName == "typingBubble") {
                 insert.dockContainer.removeChildAt(idx);
-            else
+            } else {
                 child.destroy();
+            }
         }
 
 

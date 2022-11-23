@@ -1,6 +1,6 @@
-import { ImageSource } from "../Theatre";
-import EmotionDefinition from "./EmotionDefinition";
-import { Position } from "./Position";
+import type { ImageSource } from "../Theatre";
+import type EmotionDefinition from "./EmotionDefinition";
+import type { Position } from "./Position";
 
 export class SceneEvent { };
 

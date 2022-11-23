@@ -24,13 +24,14 @@ export default class NavBar {
 
     init() {
 
-      
+
     }
 
-    addToNavBar(actorData: ActorData) {
+    addToNavBar(actorData: Actor) {
 
-        if (!actorData)
+        if (!actorData) {
             return;
+        }
 
         // if already on stage, dont add it again
         // create nav-list-item
@@ -46,11 +47,11 @@ export default class NavBar {
         let optAlign = "top";
         let name = actorData.name;
 
-        if (!this.theatre.isActorOwner(game.user.id, theatreId)) {
+        if (!this.theatre.isActorOwner(<string>game.user?.id, theatreId)) {
             ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.DoNotControl"));
             return;
         }
-
+        //@ts-ignore
         const flags: TheatreFlags = actorData.flags.theatre;
 
         // Use defaults incase the essential flag attributes are missing
@@ -70,7 +71,7 @@ export default class NavBar {
 
         let navItem = document.createElement("img");
         KHelpers.addClass(navItem, "theatre-control-nav-bar-item");
-        //navItem.setAttribute("draggable",false); 
+        //navItem.setAttribute("draggable",false);
         navItem.setAttribute("imgId", theatreId);
         navItem.setAttribute("src", portrait);
         navItem.setAttribute("title", name + (name == actorData.name ? "" : ` (${actorData.name})`));
@@ -87,7 +88,7 @@ export default class NavBar {
         navItem.addEventListener("dragover", ev => this.navItemMouseEventHandler.handleNavItemDragOver(ev));
         navItem.addEventListener("drop", ev => this.navItemMouseEventHandler.handleNavItemDragDrop(ev));
 
-        this.theatre.theatreControls.theatreNavBar.appendChild(navItem);
+        this.theatre.theatreControls.theatreNavBar?.appendChild(navItem);
         // stage event
         this.theatre.stageInsertById(theatreId);
         // Store reference

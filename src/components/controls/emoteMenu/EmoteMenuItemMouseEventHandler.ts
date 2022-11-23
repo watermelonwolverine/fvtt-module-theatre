@@ -24,7 +24,7 @@ export default class EmoteMenuItemMouseEventHandler {
                 KHelpers.removeClass(currentTarget, "emote-active");
 
                 this.theatre.setUserEmote(
-                    game.user.id,
+                    game.user?.id,
                     this.theatre.speakingAs,
                     'emote',
                     null);
@@ -40,7 +40,7 @@ export default class EmoteMenuItemMouseEventHandler {
                 KHelpers.addClass(currentTarget, "emote-active");
 
                 this.theatre.setUserEmote(
-                    game.user.id,
+                    game.user?.id,
                     this.theatre.speakingAs,
                     'emote',
                     emName);

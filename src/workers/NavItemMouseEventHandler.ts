@@ -85,7 +85,7 @@ export default class NavItemMouseEventHandler {
                         emotions = this.theatre._getInitialEmotionSetFromInsertParams(params);
 
                     if (!ev.shiftKey) {
-                        if (game.user.isGM)
+                        if (game.user?.isGM)
                             this.theatre.injectLeftPortrait(src, name, theatreId, optAlign, emotions);
                         else
                             this.theatre.injectRightPortrait(src, name, theatreId, optAlign, emotions);

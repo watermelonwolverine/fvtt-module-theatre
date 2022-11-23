@@ -1,5 +1,5 @@
 import TheatreSettings from "../../extensions/TheatreSettings";
-import Stage from "./Stage";
+import type Stage from "./Stage";
 
 type Size = {
     width: number,
@@ -12,7 +12,7 @@ export default class Portrait {
     // wraps portrait for easier mirroring
     portraitContainer: PIXI.Container;
     portrait: PIXI.Sprite;
-    // wraps container of portrait for easier positioning 
+    // wraps container of portrait for easier positioning
     // allows keeping scale out of calculations
     root: PIXI.Container;
     mirrored: boolean;
@@ -80,8 +80,9 @@ export default class Portrait {
     destroy() {
         this.portrait.destroy();
         this.portraitContainer.destroy();
-
+        //@ts-ignore
         this.portrait = null;
+        //@ts-ignore
         this.portraitContainer = null;
     }
 
@@ -111,7 +112,7 @@ export default class Portrait {
     }
 
     /**
-     * Calculates portrait target size according to the set target height.  
+     * Calculates portrait target size according to the set target height.
      */
     _calculatePortraitTargetSize(): Size {
 
@@ -160,3 +161,5 @@ export default class Portrait {
     }
 
 }
+
+

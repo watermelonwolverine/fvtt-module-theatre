@@ -1,9 +1,9 @@
 export default class TheatreActor {
 
-    actorData: ActorData;
+    actorData: Actor;
     navElement: HTMLElement;
 
-    constructor(actor: ActorData, navElement: HTMLElement) {
+    constructor(actor: Actor, navElement: HTMLElement) {
         this.actorData = actor;
         this.navElement = navElement;
     }

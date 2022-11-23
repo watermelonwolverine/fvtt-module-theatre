@@ -1,6 +1,6 @@
-import Theatre from "../../Theatre";
-import EmotionDefinition from "../../types/EmotionDefinition";
-import Portrait from "./Portrait";
+import type Theatre from "../../Theatre";
+import type EmotionDefinition from "../../types/EmotionDefinition";
+import type Portrait from "./Portrait";
 import Stage from "./Stage";
 import StageInsertClearer from "./StageInsertCleaner";
 
@@ -9,7 +9,7 @@ export default class StageInsert {
     imgId: string;
     // contains label and portraitContainer
     // sits right on top the textBox
-    dockContainer: PIXI.Container;
+    dockContainer: PIXI.Container|null;
 
     name: string;
     emotion: EmotionDefinition
@@ -26,8 +26,8 @@ export default class StageInsert {
     deleting?= false;
     meta: {}
     mirrored?= false;
-    delayedOldEmote?: string = null;
-    decayTOId?: string;
+    delayedOldEmote?: string;
+    decayTOId?: string|null;
     // given
     theatre: Theatre;
 

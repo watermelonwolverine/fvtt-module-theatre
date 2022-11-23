@@ -51,7 +51,7 @@ Handlebars.registerHelper("resprop", function (propPath, hash) {
  * Hook in on Actorsheet's Header buttons + context menus
  */
 Hooks.on("getActorSheetHeaderButtons", (app, buttons) => {
-	if (!game.user.isGM && game.settings.get(TheatreSettings.NAMESPACE, "gmOnly")) return;
+	if (!game.user?.isGM && game.settings.get(TheatreSettings.NAMESPACE, "gmOnly")) return;
 
 	let theatreButtons = []
 	if (app.object.isOwner) {
@@ -138,7 +138,7 @@ Hooks.on("preCreateChatMessage", function (chatMessage) {
 
 				Theatre.instance.delayedSentState = 2;
 				Theatre.instance.setUserEmote(
-					game.user._id,
+					game.user?._id,
 					theatreId,
 					"emote",
 					insert.emote,
@@ -163,7 +163,7 @@ Hooks.on("preCreateChatMessage", function (chatMessage) {
 			) {
 				Theatre.instance.delayedSentState = 2;
 				Theatre.instance.setUserEmote(
-					game.user._id,
+					game.user?._id,
 					theatreId,
 					"emote",
 					insert.emote,
@@ -411,7 +411,7 @@ Hooks.on("renderChatLog", function(app, html, data) {
  * Add to stage button on ActorDirectory Sidebar
  */
 Hooks.on("getActorDirectoryEntryContext", async (html, options) => {
-	if (!game.user.isGM && TheatreSettings.get(TheatreSettings.GM_ONLY)) return;
+	if (!game.user?.isGM && TheatreSettings.get(TheatreSettings.GM_ONLY)) return;
 
 	const getActorData = target => {
 		const actor = game.actors.get(target.data("documentId"));
@@ -462,9 +462,10 @@ Hooks.once("init", () => {
 			modifiers: ['Alt']
 		}],
 		onDown: () => {
-			const ownedActors = game.actors.filter(a => a.permission === 3);
+      //@ts-ignore
+			const ownedActors = game.actor?.filter(a => a.ownership === 3);
 			const ownedTokens = ownedActors.map(a => a.getActiveTokens());
-			for (const tokenArray of ownedTokens) tokenArray.forEach(t => Theatre.instance.navBar.addToNavBar(t.actor.data));
+			for (const tokenArray of ownedTokens) tokenArray.forEach(t => Theatre.instance?.navBar.addToNavBar(t.actor.data));
 		},
 		restricted: false
 	});
@@ -477,7 +478,15 @@ Hooks.once("init", () => {
 			modifiers: ['Shift']
 		}],
 		onDown: () => {
-			for (const tkn of canvas.tokens.controlled) Theatre.instance.navBar.addToNavBar(tkn.actor.data);
+			for (const tkn of <Token[]>canvas.tokens?.controlled) {
+        if(tkn.actor?.data) {
+          //@ts-ignore
+          Theatre.instance?.navBar.addToNavBar(<Actor>tkn.actor?.data);
+        } else {
+          Theatre.instance?.navBar.addToNavBar(<Actor>tkn.actor);
+        }
+
+      }
 		},
 		restricted: false
 	});
@@ -759,7 +768,7 @@ Hooks.on("updateActor", (actor, data) => {
 
 Hooks.on("getSceneControlButtons", controls => {
 	// Use "theatre", since Theatre.SETTINGS may not be available yet
-	if (!game.user.isGM && game.settings.get("theatre", "gmOnly")) {
+	if (!game.user?.isGM && game.settings.get("theatre", "gmOnly")) {
 		const suppressTheatreTool = {
 			name: "suppressTheatre",
 			title: "Theatre.UI.Title.SuppressTheatre",

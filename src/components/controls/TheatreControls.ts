@@ -40,7 +40,7 @@ export default class TheatreControls {
         this.theatreNavBar = document.createElement("div");
         this.theatreChatCover = document.createElement("div");
 
-        if (!game.user.isGM && TheatreSettings.get(TheatreSettings.GM_ONLY)) {
+        if (!game.user?.isGM && TheatreSettings.get(TheatreSettings.GM_ONLY)) {
             this.root.style.display = "none";
         }
 
@@ -49,8 +49,8 @@ export default class TheatreControls {
         let iconSuppress = document.createElement("div");
         let btnEmote = document.createElement("div");
         let iconEmote = document.createElement("div");
-        //let btnCinema = document.createElement("div"); 
-        //let iconCinema = document.createElement("div"); 
+        //let btnCinema = document.createElement("div");
+        //let iconCinema = document.createElement("div");
         let btnNarrator;
         let iconNarrator;
 
@@ -69,8 +69,8 @@ export default class TheatreControls {
         KHelpers.addClass(iconSuppress, "theatre-icon-suppress");
         KHelpers.addClass(btnEmote, "theatre-control-btn");
         KHelpers.addClass(iconEmote, "theatre-icon-emote");
-        //KHelpers.addClass(btnCinema,"theatre-control-btn"); 
-        //KHelpers.addClass(iconCinema,"theatre-icon-cinema"); 
+        //KHelpers.addClass(btnCinema,"theatre-control-btn");
+        //KHelpers.addClass(iconCinema,"theatre-icon-cinema");
         KHelpers.addClass(btnResync, "button");
         KHelpers.addClass(btnResync, "resync-theatre");
         KHelpers.addClass(iconResync, "fas");
@@ -84,18 +84,18 @@ export default class TheatreControls {
 
         btnEmote.setAttribute("title", game.i18n.localize("Theatre.UI.Title.EmoteSelector"));
         btnSuppress.setAttribute("title", game.i18n.localize("Theatre.UI.Title.SuppressTheatre"));
-        btnResync.setAttribute("title", (game.user.isGM ? game.i18n.localize("Theatre.UI.Title.ResyncGM") : game.i18n.localize("Theatre.UI.Title.ResyncPlayer")));
+        btnResync.setAttribute("title", (game.user?.isGM ? game.i18n.localize("Theatre.UI.Title.ResyncGM") : game.i18n.localize("Theatre.UI.Title.ResyncPlayer")));
         btnQuote.setAttribute("title", game.i18n.localize("Theatre.UI.Title.QuoteToggle"));
         btnDelayEmote.setAttribute("title", game.i18n.localize("Theatre.UI.Title.DelayEmoteToggle"));
 
-        //btnCinema.setAttribute("title",game.i18n.localize("Theatre.UI.Title.CinemaSelector")); 
+        //btnCinema.setAttribute("title",game.i18n.localize("Theatre.UI.Title.CinemaSelector"));
         btnEmote.addEventListener("click", (ev) => this.handleBtnEmoteClick(ev));
         btnSuppress.addEventListener("click", (ev) => this.handleBtnSuppressClick(ev));
         btnResync.addEventListener("click", (ev) => this.handleBtnResyncClick(ev));
         btnQuote.addEventListener("click", (ev) => this.handleBtnQuoteClick(ev));
 
         btnDelayEmote.addEventListener("click", this.handleBtnDelayEmoteClick);
-        //btnCinema.addEventListener("click", this.handleBtnCinemaClick); 
+        //btnCinema.addEventListener("click", this.handleBtnCinemaClick);
         this.theatreNavBar.addEventListener("wheel", ev => this.handleNavBarWheel(ev));
 
         btnEmote.appendChild(iconEmote);
@@ -103,12 +103,12 @@ export default class TheatreControls {
         btnResync.appendChild(iconResync);
         btnQuote.appendChild(iconQuote);
         btnDelayEmote.appendChild(iconDelayEmote);
-        //btnCinema.appendChild(iconCinema); 
+        //btnCinema.appendChild(iconCinema);
         this.theatreChatCover.appendChild(imgCover);
 
         this.root.appendChild(this.theatreNavBar);
 
-        if (game.user.isGM) {
+        if (game.user?.isGM) {
             btnNarrator = document.createElement("div");
             iconNarrator = document.createElement("div");
             KHelpers.addClass(btnNarrator, "theatre-control-btn");
@@ -120,14 +120,14 @@ export default class TheatreControls {
         }
 
         this.root.appendChild(btnEmote);
-        //this.theatreControls.appendChild(btnCinema); 
+        //this.theatreControls.appendChild(btnCinema);
         this.root.appendChild(btnSuppress);
 
         btnDelayEmote.style["margin"] = "0 4px";
         btnQuote.style["margin"] = "0 4px";
         btnResync.style["margin"] = "0 4px";
 
-        if (game.user.isGM || !TheatreSettings.get(TheatreSettings.GM_ONLY)) {
+        if (game.user?.isGM || !TheatreSettings.get(TheatreSettings.GM_ONLY)) {
             if (controlButtons) {
                 controlButtons.style.setProperty("flex-basis", "100%");
                 KHelpers.insertBefore(btnResync, controlButtons.children[0]);
@@ -199,7 +199,7 @@ export default class TheatreControls {
             || ev.key == "Shift"
             || ev.key == "Control") return;
         this.theatre.lastTyping = now;
-        this.theatre.setUserTyping(game.user.id, this.theatre.speakingAs)
+        this.theatre.setUserTyping(game.user?.id, this.theatre.speakingAs)
         this.theatre._sendTypingEvent();
     }
 
@@ -208,7 +208,7 @@ export default class TheatreControls {
     /**
      * NOTE: this has issues with multiple GMs since the narrator bar currently works as a
      * "shim" in that it pretends to be a proper insert for text purposes only.
-     * 
+     *
      * If another GM activates another charater, it will minimize the bar for a GM that is trying
      * to use the bar
      *
@@ -227,12 +227,12 @@ export default class TheatreControls {
     handleBtnCinemaClick(ev: MouseEvent) {
         ui.notifications.info(game.i18n.localize("Theatre.NotYet"));
 
-        // WMW TODO check  
+        // WMW TODO check
         /*
         if (KHelpers.hasClass(currentTarget,"theatre-control-small-btn-down")) {
-            KHelpers.removeClass(currentTarget,"theatre-control-small-btn-down"); 
+            KHelpers.removeClass(currentTarget,"theatre-control-small-btn-down");
         } else {
-            KHelpers.addClass(currentTarget,"theatre-control-small-btn-down"); 
+            KHelpers.addClass(currentTarget,"theatre-control-small-btn-down");
             ui.notifications.info(game.i18n.localize("Theatre.NotYet"));
         }
         */
@@ -276,7 +276,7 @@ export default class TheatreControls {
 
     handleBtnResyncClick(ev: MouseEvent) {
 
-        if (game.user.isGM) {
+        if (game.user?.isGM) {
             this.theatre._sendResyncRequest("players");
             ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.ResyncGM"));
         }

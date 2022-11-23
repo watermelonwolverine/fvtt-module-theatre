@@ -1,6 +1,6 @@
 import Theatre from "../Theatre";
-import StageInsert from "../components/stage/StageInsert";
-import SceneEventProcessor from "./SceneEventProcessor";
+import type StageInsert from "../components/stage/StageInsert";
+import type SceneEventProcessor from "./SceneEventProcessor";
 import { SceneEventTypes } from "../types/SceneEventTypes";
 
 type DragPoint = {
@@ -57,7 +57,7 @@ export default class TextBoxMouseEventHandler {
         let insert = this.theatre.stage.getInsertById(id);
 
         // permission check
-        if (!this.theatre.isActorOwner(game.user.id, insert.imgId)) {
+        if (!this.theatre.isActorOwner(game.user?.id, insert.imgId)) {
             ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.DoNotControl"));
             return;
         }

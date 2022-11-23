@@ -93,20 +93,20 @@ export default class EmoteMenuInitilializer {
         // assign color from insert
         if (insert && insert.emotion.textColor) {
             colorSelect.value = insert.emotion.textColor;
-        } else if (this.theatre.userEmotes.get(game.user.id) && this.theatre.userEmotes.get(game.user.id).textColor) {
-            colorSelect.value = this.theatre.userEmotes.get(game.user.id).textColor;
+        } else if (this.theatre.userEmotes.get(game.user?.id) && this.theatre.userEmotes.get(game.user?.id).textColor) {
+            colorSelect.value = this.theatre.userEmotes.get(game.user?.id).textColor;
             if (insert) insert.emotion.textColor = colorSelect.value;
         }
         // assgin font size
         this.configure_size_select(insert);
 
         fontSelect.addEventListener("change", ev => {
-            this.theatre.setUserEmote(game.user.id, this.theatre.speakingAs, 'textfont', (<HTMLSelectElement>(<HTMLElement>ev.currentTarget)).value);
+            this.theatre.setUserEmote(game.user?.id, this.theatre.speakingAs, 'textfont', (<HTMLSelectElement>(<HTMLElement>ev.currentTarget)).value);
             this.initialize();
         });
 
         colorSelect.addEventListener("change", ev => {
-            this.theatre.setUserEmote(game.user.id, this.theatre.speakingAs, 'textcolor', (<HTMLSelectElement>(<HTMLElement>ev.currentTarget)).value);
+            this.theatre.setUserEmote(game.user?.id, this.theatre.speakingAs, 'textcolor', (<HTMLSelectElement>(<HTMLElement>ev.currentTarget)).value);
         });
 
 
@@ -132,8 +132,8 @@ export default class EmoteMenuInitilializer {
         let sizeValue = 2;
         if (insert)
             sizeValue = insert.emotion.textSize;
-        else if (this.theatre.userEmotes.get(game.user.id))
-            sizeValue = this.theatre.userEmotes.get(game.user.id).textSize;
+        else if (this.theatre.userEmotes.get(game.user?.id))
+            sizeValue = this.theatre.userEmotes.get(game.user?.id).textSize;
 
         switch (sizeValue) {
             case 3:
@@ -152,7 +152,7 @@ export default class EmoteMenuInitilializer {
     }
 
     wheelFunc2(wheelEvent: WheelEvent) {
-        //console.log("wheel on text-anim",(<HTMLElement>ev.currentTarget).parentNode.scrollTop,ev.deltaY,ev.deltaMode); 
+        //console.log("wheel on text-anim",(<HTMLElement>ev.currentTarget).parentNode.scrollTop,ev.deltaY,ev.deltaMode);
         let pos = wheelEvent.deltaY > 0;
         (<HTMLElement>(<HTMLElement>wheelEvent.currentTarget).parentNode).scrollTop += (pos ? 10 : -10);
         wheelEvent.preventDefault();
@@ -164,9 +164,9 @@ export default class EmoteMenuInitilializer {
         // assign font from insert
         if (insert && insert.emotion.textFont) {
             fontSelect.value = insert.emotion.textFont;
-        } else if (this.theatre.userEmotes.get(game.user.id) && this.theatre.userEmotes.get(game.user.id).textFont) {
+        } else if (this.theatre.userEmotes.get(game.user?.id) && this.theatre.userEmotes.get(game.user?.id).textFont) {
 
-            fontSelect.value = this.theatre.userEmotes.get(game.user.id).textFont;
+            fontSelect.value = this.theatre.userEmotes.get(game.user?.id).textFont;
             if (insert) insert.emotion.textFont = fontSelect.value;
         } else {
             fontSelect.value = this.theatre.textFont;
@@ -180,8 +180,8 @@ export default class EmoteMenuInitilializer {
         let value = 2;
         if (insert)
             value = insert.emotion.textSize;
-        else if (this.theatre.userEmotes.get(game.user.id))
-            value = this.theatre.userEmotes.get(game.user.id).textSize;
+        else if (this.theatre.userEmotes.get(game.user?.id))
+            value = this.theatre.userEmotes.get(game.user?.id).textSize;
 
 
         switch (value) {
@@ -202,14 +202,14 @@ export default class EmoteMenuInitilializer {
                 break;
         }
         this.theatre.setUserEmote(
-            game.user.id,
+            game.user?.id,
             this.theatre.speakingAs,
             'textsize',
             value.toString());
     }
 
     wheelFunc(wheelEvent: WheelEvent) {
-        //console.log("wheel on text-box",(<HTMLElement>ev.currentTarget).scrollTop,ev.deltaY,ev.deltaMode); 
+        //console.log("wheel on text-box",(<HTMLElement>ev.currentTarget).scrollTop,ev.deltaY,ev.deltaMode);
         let pos = wheelEvent.deltaY > 0;
         (<HTMLElement>wheelEvent.currentTarget).scrollTop += (pos ? 10 : -10);
         wheelEvent.preventDefault();
@@ -230,7 +230,7 @@ export default class EmoteMenuInitilializer {
             child.addEventListener("mouseout", (ev) => this.textFlyinMenuMouseEventHandler.handleMouseOut(ev, child));
             child.addEventListener("mouseup", ev => this.textFlyinMenuMouseEventHandler.handleMouseButtonUp(ev));
 
-            // check if this child is our configured 'text style' 
+            // check if this child is our configured 'text style'
             let childTextMode = child.getAttribute("name");
             if (insert) {
                 let insertTextMode = insert.emotion.textFlyin;
@@ -248,7 +248,7 @@ export default class EmoteMenuInitilializer {
                     //TweenMax.to(flyinBox,.4,{scrollTo:{y:child.offsetTop, offsetY:flyinBox.offsetHeight/2}})
                     theatre_container_column.scrollTop = child.offsetTop - Math.max(theatre_container_column.offsetHeight / 2, 0);
                 }
-            } else if (!insert && this.theatre.userEmotes.get(game.user.id) && (child.getAttribute("name") == this.theatre.userEmotes.get(game.user.id).textFlyin)) {
+            } else if (!insert && this.theatre.userEmotes.get(game.user?.id) && (child.getAttribute("name") == this.theatre.userEmotes.get(game.user?.id).textFlyin)) {
                 KHelpers.addClass(child, "textflyin-active");
                 // scroll to
                 //TweenMax.to(flyinBox,.4,{scrollTo:{y:child.offsetTop, offsetY:flyinBox.offsetHeight/2}})
@@ -289,7 +289,7 @@ export default class EmoteMenuInitilializer {
                     //TweenMax.to(standingBox,.4,{scrollTo:{y:child.offsetTop, offsetY:standingBox.offsetHeight/2}})
                     standingBox.scrollTop = child.offsetTop - Math.max(standingBox.offsetHeight / 2, 0);
                 }
-            } else if (this.theatre.userEmotes.get(game.user.id) && (child.getAttribute("name") == this.theatre.userEmotes.get(game.user.id).textStanding)) {
+            } else if (this.theatre.userEmotes.get(game.user?.id) && (child.getAttribute("name") == this.theatre.userEmotes.get(game.user?.id).textStanding)) {
                 KHelpers.addClass(child, "textstanding-active");
                 // scroll to
                 //TweenMax.to(standingBox,.4,{scrollTo:{y:child.offsetTop, offsetY:standingBox.offsetHeight/2}})
@@ -331,16 +331,16 @@ export default class EmoteMenuInitilializer {
                     let insertEmote = insert.emotion.emote;
                     if (insertEmote && insertEmote == childEmote) {
                         KHelpers.addClass(child, "emote-active");
-                        //emContainer.scrollTop = child.offsetTop-Math.max(emContainer.offsetHeight/2,0); 
+                        //emContainer.scrollTop = child.offsetTop-Math.max(emContainer.offsetHeight/2,0);
                     }
                     // we should 'highlight' emotes that at least have a base insert
                     if (emotes[childEmote] && emotes[childEmote].insert)
                         KHelpers.addClass(child, "emote-imgavail");
 
                 }
-                if (!insert && this.theatre.userEmotes.get(game.user.id) && (childEmote == this.theatre.userEmotes.get(game.user.id).emote)) {
+                if (!insert && this.theatre.userEmotes.get(game.user?.id) && (childEmote == this.theatre.userEmotes.get(game.user?.id).emote)) {
                     KHelpers.addClass(child, "emote-active");
-                    //emContainer.scrollTop = child.offsetTop-Math.max(emContainer.offsetHeight/2,0); 
+                    //emContainer.scrollTop = child.offsetTop-Math.max(emContainer.offsetHeight/2,0);
                 }
             }
             // bind mouseleave Listener

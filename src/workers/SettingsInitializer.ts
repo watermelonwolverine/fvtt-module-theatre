@@ -39,7 +39,7 @@ export default class TheatreSettingsInitializer {
             config: true,
             default: false,
             type: Boolean,
-            onChange: () => { if (!game.user.isGM) debouncedReload(); },
+            onChange: () => { if (!game.user?.isGM) debouncedReload(); },
         });
 
         const choices: { [key: string]: string } = {}

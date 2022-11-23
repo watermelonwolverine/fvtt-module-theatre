@@ -1,5 +1,5 @@
-import EmotionDefinition from "./EmotionDefinition";
-import { Position } from "./Position";
+import type EmotionDefinition from "./EmotionDefinition";
+import type { Position } from "./Position";
 
 export class InsertData {
     insertid: string;

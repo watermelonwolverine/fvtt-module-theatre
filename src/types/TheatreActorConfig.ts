@@ -16,16 +16,20 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
+import type StageInsert from "src/components/stage/StageInsert";
 import ActorExtensions from "../extensions/ActorExtensions";
 import Theatre from "../Theatre";
 import KHelpers from "../workers/KHelpers";
 import { SceneEventTypes } from "./SceneEventTypes";
 
 export default class TheatreActorConfig extends FormApplication {
-	constructor(object = {}, options = {}) {
+
+  object:any;
+
+	constructor(object:any = {}, options:any = {}) {
 
 		if (object._theatre_mod_configTab) {
 			options.tabs = [
@@ -71,8 +75,9 @@ export default class TheatreActorConfig extends FormApplication {
 	getData() {
 		const entityName = this.object.name;
 		return {
+      title: entityName,
 			entityName: entityName,
-			isGM: game.user.isGM,
+			isGM: game.user?.isGM,
 			object: duplicate(this.object.data),
 			emote: ActorExtensions.getEmotesForActor(this.object.data._id),
 			options: this.options,
@@ -85,31 +90,31 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @param html (JQuery) The rendered template ready to have listeners attached
 	 */
-	activateListeners(html) {
+	activateListeners(html:JQuery<HTMLElement>) {
 		super.activateListeners(html);
 
 
-		let btnAdd = html[0].getElementsByClassName("theatre-config-btn-add-emote")[0];
+		let btnAdd = html[0]?.getElementsByClassName("theatre-config-btn-add-emote")[0];
 		if (btnAdd)
 			btnAdd.addEventListener("click", this._onAddEmoteLine.bind(this));
 
-		let btnsEmoteConfig = html[0].getElementsByClassName("theatre-config-btn-edit-emote");
+		let btnsEmoteConfig = <HTMLCollectionOf<Element>>html[0]?.getElementsByClassName("theatre-config-btn-edit-emote");
 		for (let btn of btnsEmoteConfig)
 			btn.addEventListener("click", this._onEditEmoteLine.bind(this));
 
 		// Support custom icon updates
-		let iconsCustom = html[0].getElementsByClassName("customicon");
+		let iconsCustom = <HTMLCollectionOf<Element>>html[0]?.getElementsByClassName("customicon");
 		for (let icon of iconsCustom)
 			icon.addEventListener("click", this._onCustomIconImage.bind(this));
 
 		// Support custom label updates
-		let labelsCustom = html[0].getElementsByClassName("customlabel");
+		let labelsCustom = <HTMLCollectionOf<Element>>html[0]?.getElementsByClassName("customlabel");
 		for (let label of labelsCustom)
 			this._setupCustomLabelEvents(label);
 	}
 
 	/** @override */
-	_onChangeTab(event, tabs, active) {
+	_onChangeTab(event:any, tabs:any, active:string) {
 		this.object._theatre_mod_configTab = active;
 		// Auto change height
 		const tab = this.element.find(`.tab[data-tab="${active}"]`)[0];
@@ -122,10 +127,10 @@ export default class TheatreActorConfig extends FormApplication {
 	 * @param formData (Object) : The object form data to be verified
 	 *
 	 * @return Object : an object containing the revised formData to be updated
-	 *                   as well as a set of data which only contains the updated 
+	 *                   as well as a set of data which only contains the updated
 	 *                   emotes (excluding other theatre updates)
 	 */
-	_verifyCustomEmotes(formData) {
+	_verifyCustomEmotes(formData:any) {
 
 		// find the formdata elements that contain "custom#" in their chain
 		// once we find these objects, verify that there's a boolean attribute
@@ -136,7 +141,9 @@ export default class TheatreActorConfig extends FormApplication {
 		// then we add it to the form submission
 		for (let k in formData)
 			if (formData[k] && /emotes\.custom\d+/.test(k)) {
+        //@ts-ignore
 				let mch = k.match(/flags\.theatre\.emotes\.custom\d+/)[0];
+        //@ts-ignore
 				let name = mch.match(/custom\d+/)[0];
 				let labelPath = mch + ".label";
 				let cflagPath = mch + ".custom";
@@ -161,15 +168,16 @@ export default class TheatreActorConfig extends FormApplication {
 			}
 
 		// collect emote form updates + revised form updates
-		let configElement = this.element[0];
+		let configElement = <HTMLElement>this.element[0];
 		let toDelete = configElement.querySelectorAll('.theatre-config-form-group[todelete="true"]');
-		let emoteFormData = {};
-		let revisedFormData = {};
+		let emoteFormData:any = {};
+		let revisedFormData:any = {};
 		for (let k in formData) {
 			let rem = false;
 			let isCustom = /custom\d+/.test(k);
 			let isEmote = /flags\.theatre\.emotes\./.test(k);
 			if (formData[k] && isCustom) {
+        //@ts-ignore
 				let mch = k.match(/custom\d+/)[0];
 				for (let d of toDelete)
 					if (d.getAttribute("name") == mch) {
@@ -196,16 +204,16 @@ export default class TheatreActorConfig extends FormApplication {
 	 * Given the formdata, check the levels in the given html element that have data-edit
 	 * and add their values to the formData update
 	 *
-	 * @param formData (Object) : An object representing the formData that will be used to update the Entity. 
+	 * @param formData (Object) : An object representing the formData that will be used to update the Entity.
 	 *
 	 * @return Object : An object represeting the formData, but updated with new entries to be updated.
 	 */
-	_processUpdateLabels(formData) {
-		let html = this.element[0];
+	_processUpdateLabels(formData:any) {
+		let html = <HTMLElement>this.element[0];
 
 		let dataLabels = html.querySelectorAll('label[data-edit]');
 		for (let label of dataLabels) {
-			let target = label.getAttribute("data-edit");
+			let target = <string>label.getAttribute("data-edit");
 			formData[target] = label.textContent;
 		}
 		return formData;
@@ -215,12 +223,12 @@ export default class TheatreActorConfig extends FormApplication {
 	 * Implement the _updateObject method as required by the parent class spec
 	 * This defines how to update the subject of the form when the form is submitted
 	   *
-	   * @param event (Object) : event that triggered this update ? 
-	   * @param formData (Object) : An object representing the formData that will be used to update the Entity. 
+	   * @param event (Object) : event that triggered this update ?
+	   * @param formData (Object) : An object representing the formData that will be used to update the Entity.
 	   *
 	 * @private
 	 */
-	async _updateObject(event, formData) {
+	async _updateObject(event:any, formData:any) {
 		formData["_id"] = this.object._id;
 
 		// if our baseinsert value was updated..
@@ -268,23 +276,25 @@ export default class TheatreActorConfig extends FormApplication {
 		let emoteFormData = resForms.emoteFormData;
 
 		// check all image resources, if they differ the actor's, we need to replace the texture, and then tell all other clients to do so as well!
-		//let inserts = formData.filter((e,k) => {return k.endsWith("insert") || k.endsWith("baseinsert")}); 
-		let insert = Theatre.instance.stage.getInsertById(theatreId);
+		//let inserts = formData.filter((e,k) => {return k.endsWith("insert") || k.endsWith("baseinsert")});
+		let insert = <StageInsert>Theatre.instance.stage.getInsertById(theatreId);
 		let container = (insert ? insert.dockContainer : null);
 		let app = Theatre.instance.pixiCTX;
-		let insertEmote = Theatre.instance._getEmoteFromInsert(insert);
-		let newSrcImg = null;
-		let imgSrcs = [];
+		let insertEmote = <string>Theatre.instance._getEmoteFromInsert(insert);
+		let newSrcImg:string|null = null;
+		let imgSrcs:{imgpath: string,resname: string}[] = [];
 
 		for (let k in formData)
 			if (k.endsWith("insert") || k.endsWith("baseinsert")) {
 				let oldValue = getProperty(this.object.data, k);
 				// if the old value does not exist, we will continue
 				if (formData[k] != oldValue) {
-					let emote = k.match(/emotes\.[a-z0-9\-]+/);
-					if (emote)
-						emote = emote[0].replace(/emotes\./, "");
-					let resName = formData[k];
+					let emoteRegex = k.match(/emotes\.[a-z0-9\-]+/);
+          let emote:string|null = null;
+					if (emoteRegex) {
+						emote = emoteRegex[0].replace(/emotes\./, "");
+          }
+					let resName = <string>formData[k];
 					// A special case exists where the baseportrait is removed, and replaced with either
 					// null or an empty string, we can set this value, but we need to change the re-render
 					// behavior to take the sheet portrait or 'mystery man' image
@@ -310,26 +320,33 @@ export default class TheatreActorConfig extends FormApplication {
 					}
 
 					// to prevent firing off X number of packets on a save submit
-					imgSrcs.push({ imgpath: resName, resname: resName });
-					if (insertEmote == emote || !emote)
+					imgSrcs.push(
+            {
+              imgpath: resName,
+              resname: resName
+            }
+          );
+					if (insertEmote == emote || !emote) {
 						newSrcImg = resName;
+          }
 				}
 			}
 
 		// check for null'd emotes, push the objects up a level if one exists
 		const newData = mergeObject(this.object.data, emoteFormData, { inplace: false });
 		let emMerge = newData.flags.theatre.emotes;
-		let nEmotes = {};
+		let nEmotes:any = {};
 		for (let emProp in emMerge) {
-			if (emMerge[emProp] == null)
+			if (emMerge[emProp] == null) {
 				continue;
+      }
 			nEmotes[emProp] = emMerge[emProp];
 		}
 		// send the emote parent in bulk to get rid of unwanted children
 		revisedFormData["flags.theatre.emotes"] = nEmotes;
 
 
-		this.object.update(revisedFormData).then((response) => {
+		this.object.update(revisedFormData).then((response:any) => {
 			// perform texture updates if needed
 			if (imgSrcs.length > 0) {
 				// we know the active emote, thus all we need is the new source image
@@ -344,15 +361,18 @@ export default class TheatreActorConfig extends FormApplication {
 
 
 						let resName = "icons/myster-man.png";
-						if (insert.emote
-							&& this.object.data.flags.theatre.emotes[insert.emote].insert
-							&& this.object.data.flags.theatre.emotes[insert.emote].insert != "")
-							resName = this.object.data.flags.theatre.emotes[insert.emote].insert;
-						else if (this.object.data.flags.theatre.baseinsert
-							&& this.object.data.flags.theatre.baseinsert != "")
-							resName = this.object.data.flags.theatre.baseinsert;
-						else if (this.object.data.img && this.object.data.img != "")
-							resName = this.object.data.img;
+						if (insert.emotion.emote
+							&& this.object.flags.theatre.emotes[insert.emotion.emote].insert
+							&& this.object.flags.theatre.emotes[insert.emotion.emote].insert != "") {
+							resName = this.object.flags.theatre.emotes[insert.emotion.emote].insert;
+            }
+						else if (this.object.flags.theatre.baseinsert
+							&& this.object.flags.theatre.baseinsert != "") {
+							resName = this.object.flags.theatre.baseinsert;
+            }
+						else if (this.object.img && this.object.img != "") {
+							resName = this.object.img;
+            }
 
 						// bubble up dataum from the update
 						insert.optAlign = newAlign;
@@ -469,8 +489,8 @@ export default class TheatreActorConfig extends FormApplication {
 		let fileButton = document.createElement("button");
 		let fileIcon = document.createElement("i");
 		let fileInput = document.createElement("input");
-		//let editEmoteButton = document.createElement("button"); 
-		//let editEmoteIcon = document.createElement("i"); 
+		//let editEmoteButton = document.createElement("button");
+		//let editEmoteIcon = document.createElement("i");
 
 		KHelpers.addClass(formGroup, "theatre-config-form-group");
 		KHelpers.addClass(emoteIconHolder, "theatre-emote-icon");
@@ -481,9 +501,9 @@ export default class TheatreActorConfig extends FormApplication {
 		KHelpers.addClass(fileIcon, "fa-file-import");
 		KHelpers.addClass(fileIcon, "fa-fw");
 		KHelpers.addClass(fileInput, "image");
-		//KHelpers.addClass(editEmoteButton,"theatre-config-btn-edit-emote"); 
-		//KHelpers.addClass(editEmoteIcon,"fas"); 
-		//KHelpers.addClass(editEmoteIcon,"fa-sliders-h"); 
+		//KHelpers.addClass(editEmoteButton,"theatre-config-btn-edit-emote");
+		//KHelpers.addClass(editEmoteIcon,"fas");
+		//KHelpers.addClass(editEmoteIcon,"fa-sliders-h");
 
 		formGroup.setAttribute("name", customName);
 
@@ -504,27 +524,27 @@ export default class TheatreActorConfig extends FormApplication {
 		emoteIcon.setAttribute("src", Theatre.ICONLIB + "/blank.png");
 		emoteIcon.setAttribute("title", game.i18n.localize("Theatre.UI.Title.ChooseEmoteIcon"));
 
-		//emoteIcon.setAttribute("src",`flags.theatre.emotes.${customName}.image`); 
+		//emoteIcon.setAttribute("src",`flags.theatre.emotes.${customName}.image`);
 
 		fileInput.setAttribute("type", "text");
 		fileInput.setAttribute("name", `flags.theatre.emotes.${customName}.insert`);
 		fileInput.setAttribute("data-dtype", "String");
 		fileInput.setAttribute("placeholder", game.i18n.localize("Theatre.UI.Config.PathPlaceholder"));
 
-		//editEmoteButton.setAttribute("type","button"); 
-		//editEmoteButton.setAttribute("name", customName); 
-		//editEmoteButton.setAttribute("title",game.i18n.localize("Theatre.UI.Config.ConfigureEmote")); 
+		//editEmoteButton.setAttribute("type","button");
+		//editEmoteButton.setAttribute("name", customName);
+		//editEmoteButton.setAttribute("title",game.i18n.localize("Theatre.UI.Config.ConfigureEmote"));
 
 		// assemble
 		emoteIconHolder.appendChild(emoteIcon);
-		//editEmoteButton.appendChild(editEmoteIcon); 
+		//editEmoteButton.appendChild(editEmoteIcon);
 		fileButton.appendChild(fileIcon);
 
 		formGroup.appendChild(emoteNameInput);
 		formGroup.appendChild(emoteIconHolder);
 		formGroup.appendChild(fileButton);
 		formGroup.appendChild(fileInput);
-		//formGroup.appendChild(editEmoteButton); 
+		//formGroup.appendChild(editEmoteButton);
 
 		KHelpers.insertBefore(formGroup, ev.currentTarget);
 		this.activateListeners($(formGroup));
@@ -534,7 +554,7 @@ export default class TheatreActorConfig extends FormApplication {
 	}
 
 	/**
-	 * Handle changing customEmote image by 
+	 * Handle changing customEmote image by
 	   *
 	   * @param ev (Event) triggered event
 	   *

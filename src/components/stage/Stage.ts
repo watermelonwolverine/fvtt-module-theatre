@@ -1,11 +1,13 @@
 import TheatreSettings from "../../extensions/TheatreSettings";
 import Theatre from "../../Theatre";
 import { SceneEventTypes } from "../../types/SceneEventTypes";
-import TheatreActor from "../../types/TheatreActor.js";
+import type TheatreActor from "../../types/TheatreActor.js";
 import TheatreStyle from "../../types/TheatreStyle";
 import KHelpers from "../../workers/KHelpers";
 import Tools from "../../workers/Tools";
-import StageInsert from "./StageInsert.js";
+import type StageInsert from "./StageInsert.js";
+//@ts-ignore
+// import { gsap, ScrollToPlugin, TextPlugin } from "/scripts/greensock/esm/all.js";
 
 export default class Stage {
 
@@ -26,11 +28,11 @@ export default class Stage {
 
 
     get width() {
-        return this.theatreBar.offsetWidth;
+        return <number>this.theatreBar?.offsetWidth;
     };
 
     get height() {
-        return this.pixiApplication.renderer.view.height;
+        return <number>this.pixiApplication?.renderer.view.height;
     }
 
     constructor(theatre: Theatre) {
@@ -64,7 +66,7 @@ export default class Stage {
      * that they contain.
      *
      * @return (HTMLElement) : The canvas HTMLElement of the created PIXI Canvas,
-     *						  or null if unsuccessful. 
+     *						  or null if unsuccessful.
      */
     initTheatreDockCanvas() {
         // get theatreDock, and an initialize the canvas
@@ -99,13 +101,20 @@ export default class Stage {
     applyStyle(theatreStyle: string) {
         switch (theatreStyle) {
             case TheatreStyle.LIGHTBOX:
-            case TheatreStyle.CLEARBOX:
-                this.theatreDock.style.height = "100%";
-            case TheatreStyle.MANGABUBBLE:
-                throw "NotImplemented";
-            case TheatreStyle.TEXTBOX:
-            default:
-                this.theatreDock.style.height = "99.5vh";
+            case TheatreStyle.CLEARBOX: {
+              //@ts-ignore
+              this.theatreDock?.style.height = "100%";
+            }
+            case TheatreStyle.MANGABUBBLE: {
+              throw "NotImplemented";
+            }
+            case TheatreStyle.TEXTBOX: {
+
+            }
+            default: {
+              //@ts-ignore
+              this.theatreDock?.style.height = "99.5vh";
+            }
         }
 
     }
@@ -120,10 +129,11 @@ export default class Stage {
             (textBox: HTMLElement) =>
                 textBox.getAttribute("imgId") == theatreId && !textBox.getAttribute("deleting");
 
-        const toRemoveTextBox: HTMLElement = this.getTextBoxes().find(textBoxFilter);
+        const toRemoveTextBox= <HTMLElement>this.getTextBoxes().find(textBoxFilter);
 
-        if (!toRemoveInsert || !toRemoveTextBox)
-            return null; // no-op
+        if (!toRemoveInsert || !toRemoveTextBox){
+            return false; // no-op
+        }
 
         toRemoveInsert.deleting = true;
 
@@ -138,17 +148,17 @@ export default class Stage {
      *
      * @params toRemoveInsert (Object) : An Object representing the insert to be removed.
      * @params toRemoveTextBox (HTMLElement) : The textbox of the insert to be removed.
-     * @params remote (Boolean) : Boolean indicating if this is being invoked remotely, or locally. 
+     * @params remote (Boolean) : Boolean indicating if this is being invoked remotely, or locally.
      *
      * @return (Object) : An object containing the items that were removed {insert : (Object), textBox: (HTMLElement)}
-     *					 or null if there was nothing to remove. 
+     *					 or null if there was nothing to remove.
      *
      */
     _removeInsert(
         toRemoveInsert: StageInsert,
         toRemoveTextBox: HTMLElement,
         remote?: boolean) {
-        let isOwner = this.theatre.isActorOwner(game.user.id, toRemoveInsert.imgId);
+        let isOwner = this.theatre.isActorOwner(<string>game.user?.id, toRemoveInsert.imgId);
         // permission check
         if (!remote && !isOwner) {
             ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.DoNotControl"));
@@ -161,8 +171,8 @@ export default class Stage {
         }
 
         // WMW: TODO: Disabled for now, not sure if ever worked as intented
-        // Save configuration if this is not a remote operation, and we're the owners of this 
-        // insert        
+        // Save configuration if this is not a remote operation, and we're the owners of this
+        // insert
         // if (!remote && isOwner) {
         //     const actorId = Tools.toActorId(toRemoveInsert.imgId);
         //     const actor: Actor = game.actors.get(actorId);
@@ -180,13 +190,13 @@ export default class Stage {
         // }
 
         // animate and delayed removal
-        //let isLeft = toRemoveInsert.getElementsByClassName("theatre-portrait-left").length > 0; 
+        //let isLeft = toRemoveInsert.getElementsByClassName("theatre-portrait-left").length > 0;
         let exitX = 0;
         if (toRemoveInsert.portrait) {
             if (toRemoveInsert.exitOrientation == "left") {
-                exitX = toRemoveInsert.dockContainer.x - toRemoveInsert.portrait.width
+                exitX = <number>toRemoveInsert.dockContainer?.x - toRemoveInsert.portrait.width
             } else {
-                exitX = toRemoveInsert.dockContainer.x + toRemoveInsert.portrait.width
+                exitX = <number>toRemoveInsert.dockContainer?.x + toRemoveInsert.portrait.width
             }
         }
 
@@ -197,12 +207,14 @@ export default class Stage {
                 { insertid: toRemoveInsert.imgId });
 
         // unactivate from navbar
-        for (const navItem of this.theatre.theatreControls.theatreNavBar.children)
-            if (navItem.getAttribute("imgId") == toRemoveInsert.imgId) {
-                KHelpers.removeClass(<HTMLElement>navItem, "theatre-control-nav-bar-item-active");
-                if (toRemoveInsert.imgId == this.theatre.speakingAs)
-                    KHelpers.removeClass(<HTMLElement>navItem, "theatre-control-nav-bar-item-speakingas");
-            }
+        const controls:HTMLCollection = <HTMLCollection>this.theatre.theatreControls?.theatreNavBar?.children || [];
+        for (const navItem of controls) {
+          if (navItem.getAttribute("imgId") == toRemoveInsert.imgId) {
+              KHelpers.removeClass(<HTMLElement>navItem, "theatre-control-nav-bar-item-active");
+              if (toRemoveInsert.imgId == this.theatre.speakingAs)
+                  KHelpers.removeClass(<HTMLElement>navItem, "theatre-control-nav-bar-item-speakingas");
+          }
+        }
         // clear chat cover + effects if active for this ID
         if (this.theatre.speakingAs == toRemoveInsert.imgId) {
             let cimg = this.theatre.getTheatreCoverPortrait();
@@ -210,12 +222,13 @@ export default class Stage {
             cimg.style.opacity = "0";
             gsap.killTweensOf(toRemoveInsert.label);
             // clear typing
-            for (let userId in this.theatre.usersTyping)
-                if (this.theatre.usersTyping.get(userId) && (this.theatre.usersTyping.get(userId).theatreId == toRemoveInsert.imgId)) {
+            for (let userId in this.theatre.usersTyping){
+                if (this.theatre.usersTyping.get(userId) && (this.theatre.usersTyping?.get(userId)?.theatreId == toRemoveInsert.imgId)) {
                     this.theatre.removeUserTyping(userId);
                     this.theatre.usersTyping.delete(userId);
                     break;
                 }
+            }
             // clear label
             // clear speakingAs
             this.theatre.speakingAs = null;
@@ -230,7 +243,7 @@ export default class Stage {
         gsap.killTweensOf(toRemoveTextBox);
         /*
         for (let c of toRemoveTextBox.children)
-            c.parentNode.removeChild(c); 
+            c.parentNode.removeChild(c);
         */
         // fade away text box
         toRemoveTextBox.style.opacity = "0";
@@ -274,22 +287,22 @@ export default class Stage {
         return true;
     }
 
-    getInsertByName(name: string): StageInsert {
+    getInsertByName(name: string): StageInsert|undefined {
         return this.getInsertBy(dock => dock.name == name);
     }
 
-    getInsertById(theatreId: string): StageInsert {
+    getInsertById(theatreId: string): StageInsert|undefined {
         return this.getInsertBy(dock => dock.imgId == theatreId);
     }
 
-    getInsertBy(filter: (dock: StageInsert) => boolean): StageInsert {
+    getInsertBy(filter: (dock: StageInsert) => boolean): StageInsert|undefined {
 
         for (let idx = this.stageInserts.length - 1; idx >= 0; --idx) {
 
-            const portraitDock = this.stageInserts[idx];
+            const portraitDock = <StageInsert>this.stageInserts[idx];
 
             // WMW: I don't know why this is there, I just found it roughly like so..
-            if (!this.stageInserts[idx].dockContainer) {
+            if (!this.stageInserts[idx]?.dockContainer) {
                 this.stageInserts.splice(idx, 1);
                 console.error(`Illegal Portrait Dock state for ${portraitDock.imgId}`)
                 continue;
@@ -297,8 +310,9 @@ export default class Stage {
 
             const itHit = filter(portraitDock);
 
-            if (itHit)
+            if (itHit) {
                 return portraitDock;
+            }
         }
 
         return undefined;
@@ -311,7 +325,7 @@ export default class Stage {
 
     /**
      * Returns whether the actor is on the stage.
-     * @params actor (Actor) : The actor. 
+     * @params actor (Actor) : The actor.
      */
     isActorStaged(actor: Actor) {
         if (!actor)
@@ -323,32 +337,33 @@ export default class Stage {
     handleWindowResize() {
 
 
-        let dockWidth = this.theatreDock.offsetWidth;
-        let dockHeight = this.theatreDock.offsetHeight;
+        let dockWidth = <number>this.theatreDock?.offsetWidth;
+        let dockHeight = <number>this.theatreDock?.offsetHeight;
 
-        this.theatreDock.setAttribute("width", dockWidth.toString());
-        this.theatreDock.setAttribute("height", dockHeight.toString());
+        this.theatreDock?.setAttribute("width", String(dockWidth));
+        this.theatreDock?.setAttribute("height", String(dockHeight));
 
-        this.pixiApplication.renderer.view.width = dockWidth;
-        this.pixiApplication.renderer.view.height = dockHeight;
-        this.pixiApplication.renderer.resize(dockWidth, dockHeight);
+        //@ts-ignore
+        this.pixiApplication?.renderer?.view?.width = dockWidth;
+        //@ts-ignore
+        this.pixiApplication?.renderer?.view?.height = dockHeight;
+        this.pixiApplication?.renderer.resize(dockWidth, dockHeight);
 
         this.maybeReapplyRelativePortraitSize();
         // TODO update size of portraits, now that they support relative heights
     }
 
     maybeReapplyRelativePortraitSize() {
-
         const imageSizeStr: string = TheatreSettings.getTheatreImageSize();
-        if (!imageSizeStr.endsWith("%"))
-            return; // absolute values were set, so no dynamic resizing needed
-
+        if (!imageSizeStr.endsWith("%")) {
+          return; // absolute values were set, so no dynamic resizing needed
+        }
         this.updatePortraits();
     }
 
     updatePortraits() {
         for (const insert of this.stageInserts) {
-            insert.portrait.updateGeometry();
+            insert.portrait?.updateGeometry();
         }
         Theatre.instance._renderTheatre(performance.now());
     }
@@ -356,17 +371,23 @@ export default class Stage {
 
     getTextBoxes(): HTMLElement[] {
         let textBoxes = [];
-        for (let container of this.theatreBar.children)
-            for (let textBox of container.children)
+        for (let container of <HTMLCollection>this.theatreBar?.children) {
+            for (let textBox of container.children) {
                 textBoxes.push(<HTMLElement>textBox);
+            }
+        }
         return textBoxes;
     }
 
-    getTextBoxById(theatreId: string): HTMLElement {
-        return this.getTextBoxes().find(e => { return e.getAttribute("imgId") == theatreId });
+    getTextBoxById(theatreId: string): HTMLElement|undefined {
+        return this.getTextBoxes().find(e => {
+          return e.getAttribute("imgId") == theatreId
+        });
     }
 
     getTextBoxByName(name: string) {
-        return this.getTextBoxes().find(e => { return e.getAttribute("name") == name });
+        return this.getTextBoxes().find(e => {
+          return e.getAttribute("name") == name
+        });
     }
 }
