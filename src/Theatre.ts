@@ -1,3 +1,4 @@
+import { EmoteDefinition } from './resources/resources_types';
 /**
  * Theatre.js
  *
@@ -35,8 +36,8 @@ import { SceneEventTypes } from "./types/SceneEventTypes";
 import TheatreActorConfig from './types/TheatreActorConfig';
 import TheatreStyle, { AnyTheatreStyle } from './types/TheatreStyle';
 import type TypingEvent from './types/TypginEvent';
-import User from './types/TheatreUser';
-import { AnimationSyntaxVerifier } from './workers/AnimationSyntaxVerifier';
+import TheaterUser from './types/TheatreUser';
+import { AnimationSyntaxVerifier, PropDef, TweenParams } from './workers/AnimationSyntaxVerifier';
 import EaseVerifier from './workers/EaseVerifier';
 import EmoteSetter from './workers/EmoteSetter';
 import InsertReorderer from './workers/InsertReorderer';
@@ -46,6 +47,8 @@ import TheatreSettingsInitializer from './workers/SettingsInitializer';
 import TextBoxFactory from './workers/textbox_factory';
 import Tools from "./workers/Tools";
 import _TheatreWorkers from './workers/workers';
+import Portrait from './components/stage/Portrait';
+import type TheatreActor from './types/TheatreActor';
 
 export type SomeCallBack = (loader: PIXI.Loader, resources: PIXI.IResourceDictionary) => void;
 
@@ -73,7 +76,7 @@ export default class Theatre {
 	renderAnims: number;
 	speakingAs: any;
 	userEmotes: Map<string, EmotionDefinition>;
-	usersTyping: Map<string, User>;
+	usersTyping: Map<string, TheaterUser>;
 	userSettings: {};
 	lastTyping: number;
 	resync: { type: AnyResyncType; timeoutId: any; };
@@ -367,24 +370,30 @@ export default class Theatre {
 	_initSocket() {
 		// TODO IMPLEMENT SOCKETLIB
 		// module socket
+    //@ts-ignore
 		game.socket?.on(Theatre.SOCKET, payload => {
 
 			switch (payload.type) {
-				case "sceneevent":
+				case "sceneevent": {
 					this.sceneEventProcessor.processSceneEvent(payload.senderId, payload.subtype, payload.data);
 					break;
-				case "typingevent":
+				}
+				case "typingevent": {
 					this._processTypingEvent(payload.senderId, payload.data);
 					break;
-				case "resyncevent":
+				}
+				case "resyncevent": {
 					this._processResyncEvent(payload.subtype, payload.senderId, payload.data);
 					break;
-				case "reqresync":
+				}
+				case "reqresync": {
 					this._processResyncRequest(payload.subtype, payload.senderId, payload.data);
 					break;
-				default:
+				}
+				default: {
 					console.log("UNKNOWN THEATRE EVENT TYPE %s", payload.type, payload);
 					break;
+				}
 			}
 		});
 
@@ -1018,9 +1027,9 @@ export default class Theatre {
 		userId: string,
 		theatreId: string) {
 		if (!this.usersTyping.get(userId)) {
-			this.usersTyping.set(userId, new User());
+			this.usersTyping.set(userId, new TheaterUser());
     }
-		let userTyping = <User>this.usersTyping.get(userId);
+		let userTyping = <TheaterUser>this.usersTyping.get(userId);
 		if (userTyping.timeoutId) {
 			window.clearTimeout(userTyping.timeoutId);
     }
@@ -1179,14 +1188,15 @@ export default class Theatre {
 	removeUserTyping(userId: string) {
 
 		if (!this.usersTyping.get(userId)) {
-			this.usersTyping.set(userId, new User());
+			this.usersTyping.set(userId, new TheaterUser());
 			return;
 		}
-		if (!this.usersTyping.get(userId)?.timeoutId)
+		if (!this.usersTyping.get(userId)?.timeoutId) {
 			return;
+    }
 
 		if (this.usersTyping.get(userId)?.theatreId) {
-			let insert = this.stage.getInsertById(this.usersTyping.get(userId)?.theatreId);
+			let insert = this.stage.getInsertById(<string>this.usersTyping.get(userId)?.theatreId);
 			// if not destroyed already
 			if (insert) {
 				// kill tweens
@@ -1203,7 +1213,7 @@ export default class Theatre {
 						break;
           }
 					case TheatreStyle.CLEARBOX: {
-						oy += (insert.optAlign == "top" ? 0 : this.stage.theatreBar.offsetHeight);
+						oy += (insert.optAlign == "top" ? 0 : <number>this.stage.theatreBar?.offsetHeight);
 						break;
           }
 					case TheatreStyle.MANGABUBBLE: {
@@ -1291,6 +1301,7 @@ export default class Theatre {
 			return false;
 		}
     if(actor.data) {
+		//@ts-ignore
 		  actor = <Actor>actor.data;
     }
     //@ts-ignore
@@ -1317,7 +1328,7 @@ export default class Theatre {
 
 		let actorId = theatreId.replace("theatre-", "");
 		let actor = game.actors?.get(actorId);
-		let user:User;
+		let user;
 
 		if (!actor) {
 			console.log("ERROR, ACTOR %s DOES NOT EXIST!", actorId);
@@ -1357,15 +1368,16 @@ export default class Theatre {
 		let actorId = id.replace("theatre-", "");
 		let resName = "icons/myster-man.png";
 		let params = Tools.getInsertParamsFromActorId(actorId);
-		if (!insert || !params) return;
-
+		if (!insert || !params) {
+      return;
+    }
 		if (insert.emotion.emote
-			&& params.emotes[insert.emotion.emote].insert
-			&& params.emotes[insert.emotion.emote].insert != "")
-			resName = params.emotes[insert.emotion.emote].insert;
-		else
+			&& params.emotes[insert.emotion.emote]?.insert
+			&& params.emotes[insert.emotion.emote]?.insert != "") {
+			resName = <string>params.emotes[insert.emotion.emote]?.insert;
+    } else {
 			resName = params.src;
-
+    }
 		// bubble up dataum from the update
 		insert.optAlign = params.optalign;
 		insert.name = params.name;
@@ -1374,8 +1386,8 @@ export default class Theatre {
 		insert.clear();
 		this.workers.portrait_container_setup_worker.setupPortraitContainer(id, params.optalign, resName, PIXI.Loader.shared.resources);
 		// re attach label + typing bubble
-		insert.dockContainer.addChild(insert.label);
-		insert.dockContainer.addChild(insert.typingBubble);
+		insert.dockContainer?.addChild(insert.label);
+		insert.dockContainer?.addChild(insert.typingBubble);
 
 		this._repositionInsertElements(insert);
 
@@ -1397,12 +1409,12 @@ export default class Theatre {
 	 */
 	_renderTheatre(time: number): void {
 		// let the ticker update all its objects
-		this.stage.pixiApplication.ticker.update(time);
+		this.stage.pixiApplication?.ticker.update(time);
 		// this.stage.pixiCTX.renderer.clear(); // PIXI.v6 does not respect transparency for clear
 		for (let insert of this.stage.stageInserts) {
 			if (insert.dockContainer) {
 				// PIXI.v6 The renderer should not clear the canvas on rendering
-				this.stage.pixiApplication.renderer.render(
+				this.stage.pixiApplication?.renderer.render(
 					insert.dockContainer,
 					undefined,
 					false);
@@ -1443,7 +1455,7 @@ export default class Theatre {
 
 		// if the tweenId exists, kill that one, and replace with the new
 		if (insert.tweens[tweenId]) {
-			insert.tweens[tweenId].kill();
+			insert.tweens[tweenId]?.kill();
 			this.renderAnims--;
 		}
 
@@ -1486,13 +1498,13 @@ export default class Theatre {
 				return;
       }
 			if (!tween) {
-				insert.tweens[tweenId].kill();
+				insert.tweens[tweenId]?.kill();
       }
-			insert.tweens[tweenId] = null;
+			insert.tweens[tweenId] = <any>null;
 			let nTweens: { [key: string]: TweenMax } = {};
 			for (let prop in insert.tweens) {
 				if (insert.tweens[prop] != null)
-					nTweens[prop] = insert.tweens[prop];
+					nTweens[prop] = <TweenMax>insert.tweens[prop];
 			}
 			// replace after we removed the prop
 			insert.tweens = nTweens;
@@ -1520,30 +1532,32 @@ export default class Theatre {
 			// kill and release all tweens
 			for (let tweenId in insert.tweens)
 				this._removeDockTween(imgId, null, tweenId);
-			insert.tweens = null;
+			insert.tweens = <any>null;
 			// destroy children
 			insert.portrait.destroy();
 
-			for (let child of insert.dockContainer.children)
+			for (let child of insert.dockContainer.children){
 				child.destroy();
-			insert.portrait = null;
-			insert.label = null;
+      }
+			insert.portrait = <any>null;
+			insert.label = <any>null;
 			// destroy self
 			insert.dockContainer.destroy();
 			insert.dockContainer = null;
 			let idx = this.stage.stageInserts.findIndex(e => e.imgId == imgId);
 			this.stage.stageInserts.splice(idx, 1);
 			// The "MyTab" module inserts another element with id "pause". Use querySelectorAll to make sure we catch both
-			if (game.settings.get(TheatreSettings.NAMESPACE, TheatreSettings.SHIFT_PAUSE_ICON))
+			if (game.settings.get(TheatreSettings.NAMESPACE, TheatreSettings.SHIFT_PAUSE_ICON)) {
 				document.querySelectorAll("#pause").forEach(ele => KHelpers.removeClass(<HTMLElement>ele, "theatre-centered"));
+      }
 			$('#players').removeClass("theatre-invisible");
 			$('#hotbar').removeClass("theatre-invisible");
 		}
 		// force a render update
 		//app.render();
-		if (!this.rendering)
+		if (!this.rendering) {
 			this._renderTheatre(performance.now());
-
+    }
 	}
 
 	/**
@@ -1560,12 +1574,12 @@ export default class Theatre {
 			return;
 		}
 		// re-align the dockContainer to the textBox and its nameOrientation
-		let textBox = this.getTextBoxById(insert.imgId);
+		let textBox = <HTMLElement>this.getTextBoxById(insert.imgId);
 		let offset = KHelpers.offset(textBox);
 		let leftPos = Math.round(
 			Number(offset.left || 0)
 			- Number(KHelpers.style(textBox)["left"].match(/\-*\d+\.*\d*/) || 0)
-			- Number(KHelpers.style(this.stage.theatreBar).getPropertyValue("margin-left").match(/\-*\d+\.*\d*/) || 0)
+			- Number(KHelpers.style(<HTMLDivElement>this.stage.theatreBar).getPropertyValue("margin-left").match(/\-*\d+\.*\d*/) || 0)
 		);
 		// pre-split measurement
 		insert.label.style.wordWrap = false;
@@ -1601,40 +1615,49 @@ export default class Theatre {
 			leftPos += textBox.offsetWidth - insert.portrait.width;
 		}
 		insert.typingBubble.y = insert.portrait.height -
-			(insert.optAlign == "top" ? 0 : Theatre.instance.theatreBar.offsetHeight) - insert.label.style.lineHeight + insert.typingBubble.height / 2;
+			(insert.optAlign == "top" ? 0 : <number>Theatre.instance?.theatreBar.offsetHeight) - insert.label.style.lineHeight + insert.typingBubble.height / 2;
 		// if the label height > font-size, it word wrapped wrap, so we need to bump up the height
 		if (labelExceeds) {
 			let divisor = Math.round(insert.label.height / insert.label.style.lineHeight);
 			insert.label.y = insert.portrait.height -
-				(insert.optAlign == "top" ? 0 : Theatre.instance.theatreBar.offsetHeight) - (insert.label.style.lineHeight * divisor);
+				(insert.optAlign == "top" ? 0 : <number>Theatre.instance?.theatreBar.offsetHeight) - (insert.label.style.lineHeight * divisor);
 		} else {
 			// normal
 			insert.label.y = insert.portrait.height -
-				(insert.optAlign == "top" ? 0 : Theatre.instance.theatreBar.offsetHeight) - insert.label.style.lineHeight;
+				(insert.optAlign == "top" ? 0 : <number>Theatre.instance?.theatreBar.offsetHeight) - insert.label.style.lineHeight;
 		}
 		insert.typingBubble.rotation = 0.1745;
-		insert.dockContainer.x = leftPos;
-		insert.dockContainer.y = this.stage.theatreDock.offsetHeight
-			- (insert.optAlign == "top" ? this.stage.theatreBar.offsetHeight : 0) - insert.portrait.height;
+    //@ts-ignore
+		insert.dockContainer?.x = leftPos;
+    //@ts-ignore
+		insert.dockContainer?.y = <number>this.stage.theatreDock?.offsetHeight
+			- (insert.optAlign == "top" ? <number>this.stage.theatreBar?.offsetHeight : 0) - insert.portrait.height;
 
 		// theatreStyle specific adjustments
 		switch (TheatreSettings.getTheatreStyle()) {
-			case TheatreStyle.LIGHTBOX:
+			case TheatreStyle.LIGHTBOX: {
 				// to allow top-aligned portraits to work without a seam
+        //@ts-ignore
 				insert.dockContainer.y += (insert.optAlign == "top" ? 8 : 0);
 				insert.label.y -= (insert.optAlign == "top" ? 8 : 0);
 				break;
-			case TheatreStyle.CLEARBOX:
-				insert.dockContainer.y = this.stage.theatreDock.offsetHeight - insert.portrait.height;
-				insert.label.y += (insert.optAlign == "top" ? 0 : Theatre.instance.theatreBar.offsetHeight);
-				insert.typingBubble.y += (insert.optAlign == "top" ? 0 : Theatre.instance.offsetHeight);
+      }
+			case TheatreStyle.CLEARBOX: {
+        //@ts-ignore
+				insert.dockContainer.y = this.stage.theatreDock?.offsetHeight - insert.portrait.height;
+				insert.label.y += (insert.optAlign == "top" ? 0 : <number>Theatre.instance?.theatreBar.offsetHeight);
+				insert.typingBubble.y += (insert.optAlign == "top" ? 0 : <number>Theatre.instance?.offsetHeight);
 				break;
-			case TheatreStyle.MANGABUBBLE:
+      }
+			case TheatreStyle.MANGABUBBLE: {
 				break;
-			case TheatreStyle.TEXTBOX:
+      }
+			case TheatreStyle.TEXTBOX: {
 				break;
-			default:
+      }
+			default: {
 				break;
+      }
 		}
 	}
 
@@ -1789,12 +1812,13 @@ export default class Theatre {
 	 * @private
 	 */
 	_clearPortraitContainer(imgId:string) {
-		let insert = this.getInsertById(imgId);
-		if (!insert || !insert.dockContainer || !insert.portrait) return;
-
+		let insert = <StageInsert>this.stage.getInsertById(imgId);//this.getInsertById(imgId);
+		if (!insert || !insert.dockContainer || !insert.portrait) {
+      return;
+    }
 		// preserve position without portrait offset
-		let ox = insert.portraitContainer.x - insert.portrait.width/2;
-		let oy = insert.portraitContainer.y - insert.portrait.height/2;
+		let ox = insert.portrait.portraitContainer?.x - insert.portrait.width/2;
+		let oy = insert.portrait.portraitContainer?.y - insert.portrait.height/2;
 		let ocx = insert.dockContainer.x;
 		let ocy = insert.dockContainer.y;
 		let oLabelAnim = insert.tweens["nameSpeakingPulse"];
@@ -1809,28 +1833,34 @@ export default class Theatre {
 			|| tweenId == "typingBounce"
 			|| tweenId == "typingAppear"
 			|| tweenId == "typingVanish"
-			|| tweenId == "typingWiggle")
+			|| tweenId == "typingWiggle") {
 				continue;
+      }
 			this._removeDockTween(imgId,null,tweenId);
 		}
 		insert.tweens = {};
-		if (oLabelAnim)
+		if (oLabelAnim) {
 			insert.tweens["nameSpeakingPulse"] = oLabelAnim;
-		if (oTypingBounceAnim)
+    }
+		if (oTypingBounceAnim) {
 			insert.tweens["typingBounce"] = oTypingBounceAnim;
-		if (oTypingWiggleAnim)
+    }
+		if (oTypingWiggleAnim) {
 			insert.tweens["typingWiggle"] = oTypingWiggleAnim;
-		if (oTypingAppearAnim)
+    }
+		if (oTypingAppearAnim) {
 			insert.tweens["typingAppear"] = oTypingAppearAnim;
-		if (oTypingVanishAnim)
+    }
+		if (oTypingVanishAnim) {
 			insert.tweens["typingVanish"] = oTypingVanishAnim;
+    }
 
 		// destroy children
-		for (let child of insert.portraitContainer.children)
+		for (let child of insert.portrait.portraitContainer.children)
 			child.destroy();
 		// attempt to preserve label + typingBubble
 		for (let idx=insert.dockContainer.children.length-1; idx >=0; --idx) {
-			let child = insert.dockContainer.children[idx];
+			let child = <PIXI.DisplayObject>insert.dockContainer.children[idx];
 			if (child.theatreComponentName && child.theatreComponentName == "label")
 				insert.dockContainer.removeChildAt(idx);
 			else if (child.theatreComponentName && child.theatreComponentName == "typingBubble")
@@ -1838,8 +1868,8 @@ export default class Theatre {
 			else
 				child.destroy();
 		}
-		insert.portrait = null;
-		insert.portraitContainer = null;
+		insert.portrait = <any>null;
+		// insert.portrait?.portraitContainer = <any>null;
 		// destroy self
 		insert.dockContainer.destroy();
 		insert.dockContainer = null;
@@ -1854,7 +1884,8 @@ export default class Theatre {
 		dockContainer.y = ocy
 		// assignment
 		insert.dockContainer = dockContainer;
-		insert.portraitContainer = portraitContainer;
+    insert.portrait = new Portrait(this.stage);
+		insert.portrait.portraitContainer = portraitContainer;
 		console.log("saving ox: %s, oy: %s",ox,oy);
 		// label is NOT re-attached, must be done by the clearer
 		// typingBubble is NOT re-attached, must be done by the clearer
@@ -1884,12 +1915,13 @@ export default class Theatre {
 		if (!loader.loading) {
 			for (let imgTuple of imgSrcs) {
 				let resName = imgTuple.resname;
-				if (!loader.resources[resName])
+				if (!loader.resources[resName]) {
 					loader.add(resName, imgTuple.imgpath);
+        }
 			}
 
 			loader.load((loader, resources) => {
-				cb.call(this, loader, resources);
+				cb.call(this, loader, <any>resources);
 			});
 		} else {
 			window.setTimeout(() => {
@@ -1916,10 +1948,11 @@ export default class Theatre {
 			if (!loader.loading) {
 				for (let imgTuple of imgSrcs) {
 					let resName = imgTuple.resname;
-					if (!loader.resources[resName])
+					if (!loader.resources[resName]) {
 						loader.add(resName, imgTuple.imgpath);
+          }
 				}
-
+        //@ts-ignore
 				loader.load(cb);
 			} else {
 				window.setTimeout(() => {
@@ -1957,10 +1990,13 @@ export default class Theatre {
 				imgSrcs.push({ imgpath: rigResource.path, resname: rigResource.path });
 
 			// load all emote base images + rigging for the emotes
-			for (let emName in params.emotes)
-				if (params.emotes[emName])
-					if (params.emotes[emName].insert && params.emotes[emName].insert != "")
-						imgSrcs.push({ imgpath: params.emotes[emName].insert, resname: params.emotes[emName].insert });
+			for (let emName in params.emotes) {
+				if (params.emotes[emName]) {
+					if (params.emotes[emName]?.insert && params.emotes[emName]?.insert != "") {
+						imgSrcs.push({ imgpath: <string>params.emotes[emName]?.insert, resname: <string>params.emotes[emName]?.insert });
+          }
+        }
+      }
 		}
 
 		// load in the sprites
@@ -2029,10 +2065,11 @@ export default class Theatre {
 		id: string,
 		remote: boolean = false): void {
 
-		let insert = this.stage.getInsertById(id);
+		let insert = <StageInsert>this.stage.getInsertById(id);
 
 		this.emoteSetter.setEmoteForInsert(ename, insert, remote);
 	}
+
 	/**
 	 * Set the emote given the name
 	 *
@@ -2045,7 +2082,7 @@ export default class Theatre {
 		name: string,
 		remote: boolean = false) {
 
-		let insert = this.stage.getInsertByName(name);
+		let insert = <StageInsert>this.stage.getInsertByName(name);
 
 		this.emoteSetter.setEmoteForInsert(ename, insert, remote);
 	}
@@ -2064,9 +2101,9 @@ export default class Theatre {
 		textBox: HTMLElement,
 		isLeft: boolean = false) {
 
-		let textBoxes = this.stage.getTextBoxes();
-		let primeBar = this.stage.primeBar;
-		let secondBar = this.stage.secondBar;
+		let textBoxes = <HTMLElement[]>this.stage.getTextBoxes();
+		let primeBar = <HTMLDivElement>this.stage.primeBar;
+		let secondBar = <HTMLDivElement>this.stage.secondBar;
 
 		if (textBoxes.length == 0) {
 			// no dock
@@ -2075,18 +2112,19 @@ export default class Theatre {
 			primeBar.style.left = "0%";
 			primeBar.style.opacity = "1";
 			primeBar.style.setProperty("pointer-events", "all");
-			this.stage.theatreBar.style.opacity = "1";
+      //@ts-ignore
+			this.stage.theatreBar?.style.opacity = "1";
 			Hooks.call("theatreDockActive", this.dockActive);
 		} else if (textBoxes.length == 1) {
 			// single dock
 			// 1. slide in second container, and add new textBox to it
-			let insert = this.stage.getInsertById(textBox.getAttribute("imgId"));
+			let insert = this.stage.getInsertById(<string>textBox.getAttribute("imgId"));
 			if (insert) {
 				//insert.meta.fromPrime = true;
 				insert.nameOrientation = "right";
 			}
 
-			let dualWidth = Math.min(Math.floor(this.stage.theatreBar.offsetWidth / 2), 650);
+			let dualWidth = Math.min(Math.floor(<number>this.stage.theatreBar?.offsetWidth / 2), 650);
 			secondBar.style.left = `calc(100% - ${dualWidth}px)`;
 			secondBar.style.opacity = "1";
 			secondBar.style.setProperty("pointer-events", "all");
@@ -2103,7 +2141,7 @@ export default class Theatre {
 			// the 'prime' dock, and add them to the prime dock (should be one)
 			// 3. expand the prime dock to fit the max bar width
 			for (let sbb of secondBar.children) {
-				let insert = this.stage.getInsertById(sbb.getAttribute("imgId"));
+				let insert = this.stage.getInsertById(<string>sbb.getAttribute("imgId"));
 				if (insert) {
 					//insert.meta.fromSecond = true;
 					insert.nameOrientation = "left";
@@ -2115,15 +2153,23 @@ export default class Theatre {
 			secondBar.style.setProperty("pointer-events", "none");
 			primeBar.style.width = "100%";
 
-			if (isLeft) KHelpers.insertBefore(textBox, primeBar.children[0]);
-			else primeBar.appendChild(textBox);
+			if (isLeft) {
+        KHelpers.insertBefore(textBox, <Element>primeBar.children[0]);
+      }
+			else {
+        primeBar.appendChild(textBox);
+      }
 			Hooks.call("theatreDockActive", this.dockActive);
 
 		} else if (textBoxes.length > 2) {
 			// bar dock
 			// 1. Just find the prime container, and add the new textBox to it
-			if (isLeft) KHelpers.insertBefore(textBox, primeBar.children[0]);
-			else primeBar.appendChild(textBox);
+			if (isLeft) {
+        KHelpers.insertBefore(textBox, <Element>primeBar.children[0]);
+      }
+			else {
+        primeBar.appendChild(textBox);
+      }
 			Hooks.call("theatreDockActive", this.dockActive);
 
 		}
@@ -2136,9 +2182,9 @@ export default class Theatre {
 	 *									  MUST correspond to an insert.
 	 */
 	_removeTextBoxFromTheatreBar(textBox: HTMLElement) {
-		let textBoxes = this.stage.getTextBoxes();
-		let primeBar = this.stage.primeBar;
-		let secondBar = this.stage.secondBar;
+		let textBoxes = <HTMLElement[]>this.stage.getTextBoxes();
+		let primeBar = <HTMLDivElement>this.stage.primeBar;
+		let secondBar = <HTMLDivElement>this.stage.secondBar;
 
 		if (textBoxes.length == 0) {
 			// no dock
@@ -2150,8 +2196,9 @@ export default class Theatre {
 			primeBar.style.left = "-100%";
 			primeBar.style.opacity = "0";
 			primeBar.style.setProperty("pointer-events", "none");
-			textBox.parentNode.removeChild(textBox);
-			this.stage.theatreBar.style.opacity = "0";
+			textBox.parentNode?.removeChild(textBox);
+      //@ts-ignore
+			this.stage.theatreBar?.style.opacity = "0";
 			Hooks.call("theatreDockActive", this.dockActive);
 		} else if (textBoxes.length == 2) {
 			// dual docks
@@ -2163,7 +2210,7 @@ export default class Theatre {
 			// then add the textBoxes in the 'secondary' dock to the primary.
 			for (let sbb of secondBar.children) {
 				if (sbb.getAttribute("imgId") != textBox.getAttribute("imgId")) {
-					let insert = this.stage.getInsertById(sbb.getAttribute("imgId"));
+					let insert = this.stage.getInsertById(<string>sbb.getAttribute("imgId"));
 					if (insert) {
 						//insert.meta.fromSecond = true;
 						insert.nameOrientation = "left";
@@ -2175,35 +2222,35 @@ export default class Theatre {
 			secondBar.style.opacity = "0";
 			secondBar.style.setProperty("pointer-events", "none");
 			primeBar.style.width = "750px";
-			textBox.parentNode.removeChild(textBox);
+			textBox.parentNode?.removeChild(textBox);
 			Hooks.call("theatreDockActive", this.dockActive);
 
 		} else if (textBoxes.length == 3) {
 			// bar dock
 			// 1. create the dual docks
 			for (let idx = primeBar.children.length - 1; idx >= 0; --idx) {
-				if (primeBar.children[idx].getAttribute("imgId") != textBox.getAttribute("imgId")) {
-					let insert = this.stage.getInsertById(primeBar.children[idx].getAttribute("imgId"));
+				if (primeBar.children[idx]?.getAttribute("imgId") != textBox.getAttribute("imgId")) {
+					let insert = this.stage.getInsertById(<string>primeBar.children[idx]?.getAttribute("imgId"));
 					if (insert) {
 						//insert.meta.fromPrime = true;
 						insert.nameOrientation = "right";
 					}
-					secondBar.appendChild(primeBar.children[idx]);
+					secondBar.appendChild(<Node>primeBar.children[idx]);
 					break;
 				}
 			}
-			let dualWidth = Math.min(Math.floor(this.stage.theatreBar.offsetWidth / 2), 650);
+			let dualWidth = Math.min(Math.floor(<number>this.stage.theatreBar?.offsetWidth / 2), 650);
 			secondBar.style.left = `calc(100% - ${dualWidth}px)`;
 			secondBar.style.opacity = "1";
 			secondBar.style.setProperty("pointer-events", "all");
 			secondBar.style.width = `${dualWidth}px`;
 			primeBar.style.width = `${dualWidth}px`;
 
-			textBox.parentNode.removeChild(textBox);
+			textBox.parentNode?.removeChild(textBox);
 			Hooks.call("theatreDockActive", this.dockActive);
 		} else {
 			// normal bar removal
-			textBox.parentNode.removeChild(textBox);
+			textBox.parentNode?.removeChild(textBox);
 			Hooks.call("theatreDockActive", this.dockActive);
 		}
 	}
@@ -2288,9 +2335,9 @@ export default class Theatre {
 
 		// activate in navbar if not already
 		let navItem = this.getNavItemById(imgId);
-		if (navItem)
+		if (navItem) {
 			KHelpers.addClass(navItem, "theatre-control-nav-bar-item-active");
-
+    }
 		this.workers.pixi_container_factory.createPortraitPIXIContainer(
 			imgPath,
 			portName,
@@ -2304,8 +2351,9 @@ export default class Theatre {
 		this._addTextBoxToTheatreBar(textBox);
 
 		// Push to socket our event
-		if (!remote)
+		if (!remote) {
 			this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.enterscene, { insertid: imgId, emotions: emotions, isleft: false });
+    }
 	}
 
 	/**
@@ -2326,11 +2374,11 @@ export default class Theatre {
 	 *
 	 * @return (HTMLElement) : The nav item, if found, else undefined.
 	 */
-	getNavItemById(id: string): HTMLElement {
+	getNavItemById(id: string): HTMLElement|undefined {
 		const theatreActor = this.stage.actors.get(id);
-		if (theatreActor)
+		if (theatreActor) {
 			return theatreActor.navElement;
-
+    }
 		return undefined
 	}
 
@@ -2341,8 +2389,8 @@ export default class Theatre {
 	 *
 	 * @return (HTMLElement) : The nav item, if found, else undefined.
 	 */
-	getNavItemByName(name: string): HTMLElement {
-		for (let navItem of this.theatreControls.theatreNavBar.children) {
+	getNavItemByName(name: string): HTMLElement|undefined {
+		for (let navItem of <HTMLCollection>this.theatreControls?.theatreNavBar?.children) {
 			if (navItem.getAttribute("name") == name)
 				return <HTMLElement>navItem;
 		}
@@ -2356,10 +2404,11 @@ export default class Theatre {
 	 *
 	 * @return (HTMLElement) : The TextBox of the given theatreId, or undefined.
 	 */
-	getTextBoxById(id: string): HTMLElement {
+	getTextBoxById(id: string): HTMLElement|undefined {
 		// Narrator is a special case
-		if (id == Theatre.NARRATOR)
+		if (id == Theatre.NARRATOR) {
 			return <HTMLElement>this.theatreNarrator.getElementsByClassName("theatre-narrator-content")[0];
+    }
 		for (let textBox of this.stage.getTextBoxes()) {
 			if (textBox.getAttribute("imgId") == id) {
 				return textBox;
@@ -2376,9 +2425,10 @@ export default class Theatre {
 	 *
 	 * @return (HTMLElement) : The TextBox of the given theatreId, or undefined.
 	 */
-	getTextBoxByName(name: string): HTMLElement {
-		if (name == Theatre.NARRATOR)
+	getTextBoxByName(name: string): HTMLElement|undefined {
+		if (name == Theatre.NARRATOR) {
 			return <HTMLElement>this.theatreNarrator.getElementsByClassName("theatre-narrator-content")[0];
+    }
 		for (let textBox of this.stage.getTextBoxes()) {
 			if (textBox.getAttribute("name") == name) {
 				return textBox;
@@ -2388,45 +2438,45 @@ export default class Theatre {
 		return undefined
 	}
 
-  /**
-	 * Get insert dock by ID
-	 *
-	 * @params id (String) : The theatreId of an insert we want.
-	 *
-	 * @return (Object) : The Object representing the insert, or undefined.
-	 */
-	getInsertById(id) {
-		for (let idx=this.portraitDocks.length-1; idx>=0; --idx) {
-			if (this.portraitDocks[idx].imgId == id) {
-				if (this.portraitDocks[idx].dockContainer)
-					return this.portraitDocks[idx];
-				else {
-					this.portraitDocks.splice(idx,1);
-					return undefined;
-				}
-			}
-    }
-	}
+  // /**
+	//  * Get insert dock by ID
+	//  *
+	//  * @params id (String) : The theatreId of an insert we want.
+	//  *
+	//  * @return (Object) : The Object representing the insert, or undefined.
+	//  */
+	// getInsertById(id) {
+	// 	for (let idx=this.portraitDocks?.length-1; idx>=0; --idx) {
+	// 		if (this.portraitDocks[idx]?.imgId == id) {
+	// 			if (this.portraitDocks[idx]?.dockContainer)
+	// 				return this.portraitDocks[idx];
+	// 			else {
+	// 				this.portraitDocks.splice(idx,1);
+	// 				return undefined;
+	// 			}
+	// 		}
+  //   }
+	// }
 
-	/**
-	 * Get insert dock by Name
-	 *
-	 * @params name (String) : The name of an insert we want.
-	 *
-	 * @return (Object) : The Object representing the insert, or undefined.
-	 */
-   getInsertByName(name:string) {
-		for (let idx=this.portraitDocks.length-1; idx>=0; --idx) {
-			if (this.portraitDocks[idx].name == name) {
-				if (this.portraitDocks[idx].dockContainer)
-					return this.portraitDocks[idx];
-				else {
-					this.portraitDocks.splice(idx,1);
-					return undefined;
-				}
-			}
-    }
-	}
+	// /**
+	//  * Get insert dock by Name
+	//  *
+	//  * @params name (String) : The name of an insert we want.
+	//  *
+	//  * @return (Object) : The Object representing the insert, or undefined.
+	//  */
+  //  getInsertByName(name:string) {
+	// 	for (let idx=this.portraitDocks.length-1; idx>=0; --idx) {
+	// 		if (this.portraitDocks[idx].name == name) {
+	// 			if (this.portraitDocks[idx].dockContainer)
+	// 				return this.portraitDocks[idx];
+	// 			else {
+	// 				this.portraitDocks.splice(idx,1);
+	// 				return undefined;
+	// 			}
+	// 		}
+  //   }
+	// }
 
 	/**
 	 * Get the portrait sprite given the insert
@@ -2464,8 +2514,10 @@ export default class Theatre {
 	 * @return (Object PIXIText) : The PIXIText label of the insert.
 	 *
 	 */
-	_getLabelFromInsert(insert: StageInsert): PIXI.Text {
-		if (!insert || !insert.dockContainer) return null;
+	_getLabelFromInsert(insert: StageInsert): PIXI.Text|undefined {
+		if (!insert || !insert.dockContainer) {
+      return undefined;
+    }
 		return insert.label;
 	}
 
@@ -2497,7 +2549,7 @@ export default class Theatre {
 	 *	User is speaking as, else undefined.
 	 */
 	getSpeakingLabel() {
-		let insert = this.stage.getInsertById(this.speakingAs);
+		let insert = <StageInsert>this.stage.getInsertById(this.speakingAs);
 		return this._getLabelFromInsert(insert);
 	}
 
@@ -2530,23 +2582,34 @@ export default class Theatre {
 			textBox1,
 			textBox2;
 		for (let insert of this.stage.stageInserts) {
-			if (insert.imgId == id1 && !insert1)
+			if (insert.imgId == id1 && !insert1) {
 				insert1 = insert;
-			else if (insert.imgId == id2 && !insert2)
+      }
+			else if (insert.imgId == id2 && !insert2) {
 				insert2 = insert;
-			if (!!insert1 && !!insert2) break;
+      }
+			if (!!insert1 && !!insert2) {
+        break;
+      }
 		}
 		for (let textBox of this.stage.getTextBoxes()) {
-			if (textBox.getAttribute("imgId") == id1 && !textBox1)
+			if (textBox.getAttribute("imgId") == id1 && !textBox1) {
 				textBox1 = textBox;
-			else if (textBox.getAttribute("imgId") == id2 && !textBox2)
+      }
+			else if (textBox.getAttribute("imgId") == id2 && !textBox2) {
 				textBox2 = textBox;
-			if (!!textBox1 && !!textBox2) break;
+      }
+			if (!!textBox1 && !!textBox2) {
+        break;
+      }
 		}
 
-		if (!insert1 || !insert2) return;
-		if (!textBox1 || !textBox2) return;
-
+		if (!insert1 || !insert2) {
+      return;
+    }
+		if (!textBox1 || !textBox2) {
+      return;
+    }
 		this._swapInserts(
 			insert1,
 			insert2,
@@ -2582,15 +2645,23 @@ export default class Theatre {
 			if (!!insert1 && !!insert2) break;
 		}
 		for (let textBox of this.stage.getTextBoxes()) {
-			if (textBox.getAttribute("name") == name1 && !textBox1)
+			if (textBox.getAttribute("name") == name1 && !textBox1) {
 				textBox1 = textBox;
-			else if (textBox.getAttribute("name") == name2 && !textBox2)
+      }
+			else if (textBox.getAttribute("name") == name2 && !textBox2) {
 				textBox2 = textBox;
-			if (!!textBox1 && !!textBox2) break;
+      }
+			if (!!textBox1 && !!textBox2) {
+        break;
+      }
 		}
 
-		if (!insert1 || !insert2) return;
-		if (!textBox1 || !textBox2) return;
+		if (!insert1 || !insert2) {
+      return;
+    }
+		if (!textBox1 || !textBox2) {
+      return;
+    }
 
 		this._swapInserts(
 			insert1,
@@ -2635,8 +2706,8 @@ export default class Theatre {
 
 		// check the dual dock case
 		if (this._isTextBoxInPrimeBar(textBox1) && this._isTextBoxInSecondBar(textBox2)) {
-			let primeBar = this.stage.primeBar;
-			let secondBar = this.stage.secondBar;
+			let primeBar = <HTMLDivElement>this.stage.primeBar;
+			let secondBar = <HTMLDivElement>this.stage.secondBar;
 			insert1.nameOrientation = "right";
 			insert1.exitOrientation = "right";
 			insert2.nameOrientation = "left";
@@ -2645,8 +2716,8 @@ export default class Theatre {
 			primeBar.appendChild(textBox2);
 			secondBar.appendChild(textBox1);
 		} else if (this._isTextBoxInPrimeBar(textBox2) && this._isTextBoxInSecondBar(textBox1)) {
-			let primeBar = this.stage.primeBar;
-			let secondBar = this.stage.secondBar;
+			let primeBar = <HTMLDivElement>this.stage.primeBar;
+			let secondBar = <HTMLDivElement>this.stage.secondBar;
 			insert1.nameOrientation = "left";
 			insert1.exitOrientation = "left";
 			insert2.nameOrientation = "right";
@@ -2656,25 +2727,29 @@ export default class Theatre {
 			secondBar.appendChild(textBox2);
 		} else {
 			// full bar case
-			if (tsib1n) KHelpers.insertBefore(textBox2, tsib1n);
-			else if (tsib1p && (tsib1p != textBox2)) KHelpers.insertAfter(textBox2, tsib1p);
-			else {
+			if (tsib1n) {
+        KHelpers.insertBefore(textBox2, tsib1n);
+      } else if (tsib1p && (tsib1p != textBox2)) {
+        KHelpers.insertAfter(textBox2, tsib1p);
+      } else {
 				KHelpers.insertAfter(textBox2, textBox1);
 				adjSwap = true;
 			}
 
 			if (!adjSwap) {
-				if (tsib2n) KHelpers.insertBefore(textBox1, tsib2n);
-				else if (tsib2p && (tsib2p != textBox1)) KHelpers.insertAfter(textBox1, tsib2p);
-				else {
+				if (tsib2n) {
+          KHelpers.insertBefore(textBox1, tsib2n);
+        } else if (tsib2p && (tsib2p != textBox1)) {
+          KHelpers.insertAfter(textBox1, tsib2p);
+				} else {
 					KHelpers.insertAfter(textBox1, textBox2);
 				}
 			}
 		}
 
-		if (this.reorderTOId)
+		if (this.reorderTOId) {
 			window.clearTimeout(this.reorderTOId);
-
+    }
 		this.reorderTOId = window.setTimeout(() => {
 			this.insertReorderer.reorderInserts();
 			this.reorderTOId = null;
@@ -2707,22 +2782,33 @@ export default class Theatre {
 			textBox1,
 			textBox2;
 		for (let insert of this.stage.stageInserts) {
-			if (insert.imgId == id1 && !insert1)
+			if (insert.imgId == id1 && !insert1) {
 				insert1 = insert;
-			else if (insert.imgId == id2 && !insert2)
+      } else if (insert.imgId == id2 && !insert2) {
 				insert2 = insert;
-			if (!!insert1 && !!insert2) break;
+      }
+			if (!!insert1 && !!insert2) {
+        break;
+      }
 		}
 		for (let textBox of this.stage.getTextBoxes()) {
-			if (textBox.getAttribute("imgId") == id1 && !textBox1)
+			if (textBox.getAttribute("imgId") == id1 && !textBox1) {
 				textBox1 = textBox;
-			else if (textBox.getAttribute("imgId") == id2 && !textBox2)
+      }
+			else if (textBox.getAttribute("imgId") == id2 && !textBox2) {
 				textBox2 = textBox;
-			if (!!textBox1 && !!textBox2) break;
+      }
+			if (!!textBox1 && !!textBox2) {
+        break;
+      }
 		}
 
-		if (!insert1 || !insert2) return;
-		if (!textBox1 || !textBox2) return;
+		if (!insert1 || !insert2) {
+      return;
+    }
+		if (!textBox1 || !textBox2) {
+      return;
+    }
 		this._moveInsert(insert1, insert2, textBox1, textBox2, remote);
 	}
 
@@ -2756,8 +2842,8 @@ export default class Theatre {
 
 		// check the dual dock case
 		if (this._isTextBoxInPrimeBar(textBox1) && this._isTextBoxInSecondBar(textBox2)) {
-			let primeBar = this.stage.primeBar;
-			let secondBar = this.stage.secondBar;
+			let primeBar = <HTMLDivElement>this.stage.primeBar;
+			let secondBar = <HTMLDivElement>this.stage.secondBar;
 			insert1.nameOrientation = "right";
 			insert1.exitOrientation = "right";
 			insert2.nameOrientation = "left";
@@ -2766,8 +2852,8 @@ export default class Theatre {
 			primeBar.appendChild(textBox2);
 			secondBar.appendChild(textBox1);
 		} else if (this._isTextBoxInPrimeBar(textBox2) && this._isTextBoxInSecondBar(textBox1)) {
-			let primeBar = this.stage.primeBar;
-			let secondBar = this.stage.secondBar;
+			let primeBar = <HTMLDivElement>this.stage.primeBar;
+			let secondBar = <HTMLDivElement>this.stage.secondBar;
 			insert1.nameOrientation = "left";
 			insert1.exitOrientation = "left";
 			insert2.nameOrientation = "right";
@@ -2777,14 +2863,16 @@ export default class Theatre {
 			secondBar.appendChild(textBox2);
 		} else {
 			// full bar case
-			if (insert2.order > insert1.order)
+			if (insert2.order > insert1.order) {
 				KHelpers.insertBefore(textBox2, textBox1);
-			else
+      } else {
 				KHelpers.insertAfter(textBox2, textBox1);
+      }
 		}
 
-		if (this.reorderTOId)
+		if (this.reorderTOId) {
 			window.clearTimeout(this.reorderTOId);
+    }
 
 		this.reorderTOId = window.setTimeout(() => {
 			this.insertReorderer.reorderInserts();
@@ -2811,11 +2899,12 @@ export default class Theatre {
 	 * @private
 	 */
 	_isTextBoxInPrimeBar(textBox: HTMLElement): boolean {
-		let primeBar = this.stage.primeBar;
+		let primeBar = <HTMLDivElement>this.stage.primeBar;
 		let id = textBox.getAttribute("imgId");
 		for (let btb of primeBar.children) {
-			if (btb.getAttribute("imgId") == id)
+			if (btb.getAttribute("imgId") == id) {
 				return true;
+      }
 		}
 		return false;
 	}
@@ -2830,11 +2919,12 @@ export default class Theatre {
 	 * @private
 	 */
 	_isTextBoxInSecondBar(textBox: HTMLElement): boolean {
-		let secondBar = this.stage.secondBar;
+		let secondBar = <HTMLDivElement>this.stage.secondBar;
 		let id = textBox.getAttribute("imgId");
 		for (let btb of secondBar.children) {
-			if (btb.getAttribute("imgId") == id)
+			if (btb.getAttribute("imgId") == id) {
 				return true;
+      }
 		}
 		return false;
 	}
@@ -2850,8 +2940,9 @@ export default class Theatre {
 		id: string,
 		isLeft: boolean,
 		remote: boolean = false) {
-		if (this.stage.stageInserts.length <= 2) return;
-
+		if (this.stage.stageInserts.length <= 2) {
+      return;
+    }
 		let targInsert;
 		let targTextBox;
 		for (let insert of this.stage.stageInserts) {
@@ -2866,8 +2957,9 @@ export default class Theatre {
 				break;
 			}
 		}
-		if (!targInsert || !targTextBox) return;
-
+		if (!targInsert || !targTextBox) {
+      return;
+    }
 		this._pushInsert(targInsert, targTextBox, isLeft, remote);
 	}
 
@@ -2882,8 +2974,9 @@ export default class Theatre {
 		name: string,
 		isLeft: boolean,
 		remote: boolean = false) {
-		if (this.stage.stageInserts.length <= 2) return;
-
+		if (this.stage.stageInserts.length <= 2) {
+      return;
+    }
 		let targInsert;
 		let targTextBox;
 		for (let insert of this.stage.stageInserts) {
@@ -2898,8 +2991,9 @@ export default class Theatre {
 				break;
 			}
 		}
-		if (!targInsert || !targTextBox) return;
-
+		if (!targInsert || !targTextBox) {
+      return;
+    }
 		this._pushInsert(targInsert, targTextBox, isLeft, remote);
 	}
 
@@ -2993,8 +3087,8 @@ export default class Theatre {
 	 * return (Boolean) : True if the insert is mirrored, false otherwise.
 	 */
 	isInsertMirrored(id: string): boolean {
-		let insert = this.stage.getInsertByName(id);
-		return insert.mirrored;
+		let insert = <StageInsert>this.stage.getInsertByName(id);
+		return String(insert.mirrored) == "true" ? true : false;
 	}
 
 	/**
@@ -3067,7 +3161,7 @@ export default class Theatre {
 	resetInsertById(
 		id: string,
 		remote: boolean = false) {
-		let insert = this.stage.getInsertById(id);
+		let insert = <StageInsert>this.stage.getInsertById(id);
 
 		this._resetPortraitPosition(insert, remote);
 	}
@@ -3081,7 +3175,7 @@ export default class Theatre {
 	resetInsertByName(
 		name: string,
 		remote: boolean = false) {
-		let insert = this.stage.getInsertByName(name);
+		let insert = <StageInsert>this.stage.getInsertByName(name);
 
 		this._resetPortraitPosition(insert, remote);
 	}
@@ -3154,13 +3248,13 @@ export default class Theatre {
 
 		// TODO fix: This isn't right right any more and needs fixing
 
-		let tweenParams = AnimationSyntaxVerifier.verifyAnimationSyntax(animSyntax);
+		let tweenParams = <TweenParams[]>AnimationSyntaxVerifier.verifyAnimationSyntax(animSyntax);
 
-		let resTarget = resMap.find(e => (e.name == tweenParams[0].resName));
+		let resTarget = <RiggingResource>resMap.find(e => (e.name == tweenParams[0]?.resName));
 		let resource = PIXI.Loader.shared.resources[resTarget.path];
 
 		if (!resource) {
-			console.log('ERROR: resource name : "%s" with path "%s" does not exist!', tweenParams[0].resName, resTarget.path);
+			console.log('ERROR: resource name : "%s" with path "%s" does not exist!', tweenParams[0]?.resName, resTarget.path);
 			return;
 		}
 
@@ -3170,7 +3264,7 @@ export default class Theatre {
 
 		for (let idx = 0; idx < tweenParams.length; ++idx) {
 
-			let advOptions = tweenParams[idx].advOptions;
+			let advOptions = tweenParams[idx]?.advOptions;
 			// advanced options breakdown
 			let yoyo = null;
 			let delay = 0;
@@ -3190,10 +3284,10 @@ export default class Theatre {
 			}
 
 			let pixiParams: PixiPlugin.Vars = {};
-			for (let prop of tweenParams[idx].props) {
+			for (let prop of <PropDef[]>tweenParams[idx]?.props) {
 
-				let final: number;
-				let initial: number;
+				let final: number = 0;
+				let initial: number = 0;
 
 				// special case of x/y/scale
 				if (prop.name == "x"
@@ -3202,57 +3296,64 @@ export default class Theatre {
 					|| prop.name == "scaleX"
 					|| prop.name == "scaleY") {
 					if ((prop.initial as string).includes("%")) {
-						initial = Number(prop.initial.match(/-*\d+\.*\d*/)[0] || 0) / 100
+						initial = Number(Number((<string[]>prop.initial.match(/-*\d+\.*\d*/))[0]) || 0) / 100
 							* (prop.name == "x" ? insert.portrait.width : insert.portrait.height);
-						final = Number(prop.final.match(/-*\d+\.*\d*/)[0] || 0) / 100
+						final = Number(Number((<string[]>prop.final.match(/-*\d+\.*\d*/))[0]) || 0) / 100
 							* (prop.name == "x" ? insert.portrait.width : insert.portrait.height);
 					} else if (["scaleX", "scaleY", "rotation"].some(e => e == prop.name)) {
-						initial = Number(prop.initial.match(/-*\d+\.*\d*/)[0] || 0);
-						final = Number(prop.final.match(/-*\d+\.*\d*/)[0] || 0);
+						initial = Number(Number((<string[]>prop.initial.match(/-*\d+\.*\d*/))[0]) || 0);
+						final = Number(Number((<string[]>prop.final.match(/-*\d+\.*\d*/))[0]) || 0);
 					}
 				}
 
 				// special case for some GSAP -> PIXI names
 				switch (prop.name) {
-					case "scaleX":
+					case "scaleX": {
 						sprite.scale.x = initial;
 						pixiParams.scaleX = final;
 						break;
-					case "scaleY":
+          }
+					case "scaleY": {
 						sprite.scale.y = initial;
 						pixiParams.scaleY = final;
 						break;
-					case "rotation":
+          }
+					case "rotation": {
 						sprite.rotation = initial * (Math.PI / 180);
 						pixiParams.rotation = final;
 						break;
-					case "x":
+          }
+					case "x": {
 						sprite.x = initial;
 						pixiParams.x = final;
 						break;
-					case "y":
+          }
+					case "y": {
 						sprite.y = initial;
 						pixiParams.y = final;
 						break;
-					case "alpha":
+          }
+					case "alpha": {
 						sprite.alpha = initial;
 						pixiParams.alpha = final;
 						break;
-					default:
+          }
+					default: {
 						throw new Error("Not Implemented: " + prop.name);
 						break;
+          }
 				}
 			}
 
 			let tweenId = animName + idx;
-			let tween = TweenMax.to(sprite, tweenParams[idx].duration, {
+			let tween = TweenMax.to(sprite, <number>tweenParams[idx]?.duration, {
 				pixi: pixiParams,
 				ease: ease,
 				delay: delay,
 				repeatDelay: repeatDelay,
 				repeat: repeat,
-				yoyo: yoyo,
-				yoyoEase: yoyoEase,
+				yoyo: <boolean>yoyo,
+				yoyoEase: <gsap.EaseFunction>yoyoEase,
 				/*onRepeat: function() {
 					console.log("ANIMATION tween is repeating!",this);
 				}, */
@@ -3263,8 +3364,9 @@ export default class Theatre {
 				},
 				onCompleteParams: [this, insert.imgId, tweenId]
 			});
-			if (repeat != 0)
-				tween.duration(tweenParams[idx].duration);
+			if (repeat != 0) {
+				tween.duration(<number>tweenParams[idx]?.duration);
+      }
 			this._addDockTween(insert.imgId, tween, tweenId);
 
 		}
@@ -3348,7 +3450,7 @@ export default class Theatre {
 		if (!navItem) return;
 
 
-		let params = Tools.getInsertParamsFromActorId(actorId);
+		let params = <Params>Tools.getInsertParamsFromActorId(actorId);
 
 		// set as user active
 		// If the insert does not exist in the dock, add it,
@@ -3356,26 +3458,29 @@ export default class Theatre {
 		// If it's already active, and we're GM, then we want to transition to 'god mode'
 		// voice, thus we simply un-activate our character, and assume GM voice again
 		// (the default, if no insert selected)
-		let insert = this.stage.getInsertById(id);
-		let textBox = this.getTextBoxById(id);
+		let insert = <StageInsert>this.stage.getInsertById(id);
+		let textBox = <HTMLElement>this.getTextBoxById(id);
 		let label = (insert ? insert.label : null);
 
 		// remove old speaking as, shift it
 		let oldSpeakingItem = this.getNavItemById(this.speakingAs);
 		let oldSpeakingInsert = this.stage.getInsertById(this.speakingAs);
 		let oldSpeakingLabel = (oldSpeakingInsert ? oldSpeakingInsert.label : null);
-		if (oldSpeakingItem)
+		if (oldSpeakingItem) {
 			KHelpers.removeClass(oldSpeakingItem, "theatre-control-nav-bar-item-speakingas");
+    }
 		if (oldSpeakingInsert) {
 			this._removeDockTween(this.speakingAs, null, "nameSpeakingPulse");
 			oldSpeakingInsert.label.tint = 0xFFFFFF;
 		}
 		// if narrator is active, deactivate it and push the button up
-		if (game.user?.isGM && this.speakingAs == Theatre.NARRATOR)
+		if (game.user?.isGM && this.speakingAs == Theatre.NARRATOR) {
 			this.toggleNarratorBar(false);
+    }
 		// if this insert / textbox pair is being removed, stop
-		if (!!insert && textBox.getAttribute("deleting"))
+		if (!!insert && textBox.getAttribute("deleting")) {
 			return;
+    }
 
 		if (insert) {
 			// already in theatre
@@ -3385,7 +3490,7 @@ export default class Theatre {
 				this.speakingAs = id;
 				KHelpers.addClass(navItem, "theatre-control-nav-bar-item-speakingas");
 
-				const navBar = this.theatreControls.theatreNavBar;
+				const navBar = <HTMLDivElement>this.theatreControls.theatreNavBar;
 
 				TweenMax.to(
 					navBar,
@@ -3416,11 +3521,11 @@ export default class Theatre {
 
 				// change cover
 				cimg.setAttribute("src", params.src);
-				cimg.style.width = `${this.theatreControls.theatreChatCover.offsetHeight}px`
+				cimg.style.width = `${this.theatreControls.theatreChatCover?.offsetHeight}px`
 				cimg.style.opacity = "0.3";
 				// push focus to chat-message
 				let chatMessage = document.getElementById("chat-message");
-				chatMessage.focus();
+				chatMessage?.focus();
 				// send typing event
 				//this._sendTypingEvent();
 				//this.setUserTyping(game.user?.id,this.speakingAs);
@@ -3431,7 +3536,8 @@ export default class Theatre {
 				cimg.style.opacity = "0";
 				// clear typing theatreId data
 				this.removeUserTyping(game.user?.id);
-				this.usersTyping.get(game.user?.id).theatreId = null;
+        //@ts-ignore
+				this.usersTyping.get(<string>game.user?.id)?.theatreId = null;
 			}
 		} else {
 			let src = params.src;
@@ -3441,23 +3547,24 @@ export default class Theatre {
 			let emotions;
 
 			// determine if to launch with actor saves or default settings
-			if (ev && ev.altKey)
-				emotions = Theatre.instance._getInitialEmotionSetFromInsertParams(params, true);
-			else
-				emotions = Theatre.instance._getInitialEmotionSetFromInsertParams(params);
-
+			if (ev && ev.altKey) {
+				emotions = <EmotionDefinition>Theatre.instance?._getInitialEmotionSetFromInsertParams(params, true);
+      } else {
+				emotions = <EmotionDefinition>Theatre.instance?._getInitialEmotionSetFromInsertParams(params);
+      }
 			if (ev && !ev.shiftKey) {
-				if (game.user?.isGM)
+				if (game.user?.isGM) {
 					this.injectLeftPortrait(src, name, id, optAlign, emotions);
-				else
+        } else {
 					this.injectRightPortrait(src, name, id, optAlign, emotions);
-			} else
+        }
+			} else {
 				this.injectRightPortrait(src, name, id, optAlign, emotions);
-
+      }
 			this.speakingAs = id;
 			KHelpers.addClass(navItem, "theatre-control-nav-bar-item-speakingas");
 
-			const navBar = this.theatreControls.theatreNavBar;
+			const navBar = <HTMLDivElement>this.theatreControls.theatreNavBar;
 
 			TweenMax.to(
 				navBar,
@@ -3470,7 +3577,7 @@ export default class Theatre {
 				});
 
 			window.setTimeout(() => {
-				insert = this.stage.getInsertById(id);
+				insert = <StageInsert>this.stage.getInsertById(id);
 				// if our insert hasn't been destroyed
 				if (insert && !!insert.dockContainer && this.speakingAs == id) {
 					label = this.label;
@@ -3495,10 +3602,10 @@ export default class Theatre {
 
 			// change cover
 			cimg.setAttribute("src", src);
-			cimg.style.width = `${this.theatreControls.theatreChatCover.offsetHeight}px`
+			cimg.style.width = `${this.theatreControls.theatreChatCover?.offsetHeight}px`
 			cimg.style.opacity = "0.3";
 			// push focus to chat-message
-			let chatMessage = document.getElementById("chat-message");
+			let chatMessage = <HTMLDivElement>document.getElementById("chat-message");
 			chatMessage.focus();
 		}
 		// send typing event
@@ -3519,10 +3626,11 @@ export default class Theatre {
 		theatreId: string,
 		remote: boolean = false) {
 
-		let insert = this.stage.getInsertById(theatreId);
-		let textBox = this.stage.getTextBoxById(theatreId);
-		if (!textBox || !insert) return;
-
+		let insert = <StageInsert>this.stage.getInsertById(theatreId);
+		let textBox = <HTMLDivElement>this.stage.getTextBoxById(theatreId);
+		if (!textBox || !insert) {
+      return;
+    }
 		if (!remote && !this.isActorOwner(game.user?.id, theatreId)) {
 			ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.DoNotControl"));
 			return;
@@ -3539,15 +3647,16 @@ export default class Theatre {
 		}
 		// kill tweens
 		for (let c of textBox.children) {
-			for (let sc of c.children)
+			for (let sc of c.children) {
 				gsap.killTweensOf(sc);
+      }
 			gsap.killTweensOf(c);
 		}
 		gsap.killTweensOf(textBox);
 
 		// decay
 		TweenMax.to(textBox.children, 0.5, {
-			top: this.stage.theatreBar.offsetHeight / 2,
+			top: <number>this.stage.theatreBar?.offsetHeight / 2,
 			opacity: 0,
 			ease: Power0.easeNone,
 			onComplete: function () {
@@ -3591,15 +3700,18 @@ export default class Theatre {
 
 		// style specific settings
 		switch (TheatreSettings.getTheatreStyle()) {
-			case TheatreStyle.CLEARBOX:
+			case TheatreStyle.CLEARBOX: {
 				textBox.style.cssText += `background: linear-gradient(transparent 0%, rgba(${red},${green},${blue},0.30) 40%, rgba(${red},${green},${blue},0.30) 60%, transparent 100%); box-shadow: 0px 5px 2px 1px rgba(${darkred}, ${darkgreen}, ${darkblue}, 0.30)`;
 				break;
+      }
 			case TheatreStyle.MANGABUBBLE:
 			case TheatreStyle.LIGHTBOX:
 			case TheatreStyle.TEXTBOX:
 			default:
-				textBox.style.cssText += `background: linear-gradient(transparent 0%, rgba(${red},${green},${blue},0.10) 40%, rgba(${red},${green},${blue},0.10) 60%, transparent 100%); box-shadow: 0px 5px 2px 1px rgba(${darkred}, ${darkgreen}, ${darkblue}, .2)`;
-				break;
+        {
+          textBox.style.cssText += `background: linear-gradient(transparent 0%, rgba(${red},${green},${blue},0.10) 40%, rgba(${red},${green},${blue},0.10) 60%, transparent 100%); box-shadow: 0px 5px 2px 1px rgba(${darkred}, ${darkgreen}, ${darkblue}, .2)`;
+          break;
+        }
 		}
 
 	}
@@ -3675,37 +3787,38 @@ export default class Theatre {
 			// set speakingAs to "narrator" note that this will need heavy regression testing
 			// as it'll be plugging into the insert workflow when it's truely not a real insert
 			if (game.user?.isGM) {
-				let btnNarrator = <HTMLElement>this.theatreControls.root.getElementsByClassName("theatre-icon-narrator")[0].parentNode;
-				let oldSpeakingItem = this.getNavItemById(this.speakingAs);
-				let oldSpeakingInsert = this.stage.getInsertById(this.speakingAs);
-				let oldSpeakingLabel = this._getLabelFromInsert(oldSpeakingInsert);
+				let btnNarrator = <HTMLElement>this.theatreControls.root?.getElementsByClassName("theatre-icon-narrator")[0]?.parentNode;
+				let oldSpeakingItem = <HTMLElement>this.getNavItemById(this.speakingAs);
+				let oldSpeakingInsert = <StageInsert>this.stage.getInsertById(this.speakingAs);
+				let oldSpeakingLabel = <PIXI.Text>this._getLabelFromInsert(oldSpeakingInsert);
 
 				KHelpers.addClass(btnNarrator, "theatre-control-nav-bar-item-speakingas");
-				if (oldSpeakingItem)
+				if (oldSpeakingItem) {
 					KHelpers.removeClass(oldSpeakingItem, "theatre-control-nav-bar-item-speakingas");
+        }
 				if (oldSpeakingInsert) {
 					oldSpeakingInsert.label.tint = 0xFFFFFF;
 					this._removeDockTween(this.speakingAs, null, "nameSpeakingPulse");
 				}
 
-				let textFlyin = this.theatreNarrator.getAttribute("textflyin");
-				let textStanding = this.theatreNarrator.getAttribute("textstanding");
-				let textFont = this.theatreNarrator.getAttribute("textfont");
-				let textSize = this.theatreNarrator.getAttribute("textsize");
-				let textColor = this.theatreNarrator.getAttribute("textcolor");
+				let textFlyin = <string>this.theatreNarrator.getAttribute("textflyin");
+				let textStanding = <string>this.theatreNarrator.getAttribute("textstanding");
+				let textFont = <string>this.theatreNarrator.getAttribute("textfont");
+				let textSize = <string>this.theatreNarrator.getAttribute("textsize");
+				let textColor = <string>this.theatreNarrator.getAttribute("textcolor");
 
-				const emotes = this.userEmotes.get(game.user?.id);
+				const emotes = <EmotionDefinition>this.userEmotes?.get(<string>game.user?.id);
 
 				this.theatreNarrator.setAttribute("textflyin", textFlyin ? textFlyin
-					: (emotes ? emotes.textFlyin : null))
+          : (emotes ? <string>emotes.textFlyin : ''))
 				this.theatreNarrator.setAttribute("textstanding", textStanding ? textStanding
-					: (emotes ? emotes.textStanding : null))
+					: (emotes ? <string>emotes.textStanding : ''))
 				this.theatreNarrator.setAttribute("textfont", textFont ? textFont
-					: (emotes ? emotes.textFont : null))
+					: (emotes ? <string>emotes.textFont : ''))
 				this.theatreNarrator.setAttribute("textsize", textSize ? textSize
-					: (emotes ? emotes.textSize.toString() : null))
+					: (emotes ? String(emotes.textSize) : ''))
 				this.theatreNarrator.setAttribute("textcolor", textColor ? textColor
-					: (emotes ? emotes.textColor : null))
+					: (emotes ? <string>emotes.textColor : ''))
 
 				let cimg = this.getTheatreCoverPortrait();
 				// clear cover
@@ -3713,16 +3826,18 @@ export default class Theatre {
 				cimg.style.opacity = "0";
 				// clear typing theatreId data
 				this.removeUserTyping(game.user?.id);
+        //@ts-ignore
 				this.usersTyping.get(game.user?.id).theatreId = null;
 				// Mark speaking as Narrator
 				this.speakingAs = Theatre.NARRATOR;
 				this.setUserTyping(game.user?.id, Theatre.NARRATOR);
 				// push focus to chat-message
-				let chatMessage = document.getElementById("chat-message");
+				let chatMessage = <HTMLElement>document.getElementById("chat-message");
 				chatMessage.focus();
 				// send event to triggier the narrator bar
-				if (!remote)
+				if (!remote) {
 					this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.narrator, { active: true });
+        }
 				// re-render the emote menu (expensive)
 				this.emoteMenuRenderer.initialize();
 			}
@@ -3735,12 +3850,14 @@ export default class Theatre {
 			this.isNarratorActive = false;
 			// kill animations
 			for (let c of narratorContent.children) {
-				for (let sc of c.children)
+				for (let sc of c.children) {
 					gsap.killTweensOf(sc);
+        }
 				gsap.killTweensOf(c);
 			}
-			for (let c of narratorContent.children)
-				c.parentNode.removeChild(c);
+			for (let c of narratorContent.children) {
+				c.parentNode?.removeChild(c);
+      }
 			gsap.killTweensOf(narratorContent);
 			narratorContent.style.setProperty("overflow-y", "scroll");
 			narratorContent.style.setProperty("overflow-x", "hidden");
@@ -3748,15 +3865,17 @@ export default class Theatre {
 			narratorContent.textContent = '';
 
 			if (game.user?.isGM) {
-				let btnNarrator = <HTMLElement>this.theatreControls.root.getElementsByClassName("theatre-icon-narrator")[0].parentNode;
+				let btnNarrator = <HTMLElement>this.theatreControls.root?.getElementsByClassName("theatre-icon-narrator")[0]?.parentNode;
 				KHelpers.removeClass(btnNarrator, "theatre-control-nav-bar-item-speakingas");
 				// clear narrator
 				this.speakingAs = null;
 				this.removeUserTyping(game.user?.id);
-				this.usersTyping.get(game.user?.id).theatreId = null;
+        //@ts-ignore
+				this.usersTyping.get(game.user?.id)?.theatreId = null;
 				// send event to turn off the narrator bar
-				if (!remote)
+				if (!remote) {
 					this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.narrator, { active: false });
+        }
 				// re-render the emote menu (expensive)
 				this.emoteMenuRenderer.initialize();
 			}
@@ -3776,17 +3895,17 @@ export default class Theatre {
 		this.stage.theatreBar.style.width = (ui.sidebar._collapsed ? "100%" : `calc(100% - ${sideBar.offsetWidth + 2}px)`);
 		// @ts-ignore ts2445
 		this.theatreNarrator.style.width = (ui.sidebar._collapsed ? "100%" : `calc(100% - ${sideBar.offsetWidth + 2}px)`);
-		let primeBar = this.stage.primeBar;
-		let secondBar = this.stage.secondBar;
+		let primeBar = <HTMLDivElement>this.stage.primeBar;
+		let secondBar = <HTMLDivElement>this.stage.secondBar;
 		if (this.stage.getTextBoxes().length == 2) {
-			let dualWidth = Math.min(Math.floor(this.stage.theatreBar.offsetWidth / 2), 650);
+			let dualWidth = Math.min(Math.floor(<number>this.stage.theatreBar?.offsetWidth / 2), 650);
 			primeBar.style.width = dualWidth + "px";
 			secondBar.style.width = dualWidth + "px";
 			secondBar.style.left = `calc(100% - ${dualWidth}px)`;
 		}
 		// emote menu
 		if (this.theatreControls.theatreEmoteMenu)
-			this.theatreControls.theatreEmoteMenu.style.top = `${this.theatreControls.root.offsetTop - 410}px`
+			this.theatreControls.theatreEmoteMenu.style.top = `${<number>this.theatreControls.root?.offsetTop - 410}px`
 
 
 		this.stage.handleWindowResize()
@@ -3805,13 +3924,14 @@ export default class Theatre {
 	}
 
 	updateSuppression(suppress: boolean) {
-		Theatre.instance.isSuppressed = suppress;
+    //@ts-ignore
+		Theatre.instance?.isSuppressed = <boolean>suppress;
 
-		let primeBar = this.stage.primeBar;
-		let secondBar = this.stage.secondBar;
-		let opacity: number = null
+		let primeBar = <HTMLDivElement>this.stage.primeBar;
+		let secondBar = <HTMLDivElement>this.stage.secondBar;
+		let opacity: number|null = null
 
-		if (Theatre.instance.isSuppressed) {
+		if (Theatre.instance?.isSuppressed) {
 
 			opacity = TheatreSettings.getSuppressOpacity();
 
@@ -3825,12 +3945,15 @@ export default class Theatre {
 			secondBar.style.setProperty("pointer-events", "all");
 		}
 
-		this.stage.theatreDock.style.opacity = opacity.toString();
-		Theatre.instance.theatreBar.style.opacity = opacity.toString();
-		Theatre.instance.theatreNarrator.style.opacity = opacity.toString();
+    //@ts-ignore
+		this.stage?.theatreDock?.style.opacity = String(opacity);
+    //@ts-ignore
+		Theatre.instance?.theatreBar.style.opacity = String(opacity);
+    //@ts-ignore
+		Theatre.instance?.theatreNarrator.style.opacity = String(opacity);
 
 		// call hooks
-		Hooks.call("theatreSuppression", Theatre.instance.isSuppressed);
+		Hooks.call("theatreSuppression", Theatre.instance?.isSuppressed);
 	}
 
 	/**
@@ -3851,8 +3974,8 @@ export default class Theatre {
 		}
 
 		new TheatreActorConfig(actorSheet.actor, {
-			top: actorSheet.position.top + 40,
-			left: actorSheet.position.left + ((actorSheet.position.width - 500) / 2),
+			top: <number>actorSheet.position?.top + 40,
+			left: <number>actorSheet.position?.left + ((<number>actorSheet.position?.width - 500) / 2),
 			configureDefault: true
 		}).render(true);
 	}
@@ -3897,19 +4020,19 @@ export default class Theatre {
 
 	/** Removes the actor from the nav bar and from stage. */
 	_removeFromStage(theatreId: string) {
-		const staged = this.stage.actors.get(theatreId);
+		const staged = <TheatreActor>this.stage.actors.get(theatreId);
 		if (staged) {
 			if (staged.navElement) {
-				this.theatreControls.theatreNavBar.removeChild(staged.navElement);
+				this.theatreControls.theatreNavBar?.removeChild(staged.navElement);
 			}
 			this.stage.removeActorFromStage(theatreId)
 		}
 	}
 
 	maybeUpdateNarratorHeight() {
-
-		if (this.theatreNarrator)
+		if (this.theatreNarrator) {
 			this.theatreNarrator.style.top = `calc(${TheatreSettings.getNarratorHeight} - 50px)`;
+    }
 	}
 
 

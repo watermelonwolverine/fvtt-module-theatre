@@ -365,7 +365,7 @@ export default class Stage {
         for (const insert of this.stageInserts) {
             insert.portrait?.updateGeometry();
         }
-        Theatre.instance._renderTheatre(performance.now());
+        Theatre.instance?._renderTheatre(performance.now());
     }
 
 

@@ -1,13 +1,13 @@
 import ActorExtensions from "../extensions/ActorExtensions";
 import EmotionDefinition from "../types/EmotionDefinition";
-import Params from "../types/Params";
+import type Params from "../types/Params";
 
 const THEATRE_PREFIX = "theatre-"
 
 export default class Tools {
 
-    static getTheatreId(actor: Actor | ActorData): string {
-        return THEATRE_PREFIX + actor._id;
+    static getTheatreId(actor: Actor): string {
+        return THEATRE_PREFIX + <string>actor.id;
     }
 
     static toActorId(theatreId: string) {
@@ -22,7 +22,7 @@ export default class Tools {
      * @return (Object) : An object containing the parameters of the insert given the actor Id
      *					 or null.
         */
-    static getInsertParamsFromActorId(actorId: string): Params {
+    static getInsertParamsFromActorId(actorId: string): Params|null {
 
         let actor: Actor = game.actors.get(actorId);
 
@@ -31,27 +31,43 @@ export default class Tools {
             return null;
         }
 
-        const actorData : ActorData= actor.data;
+        const actorData : Actor = actor;
 
-        let theatreId = `theatre-${actorData._id}`;
-        let portrait = (actorData.img ? actorData.img : "icons/mystery-man.png");
+        let theatreId = `theatre-${actorData.id}`;
+        let portrait = (actorData.img ? <string>actorData.img : "icons/mystery-man.png");
         let optAlign = "top";
-        let name = ActorExtensions.getDisplayName(actorData._id);
+        let name = ActorExtensions.getDisplayName(<string>actorData.id);
         let emotes = {};
         let settings = new EmotionDefinition();
 
         // Use defaults incase the essential flag attributes are missing
+        //@ts-ignore
         if (actorData.flags.theatre) {
-            if (actorData.flags.theatre.name && actorData.flags.theatre.name != "")
+            //@ts-ignore
+            if (actorData.flags.theatre.name && actorData.flags.theatre.name != "") {
+                //@ts-ignore
                 name = actorData.flags.theatre.name;
-            if (actorData.flags.theatre.baseinsert && actorData.flags.theatre.baseinsert != "")
+            }
+            //@ts-ignore
+            if (actorData.flags.theatre.baseinsert && actorData.flags.theatre.baseinsert != "") {
+                //@ts-ignore
                 portrait = actorData.flags.theatre.baseinsert;
-            if (actorData.flags.theatre.optalign && actorData.flags.theatre.optalign != "")
+            }
+            //@ts-ignore
+            if (actorData.flags.theatre.optalign && actorData.flags.theatre.optalign != "") {
+                //@ts-ignore
                 optAlign = actorData.flags.theatre.optalign;
-            if (actorData.flags.theatre.emotes)
+            }
+            //@ts-ignore
+            if (actorData.flags.theatre.emotes) {
+                //@ts-ignore
                 emotes = actorData.flags.theatre.emotes;
-            if (actorData.flags.theatre.settings)
+            }
+            //@ts-ignore
+            if (actorData.flags.theatre.settings) {
+                //@ts-ignore
                 settings = actorData.flags.theatre.settings;
+            }
         }
 
         return {
