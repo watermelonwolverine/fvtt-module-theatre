@@ -88,8 +88,14 @@ const getManifest = () => {
         json.root = `dist`;
     }
 
-    const modulePath = path.join(json.root, `module.json`);
-    const systemPath = path.join(json.root, `system.json`);
+    let modulePath = path.join(json.root, `module.json`);
+    if (!fs.existsSync(modulePath)) {
+      modulePath = path.join(``, `module.json`);
+    }
+    let systemPath = path.join(json.root, `system.json`);
+    if (!fs.existsSync(modulePath)) {
+      systemPath = path.join(``, `system.json`);
+    }
 
     if (fs.existsSync(modulePath)) {
         json.file = loadJson(modulePath);
