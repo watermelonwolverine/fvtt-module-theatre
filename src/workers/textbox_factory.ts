@@ -20,18 +20,22 @@ export default class TextBoxFactory {
 		const textBox = document.createElement("div");
 		// textBox class + style depends on our display mode
 		switch (TheatreSettings.getTheatreStyle()) {
-			case TheatreStyle.LIGHTBOX:
+			case TheatreStyle.LIGHTBOX: {
 				KHelpers.addClass(textBox, "theatre-text-box-light");
 				break;
-			case TheatreStyle.CLEARBOX:
+			}
+			case TheatreStyle.CLEARBOX: {
 				KHelpers.addClass(textBox, "theatre-text-box-clear");
 				break;
-			case TheatreStyle.MANGABUBBLE:
+			}
+			case TheatreStyle.MANGABUBBLE: {
 				break;
+			}
 			case TheatreStyle.TEXTBOX:
-			default:
+			default: {
 				KHelpers.addClass(textBox, "theatre-text-box");
 				break;
+			}
 		}
 		KHelpers.addClass(textBox, "no-scrollbar");
 

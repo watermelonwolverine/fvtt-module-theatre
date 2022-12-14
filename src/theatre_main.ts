@@ -105,7 +105,7 @@ Hooks.on("preCreateChatMessage", function (chatMessage: any) {
 	// make the message OOC if needed
 	if (
 		!chatMessage.roll &&
-    //@ts-ignore
+		//@ts-ignore
 		$(Theatre.instance.theatreControls.theatreChatCover).hasClass("theatre-control-chat-cover-ooc")
 	) {
 		const user = <User>game.users?.get(chatMessage.user);
@@ -780,7 +780,7 @@ Hooks.once("ready", () => {
 	libWrapper.register(
 		TheatreSettings.NAMESPACE,
 		"CombatHudCanvasElement.prototype.toggleMacroPlayers",
-		(wrapped:any, togg:any) => {
+		(wrapped: any, togg: any) => {
 			if (togg && Theatre.instance.dockActive) {
 				return;
 			}

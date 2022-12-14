@@ -1284,7 +1284,7 @@ export default class Theatre {
 			return false;
 		}
 		if (
-      //@ts-ignore
+			//@ts-ignore
 			(actor.ownership[userId] && actor.ownership[userId] >= 3) ||
 			//@ts-ignore
 			(actor.ownership["default"] && actor.ownership["default"] >= 3)

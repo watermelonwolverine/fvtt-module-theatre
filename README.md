@@ -2,17 +2,43 @@
 
 Theatre is a mod for Foundry VTT that allows for a visual novel style RP experience for text, and text-voice hybrid games. The primary function of Theatre is to allow for graphical 'theatre-inserts' or 'standin-graphics' to appear on screen with an accompanying area for text beneath them. This follows the style of visual novels, and even provides a means to animate or decorate the text as it appears in the below box. It also provides an emote system to allow users to configure different graphics for the various emotive expressions. Most of the emotes additionally have a built in 'emote animation' that occurs when the emote is selected, which can be toggled off globally if undesired.
 
-### Installation For FVTT
+# About this fork
 
-Copy https://github.com/League-of-Foundry-Developers/fvtt-module-theatre/releases/download/latest/module.json into the module installer inside foundry when it asks for the manifest.
+Currently under development. Don't use this.
+## Setup
 
-OR
+1. npm install
+2. Copy `.vscode/settings.template.json` to `.vscode/settings.json` and do what it says in the file.
+3. Copy `devEnv.template.json` to `devEnv.json` and do what it says in the file.
+4. Run `npx gulp dev --sm`
+5. Start FoundryVTT server
+5. Launch  `FoundryVTT` under `Run and Debug`
 
-Download the [zip](https://github.com/League-of-Foundry-Developers/fvtt-module-theatre/releases/download/latest/theatre.zip), create a folder in public/modules called 'theatre' and extract the contents of "theatre.zip" there.
+# Installation (for this fork)
 
-OR
+To install this module manually:
+1. Inside the Foundry "Configuration and Setup" screen, click "Add-on Modules"
+2. Click "Install Module"
+3. In the "Manifest URL" field, paste the following url:
+`https://raw.githubusercontent.com/watermelonwolverine/fvtt-module-theatre/master/module.json`
+4. Click 'Install' and wait for installation to complete
+5. Don't forget to enable the module in game using the "Manage Module" button
 
-Find Theatre Inserts in the module browser integrated in Foundry VTT
+# Installation
+
+It's always better and easier to install modules through in in app browser. Just search for "Theater"
+
+To install this module manually:
+1. Inside the Foundry "Configuration and Setup" screen, click "Add-on Modules"
+2. Click "Install Module"
+3. In the "Manifest URL" field, paste the following url:
+`https://raw.githubusercontent.com/League-of-Foundry-Developers/fvtt-module-theatre/master/module.json`
+4. Click 'Install' and wait for installation to complete
+5. Don't forget to enable the module in game using the "Manage Module" button
+
+### libWrapper
+
+This module uses the [libWrapper](https://github.com/ruipin/fvtt-lib-wrapper) library for wrapping core methods. It is a hard dependency and it is recommended for the best experience and compatibility with other modules.
 
 ### Key Binds
 Theatre inserts now supports keybinds through the keybind API. The default keybinds are as follows (on windows):
