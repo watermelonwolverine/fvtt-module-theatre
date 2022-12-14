@@ -50,7 +50,7 @@ Handlebars.registerHelper("resprop", function (propPath, hash) {
 /**
  * Hook in on Actorsheet's Header buttons + context menus
  */
-Hooks.on("getActorSheetHeaderButtons", (app, buttons) => {
+Hooks.on("getActorSheetHeaderButtons", (app:any, buttons:any) => {
 	if (!game.user?.isGM && game.settings.get(TheatreSettings.NAMESPACE, "gmOnly")) return;
 
 	let theatreButtons = []

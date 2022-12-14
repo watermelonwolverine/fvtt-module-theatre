@@ -16,8 +16,8 @@ export default class TextBoxMouseEventHandler {
     sceneEventProcessor: SceneEventProcessor;
 
     // context
-    dragPoint: DragPoint;
-    swapTarget: string;
+    dragPoint: DragPoint|null;
+    swapTarget: string|null;
 
     windowMouseButtonUpHandler = (ev: MouseEvent) => this.handleWindowMouseUp(ev);
 
@@ -48,16 +48,16 @@ export default class TextBoxMouseEventHandler {
             || ev.altKey)
             return; // no-op
 
-        let id = (ev.currentTarget as HTMLElement).getAttribute("imgId");
+        let id = <string>(ev.currentTarget as HTMLElement).getAttribute("imgId");
 
         if (!!this.dragPoint && !!this.dragPoint.insert) {
             console.error("PREXISTING DRAGPOINT!");
         }
 
-        let insert = this.theatre.stage.getInsertById(id);
+        let insert = <StageInsert>this.theatre.stage.getInsertById(id);
 
         // permission check
-        if (!this.theatre.isActorOwner(game.user?.id, insert.imgId)) {
+        if (!this.theatre.isActorOwner(<string>game.user?.id, insert.imgId)) {
             ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.DoNotControl"));
             return;
         }
@@ -75,13 +75,13 @@ export default class TextBoxMouseEventHandler {
     }
 
     handleTextBoxRMBDown(ev: MouseEvent) {
-        let id = (ev.currentTarget as HTMLElement).getAttribute("imgId");
+        let id = <string>(ev.currentTarget as HTMLElement).getAttribute("imgId");
         this.swapTarget = id;
         ev.stopPropagation();
     }
 
     handleTextBoxMouseDoubleClick(ev: MouseEvent) {
-        let id = (ev.currentTarget as HTMLElement).getAttribute("imgId");
+        let id = <string>(ev.currentTarget as HTMLElement).getAttribute("imgId");
         this.theatre.resetInsertById(id);
     }
 
@@ -95,8 +95,8 @@ export default class TextBoxMouseEventHandler {
 
     handleTextBoxLMBUp(ev: MouseEvent) {
 
-        let id = (ev.currentTarget as HTMLElement).getAttribute("imgId");
-        let chatMessage = document.getElementById("chat-message");
+        let id = <string>(ev.currentTarget as HTMLElement).getAttribute("imgId");
+        let chatMessage = <HTMLElement>document.getElementById("chat-message");
 
         if (ev.ctrlKey) {
 
@@ -114,8 +114,8 @@ export default class TextBoxMouseEventHandler {
     }
 
     handleTextBoxRMBUp(ev: MouseEvent) {
-        let id = (ev.currentTarget as HTMLElement).getAttribute("imgId");
-        let chatMessage = document.getElementById("chat-message");
+        let id = <string>(ev.currentTarget as HTMLElement).getAttribute("imgId");
+        let chatMessage = <HTMLElement>document.getElementById("chat-message");
         if (ev.ctrlKey) {
             this.theatre.stage.removeInsertById(id);
             ev.stopPropagation();
@@ -130,8 +130,8 @@ export default class TextBoxMouseEventHandler {
             chatMessage.focus();
             ev.stopPropagation();
         } else if (ev.altKey) {
-            let actor = game.actors.get(id.replace("theatre-", ""));
-            this.theatre.navBar.addToNavBar(actor.data);
+            let actor = <Actor>game.actors?.get(id.replace("theatre-", ""));
+            this.theatre.navBar.addToNavBar(actor);
         } else if (this.swapTarget) {
             if (this.swapTarget != id) {
                 this.theatre.moveInsertById(id, this.swapTarget);
@@ -147,7 +147,7 @@ export default class TextBoxMouseEventHandler {
 
     handleWindowMouseUp(ev: MouseEvent) {
 
-        const insert = this.dragPoint.insert;
+        const insert = <StageInsert>this.dragPoint?.insert;
 
         if (!insert.dockContainer || !insert.portrait) {
             console.log("ERROR: insert dockContainer or portrait is INVALID");
@@ -167,7 +167,7 @@ export default class TextBoxMouseEventHandler {
             },
             onCompleteParams: [Theatre.instance, insert.imgId, tweenId]
         });
-        Theatre.instance._addDockTween(insert.imgId, tween, tweenId);
+        Theatre.instance?._addDockTween(insert.imgId, tween, tweenId);
 
         this.sceneEventProcessor.sendSceneEvent(
             SceneEventTypes.positionupdate,
@@ -183,7 +183,7 @@ export default class TextBoxMouseEventHandler {
         window.removeEventListener("mouseup", this.windowMouseButtonUpHandler);
         this.dragPoint = null;
 
-        let chatMessage = document.getElementById("chat-message");
+        let chatMessage = <HTMLElement>document.getElementById("chat-message");
         chatMessage.focus();
     }
 
@@ -193,7 +193,7 @@ export default class TextBoxMouseEventHandler {
 
         const portrait = insert.portrait;
 
-        const deltaX = x - this.dragPoint.dragStartX;
+        const deltaX = x - Number(this.dragPoint?.dragStartX);
 
         let finalX = portrait.x + deltaX;
 

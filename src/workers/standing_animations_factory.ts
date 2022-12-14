@@ -40,7 +40,7 @@ export default class TextStandingAnimationsFactory {
 
         for (const name of this.ALL_ANIMATIONS) {
             result[name] = {
-                func: this.getForName(name),
+                func: <TextStandingAnimationFunction>this.getForName(name),
                 label: game.i18n.localize("Theatre.Standing." + this.capitalizeFirstLetter(name))
             }
         }
@@ -56,40 +56,40 @@ export default class TextStandingAnimationsFactory {
     }
 
 
-    static getForName(name: string): TextStandingAnimationFunction {
+    static getForName(name: string): TextStandingAnimationFunction|undefined {
 
         switch (name) {
 
-            case this.IMPACT:
+            case this.IMPACT: {
                 return this.do_impact;
-
-            case this.QUIVER:
+            }
+            case this.QUIVER: {
                 return this.do_quiver;
-
-            case this.WAVE:
+            }
+            case this.WAVE: {
                 return this.do_wave;
-
-            case this.FADE:
+            }
+            case this.FADE: {
                 return this.do_fade;
-
-            case this.EXCITED:
+            }
+            case this.EXCITED: {
                 return this.do_excited;
-
-            case this.VIOLENT:
+            }
+            case this.VIOLENT: {
                 return this.do_violent;
-
-            case this.BUBBLY:
+            }
+            case this.BUBBLY: {
                 return this.do_bubbly;
-
-            case this.SPOOKY:
+            }
+            case this.SPOOKY: {
                 return this.do_spooky;
-
-            case this.INSANE:
+            }
+            case this.INSANE: {
                 return this.do_insane;
-
-            default:
+            }
+            default: {
                 return undefined;
-
+            }
         };
     }
 

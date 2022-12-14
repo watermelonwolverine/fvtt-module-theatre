@@ -31,10 +31,10 @@ export default class KHelpers {
 		return el.currentStyle || window.getComputedStyle(el);
 	}
 	static insertAfter(el: HTMLElement, referenceNode: Node) {
-		referenceNode.parentNode.insertBefore(el, referenceNode.nextSibling);
+		referenceNode.parentNode?.insertBefore(el, referenceNode.nextSibling);
 	}
 	static insertBefore(el: HTMLElement, referenceNode: Node) {
-		referenceNode.parentNode.insertBefore(el, referenceNode);
+		referenceNode.parentNode?.insertBefore(el, referenceNode);
 	}
 
 	/**
@@ -62,7 +62,7 @@ export default class KHelpers {
 				el = el.parentNode as HTMLElement;
 			}
 		}
-		return targ;
+		return <HTMLElement>targ;
 	}
 
 }

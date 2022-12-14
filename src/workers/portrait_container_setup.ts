@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
+import type { Animation } from "src/resources/resources_types";
 import ActorExtensions from "../extensions/ActorExtensions";
 import TheatreSettings from "../extensions/TheatreSettings";
-import Theatre from "../Theatre";
+import type Theatre from "../Theatre";
 import TheatreStyle from "../types/TheatreStyle";
 
 export default class TheatrePortraitContainerSetupWorker {
@@ -44,7 +45,7 @@ export default class TheatrePortraitContainerSetupWorker {
             return;
         }
 
-        if (!resources[resName] || !resources[resName].texture) {
+        if (!resources[resName] || !resources[resName]?.texture) {
             console.error("ERROR could not load texture %s", resName, resources);
             ui.notifications.error(`${game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P1")} ${imgId} ${game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P2")} ${resName}`);
             stage.removeInsertById(imgId);
@@ -52,11 +53,11 @@ export default class TheatrePortraitContainerSetupWorker {
         }
 
         let dockContainer = insert.dockContainer;
-        insert.portrait.updateTexture(resources[resName].texture);
+        insert.portrait.updateTexture(<PIXI.Texture>resources[resName]?.texture);
         insert.portrait.init();
 
         insert.dockContainer.x = 0;
-        insert.dockContainer.y = insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight;
+        insert.dockContainer.y = insert.optAlign == "top" ? 0 : Number(stage.theatreBar?.offsetHeight);
 
         const portWidth = insert.portrait.width;
         const portHeight = insert.portrait.height;
@@ -64,9 +65,9 @@ export default class TheatrePortraitContainerSetupWorker {
         insert.label.style.fontWeight = this.theatre.fontWeight;
         insert.label.style.wordWrapWidth = portWidth;
 
-        insert.label.y = portHeight - (insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight) - insert.label.style.lineHeight - 20;
-
-        insert.typingBubble.texture = resources["modules/theatre/app/graphics/typing.png"].texture;
+        insert.label.y = portHeight - (insert.optAlign == "top" ? 0 : Number(stage.theatreBar?.offsetHeight)) - insert.label.style.lineHeight - 20;
+        //@ts-ignore
+        insert.typingBubble.texture = resources["modules/theatre/app/graphics/typing.png"]?.texture;
 
         // TheatreStyle specific adjustments
         switch (TheatreSettings.getTheatreStyle()) {
@@ -76,9 +77,9 @@ export default class TheatrePortraitContainerSetupWorker {
                 insert.label.y -= (insert.optAlign == "top" ? 8 : 0);
                 break;
             case TheatreStyle.CLEARBOX:
-                dockContainer.y = stage.theatreDock.offsetHeight - portHeight;
-                insert.label.y += (insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight);
-                insert.typingBubble.y += (insert.optAlign == "top" ? 0 : stage.theatreBar.offsetHeight);
+                dockContainer.y = Number(stage.theatreDock?.offsetHeight) - portHeight;
+                insert.label.y += (insert.optAlign == "top" ? 0 : Number(stage.theatreBar?.offsetHeight));
+                insert.typingBubble.y += (insert.optAlign == "top" ? 0 : Number(stage.theatreBar?.offsetHeight));
                 break;
             case TheatreStyle.MANGABUBBLE:
                 break;
@@ -91,11 +92,12 @@ export default class TheatrePortraitContainerSetupWorker {
         // run rigging animations if we have have any
         if (insert.emotion.emote) {
             let actorId = insert.imgId.replace("theatre-", "");
-            let defaultDisabled = this.theatre.isDefaultDisabled(insert.imgId);
+            let defaultDisabled = <boolean>this.theatre.isDefaultDisabled(insert.imgId);
             let emotes = ActorExtensions.getEmotesForActor(actorId, defaultDisabled);
             let rigResMap = ActorExtensions.getRiggingResources(actorId);
-            if (emotes[insert.emotion.emote] && emotes[insert.emotion.emote].rigging) {
-                for (let anim of emotes[insert.emotion.emote].rigging.animations) {
+            if (emotes[insert.emotion.emote] && emotes[insert.emotion.emote]?.rigging) {
+                const animations = <Animation[]>emotes[insert.emotion.emote]?.rigging?.animations;
+                for (let anim of animations) {
                     this.theatre.addTweensFromAnimationSyntax(anim.name, anim.syntax, rigResMap, insert);
                 }
             }

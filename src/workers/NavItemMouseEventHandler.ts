@@ -1,5 +1,5 @@
 import Theatre from "../Theatre";
-import EmotionDefinition from "../types/EmotionDefinition";
+import type EmotionDefinition from "../types/EmotionDefinition";
 import KHelpers from "./KHelpers";
 import Tools from "./Tools";
 
@@ -12,11 +12,12 @@ export default class NavItemMouseEventHandler {
     }
 
     handleNavItemDragStart(ev: DragEvent) {
-        ev.dataTransfer.clearData("text/plain");
-        ev.dataTransfer.clearData("text/html");
-        ev.dataTransfer.clearData("text/uri-list");
-        ev.dataTransfer.dropEffect = "move";
-        ev.dataTransfer.setDragImage(<HTMLElement>ev.currentTarget, 16, 16);
+        ev.dataTransfer?.clearData("text/plain");
+        ev.dataTransfer?.clearData("text/html");
+        ev.dataTransfer?.clearData("text/uri-list");
+        //@ts-ignore
+        ev.dataTransfer?.dropEffect = "move";
+        ev.dataTransfer?.setDragImage(<HTMLElement>ev.currentTarget, 16, 16);
         this.theatre.dragNavItem = ev.currentTarget;
     }
 
@@ -27,13 +28,14 @@ export default class NavItemMouseEventHandler {
 
     handleNavItemDragOver(ev: DragEvent) {
         ev.preventDefault();
-        ev.dataTransfer.dropEffect = "move";
+        //@ts-ignore
+        ev.dataTransfer?.dropEffect = "move";
     }
 
     handleNavItemDragDrop(ev: DragEvent) {
         ev.preventDefault();
         KHelpers.insertBefore(
-            Theatre.instance.dragNavItem,
+            Theatre.instance?.dragNavItem,
             <HTMLElement>ev.currentTarget);
     }
 
@@ -47,7 +49,7 @@ export default class NavItemMouseEventHandler {
 
         const currentTarget = <HTMLElement>ev.currentTarget;
 
-        let theatreId = currentTarget.getAttribute("imgId");
+        let theatreId = <string>currentTarget.getAttribute("imgId");
         let actorId = Tools.toActorId(theatreId);
         let params = Tools.getInsertParamsFromActorId(actorId);
 
@@ -56,7 +58,7 @@ export default class NavItemMouseEventHandler {
             // TODO SHOW ERROR MESSAGE
             console.error("ERROR, actorId %s does not exist!", actorId);
             // remove the nav Item
-            currentTarget.parentNode.removeChild(currentTarget);
+            currentTarget.parentNode?.removeChild(currentTarget);
             return;
         }
 

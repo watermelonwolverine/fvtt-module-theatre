@@ -1,9 +1,10 @@
 import Theatre from "../Theatre";
 import EmotionDefinition from "../types/EmotionDefinition";
-import Stage from "../components/stage/Stage";
-import { AddAllTexturesEvent, AddTextureEvent, AnySceneEvent, DecayTextEvent, EmoteEvent, EnterSceneEvent, ExitSceneEvent, MoveEvent, NarratorEvent, PositionUpdateEvent, PushEvent, RenderInsertEvent, SceneEvent, StageEvent, SwapEvent } from "../types/SceneEvents";
+import type Stage from "../components/stage/Stage";
+import type { AddAllTexturesEvent, AddTextureEvent, AnySceneEvent, DecayTextEvent, EmoteEvent, EnterSceneEvent, ExitSceneEvent, MoveEvent, NarratorEvent, PositionUpdateEvent, PushEvent, RenderInsertEvent, SceneEvent, StageEvent, SwapEvent } from "../types/SceneEvents";
 import { AnySceneEventType, SceneEventTypes } from "../types/SceneEventTypes";
 import Tools from "./Tools";
+import type StageInsert from "src/components/stage/StageInsert";
 
 
 export default class SceneEventProcessor {
@@ -147,12 +148,12 @@ export default class SceneEventProcessor {
 
         const emotions = data.emotions;
 
-        this.theatre.setUserEmote(senderId, data.insertid, "emote", emotions.emote, true);
-        this.theatre.setUserEmote(senderId, data.insertid, "textflyin", emotions.textFlyin, true);
-        this.theatre.setUserEmote(senderId, data.insertid, "textstanding", emotions.textStanding, true);
-        this.theatre.setUserEmote(senderId, data.insertid, "textfont", emotions.textFont, true);
-        this.theatre.setUserEmote(senderId, data.insertid, "textsize", emotions.textSize.toString(), true);
-        this.theatre.setUserEmote(senderId, data.insertid, "textcolor", emotions.textColor, true);
+        this.theatre.setUserEmote(senderId, data.insertid, "emote", <string>emotions.emote, true);
+        this.theatre.setUserEmote(senderId, data.insertid, "textflyin", <string>emotions.textFlyin, true);
+        this.theatre.setUserEmote(senderId, data.insertid, "textstanding", <string>emotions.textStanding, true);
+        this.theatre.setUserEmote(senderId, data.insertid, "textfont", <string>emotions.textFont, true);
+        this.theatre.setUserEmote(senderId, data.insertid, "textsize", String(emotions.textSize), true);
+        this.theatre.setUserEmote(senderId, data.insertid, "textcolor", <string>emotions.textColor, true);
 
         if (data.insertid == this.theatre.speakingAs)
             this.theatre.emoteMenuRenderer.initialize();
@@ -161,7 +162,7 @@ export default class SceneEventProcessor {
 
     processAddTextureEvent(event: AddTextureEvent) {
 
-        const insert = this.stage.getInsertById(event.insertid);
+        const insert = <StageInsert>this.stage.getInsertById(event.insertid);
         const actorId = Tools.toActorId(event.insertid);
 
         const params = Tools.getInsertParamsFromActorId(actorId);
@@ -223,7 +224,7 @@ export default class SceneEventProcessor {
 
     processAddAllTexturesEvent(event: AddAllTexturesEvent) {
 
-        const insert = this.stage.getInsertById(event.insertid);
+        const insert = <StageInsert>this.stage.getInsertById(event.insertid);
         const actorId = Tools.toActorId(event.insertid);
         const params = Tools.getInsertParamsFromActorId(actorId);
 
@@ -261,7 +262,7 @@ export default class SceneEventProcessor {
                     insert.label.text = params.name;
 
                     insert.clear();
-                    
+
                     this.theatre.workers.portrait_container_setup_worker.setupPortraitContainer(
                         event.insertid,
                         insert.optAlign,
@@ -308,10 +309,10 @@ export default class SceneEventProcessor {
     sendSceneEvent(
         eventType: AnySceneEventType,
         eventData: AnySceneEvent) {
-
-        game.socket.emit(Theatre.SOCKET,
+        // TODO Use socketlib instead
+        game.socket?.emit(Theatre.SOCKET,
             {
-                senderId: game.user.id,
+                senderId: <string>game.user?.id,
                 type: "sceneevent",
                 subtype: eventType,
                 data: eventData

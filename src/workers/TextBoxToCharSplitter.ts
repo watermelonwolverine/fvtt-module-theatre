@@ -2,10 +2,10 @@ import KHelpers from "./KHelpers";
 
 export default class TextBoxToCharSplitter {
     /**
-     * Split to chars, logically group words based on language. 
+     * Split to chars, logically group words based on language.
      *
      * @param text: The text to split.
-     * @param textBox: The textBox the text will be contained in. 
+     * @param textBox: The textBox the text will be contained in.
      *
      * @return: An array of HTMLElements of the split text.
      */
@@ -21,7 +21,7 @@ export default class TextBoxToCharSplitter {
         // grouping of characters, we should attempt to preserve words by collecting
         // character spans into divs.
         // If we're a language that is symbol based, and don't care about word groupings
-        // then we just out a stream of characters without regard to groupings. 
+        // then we just out a stream of characters without regard to groupings.
         //
         //
         switch (game.i18n.lang) {
@@ -34,7 +34,7 @@ export default class TextBoxToCharSplitter {
                 splitMode = 3;
                 break;
             case "ko":
-                // KS X ISO/IEC 26300:2007 (KO) 
+                // KS X ISO/IEC 26300:2007 (KO)
                 splitMode = 4;
                 break;
             case "zh":
@@ -126,7 +126,7 @@ export default class TextBoxToCharSplitter {
             let rSplit = "—.‥〳〴〵";
             let word = null;
             for (let idx = 0; idx < text.length; ++idx) {
-                let c = text[idx];
+                let c = <string>text[idx];
                 let rh = false;
                 let rt = false;
                 let rs = false;
@@ -154,7 +154,7 @@ export default class TextBoxToCharSplitter {
                         word.style.position = "relative";
                     }
                 }
-                if (rSplit.match(RegExp.escape(c)) && text[idx + 1] && (text[idx + 1] == c)) {
+                if (rSplit.match(RegExp.escape(c)) && la && (la == c)) {
                     // if c is of the rSplit set, and is followed by another of its type
                     rs = true;
                     if (!word) {
@@ -163,7 +163,7 @@ export default class TextBoxToCharSplitter {
                         word.style.position = "relative";
                     }
                 }
-                if (!isNaN(Number(c)) && text[idx + 1] && !isNaN(Number(text[idx + 1]))) {
+                if (!isNaN(Number(c)) && la && !isNaN(Number(la))) {
                     // keep numbers together
                     rs = true;
                     if (!word) {
@@ -174,7 +174,7 @@ export default class TextBoxToCharSplitter {
                 }
 
                 // scan next character to see if it belongs in the rHead or rTail
-                if (text[idx + 1] && (/*rTail.match(text[idx+1]) || */rHead.match(RegExp.escape(text[idx + 1]))))
+                if (la && (/*rTail.match(text[idx+1]) || */rHead.match(RegExp.escape(la))))
                     nv = true;
 
                 if (c == " ") {
@@ -230,12 +230,12 @@ export default class TextBoxToCharSplitter {
                 word = null;
             }
         } else if (splitMode == 4) {
-            // Korean Line breaking KS X ISO/IEC 26300:2007 (KO) 
+            // Korean Line breaking KS X ISO/IEC 26300:2007 (KO)
             let rHead = "!%),.:;?]}¢°'\"†‡℃〆〈《「『〕！％），．：；？］｝ ";
             let rTail = "$([\\{£¥'\"々〇〉》」〔＄（［｛｠￥￦#";
             let word = null;
             for (let idx = 0; idx < text.length; ++idx) {
-                let c = text[idx];
+                let c = <string>text[idx];
                 let rh = false;
                 let rt = false;
                 let rs = false;
@@ -262,7 +262,7 @@ export default class TextBoxToCharSplitter {
                         word.style.position = "relative";
                     }
                 }
-                if (!isNaN(Number(c)) && text[idx + 1] && !isNaN(Number(text[idx + 1]))) {
+                if (!isNaN(Number(c)) && la && !isNaN(Number(la))) {
                     // keep numbers together
                     rs = true;
                     if (!word) {
@@ -273,20 +273,21 @@ export default class TextBoxToCharSplitter {
                 }
 
                 // scan next character to see if it belongs in the rHead or rTail
-                if (text[idx + 1] && (/*rTail.match(text[idx+1]) || */rHead.match(RegExp.escape(text[idx + 1]))))
+                if (la && (/*rTail.match(text[idx+1]) || */rHead.match(RegExp.escape(la))))
                     nv = true;
 
                 if (c == " ") {
-                    // if not a newline, but a space output the space just like any other character. 
+                    // if not a newline, but a space output the space just like any other character.
                     let cspan = document.createElement("span");
                     cspan.textContent = c;
                     cspan.style.height = `${fontSize}px`;
                     cspan.style.width = `${fontSize / 4}px`;
                     cspan.style.position = "relative";
-                    if (word)
+                    if (word) {
                         word.appendChild(cspan);
-                    else
+                    } else {
                         textBox.appendChild(cspan);
+                    }
                     charSpans.push(cspan);
                 } else if (c == "\n") {
                     // end any word immediately, we trust the formatting over the Kinsoku Shori
@@ -296,10 +297,11 @@ export default class TextBoxToCharSplitter {
                     cspan.textContent = c;
                     cspan.style.height = `${fontSize}px`;
                     cspan.style.position = "relative";
-                    if (word)
+                    if (word) {
                         word.appendChild(cspan);
-                    else
+                    } else {
                         textBox.appendChild(cspan);
+                    }
                     charSpans.push(cspan);
                 }
 

@@ -1,6 +1,7 @@
-import StageInsert from "../components/stage/StageInsert";
+import type { EmoteDictionary } from "src/resources/resources_types";
+import type StageInsert from "../components/stage/StageInsert";
 import ActorExtensions from "../extensions/ActorExtensions";
-import Theatre from "../Theatre";
+import type Theatre from "../Theatre";
 
 export default class EmoteSetter {
 
@@ -15,8 +16,8 @@ export default class EmoteSetter {
      * the moment the insert is in the RP bar
      *
      * @param ename: The emote name.
-     * @param insert: An Object representing the insert. 
-     * @param remote: Wether this is being invoked remotely or locally. 
+     * @param insert: An Object representing the insert.
+     * @param remote: Wether this is being invoked remotely or locally.
      *
      */
     setEmoteForInsert(
@@ -36,14 +37,14 @@ export default class EmoteSetter {
         if (!insert) return;
         let aEmote = insert.emotion.emote;
         let actorId = insert.imgId.replace("theatre-", "");
-        let actor = game.actors.get(actorId);
+        let actor = game.actors?.get(actorId);
         if (!actor) return;
 
         let baseInsert = actor.data.img ? actor.data.img : "icons/mystery-man.png";
 
         if (actor.data.flags.theatre)
             baseInsert = actor.data.flags.theatre.baseinsert ? actor.data.flags.theatre.baseinsert : baseInsert;
-        let emotes = ActorExtensions.getEmotesForActor(actorId);
+        let emotes = <EmoteDictionary>ActorExtensions.getEmotesForActor(actorId);
 
         // emote already active
         //if ((this.speakingAs != insert.imgId && !this.isDelayEmote) || this.delayedSentState > 2)
@@ -52,24 +53,24 @@ export default class EmoteSetter {
 
         if (!!ename
             && emotes[ename]
-            && emotes[ename].insert
-            && emotes[ename].insert != "") {
+            && emotes[ename]?.insert
+            && emotes[ename]?.insert != "") {
             // clear the pixi container
             insert.clear();
             // set this sprite to span the PIXI Container via setupPortraitCanvas
-            let imgSrcs = [];
+            let imgSrcs:{imgpath:string, resname: string}[] = [];
             // emote base image
-            const emoteResName: string = emotes[ename].insert;
-            imgSrcs.push({ imgpath: emotes[ename].insert, resname: emoteResName });
+            const emoteResName: string = <string>emotes[ename]?.insert;
+            imgSrcs.push({ imgpath: <string>emotes[ename]?.insert, resname: emoteResName });
             // add sprites
             this.theatre._addSpritesToPixi(imgSrcs, (loader, resources) => {
 
                 // Error loading the sprite
-                if (!resources[emoteResName] || resources[emoteResName].error) {
-                    console.error("ERROR loading resource %s : %s : %s", insert.imgId, emoteResName, emotes[ename].insert);
+                if (!resources[emoteResName] || resources[emoteResName]?.error) {
+                    console.error("ERROR loading resource %s : %s : %s", insert.imgId, emoteResName, emotes[ename]?.insert);
                     ui.notifications.error(game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P1") +
                         + emoteResName
-                        + game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P2") + emotes[ename].insert + "'");
+                        + game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P2") + emotes[ename]?.insert + "'");
                     this.theatre.stage.removeInsertById(insert.imgId);
                 }
 
@@ -83,13 +84,16 @@ export default class EmoteSetter {
                     resources,
                 );
                 // re-attach label + typingBubble
+                //@ts-ignore
                 insert.dockContainer.addChild(insert.label);
+                //@ts-ignore
                 insert.dockContainer.addChild(insert.typingBubble);
 
                 this.theatre._repositionInsertElements(insert);
 
-                if (!this.theatre.rendering)
+                if (!this.theatre.rendering) {
                     this.theatre._renderTheatre(performance.now());
+                }
             });
         } else {
             // load base insert unless the base insert is already loaded
@@ -100,20 +104,20 @@ export default class EmoteSetter {
 
             // flag our insert with our emote state, unless we're "actually" no emote rather
             // than just emoting with no insert available
-            if (ename)
+            if (ename) {
                 insert.emotion.emote = ename;
-            else
+            } else {
                 insert.emotion.emote = null;
-
+            }
             // if baseInsert is not present, put it in
             if (!loader.resources[baseInsert]) {
-                let imgSrcs = [];
+                let imgSrcs:{imgpath:string, resname:string}[] = [];
                 // clear the PIXI Container
                 imgSrcs.push({ imgpath: baseInsert, resname: baseInsert });
                 this.theatre._addSpritesToPixi(imgSrcs, (loader, resources) => {
 
                     // Error loading the sprite
-                    if (!resources[baseInsert] || resources[baseInsert].error) {
+                    if (!resources[baseInsert] || resources[baseInsert]?.error) {
                         console.error("ERROR loading resource %s : %s : %s", insert.imgId, baseInsert, baseInsert);
                         ui.notifications.error(game.i18n.localize("Theatre.UI.Notification.ImageLoadFail_P1") +
                             + baseInsert
@@ -125,20 +129,25 @@ export default class EmoteSetter {
                     this.theatre.workers.portrait_container_setup_worker.setupPortraitContainer(insert.imgId, insert.optAlign, baseInsert, resources);
 
                     // re-attach label + typingBubble
+                    //@ts-ignore
                     insert.dockContainer.addChild(insert.label);
+                    //@ts-ignore
                     insert.dockContainer.addChild(insert.typingBubble);
 
                     this.theatre._repositionInsertElements(insert);
 
-                    if (!this.theatre.rendering)
+                    if (!this.theatre.rendering) {
                         this.theatre._renderTheatre(performance.now());
+                    }
                 });
             } else {
                 // base exists
                 this.theatre.workers.portrait_container_setup_worker.setupPortraitContainer(insert.imgId, insert.optAlign, baseInsert, loader.resources);
 
                 // re-attach label + typingBubble
+                //@ts-ignore
                 insert.dockContainer.addChild(insert.label);
+                //@ts-ignore
                 insert.dockContainer.addChild(insert.typingBubble);
 
                 this.theatre._repositionInsertElements(insert);

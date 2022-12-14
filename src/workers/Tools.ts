@@ -24,7 +24,7 @@ export default class Tools {
         */
     static getInsertParamsFromActorId(actorId: string): Params|null {
 
-        let actor: Actor = game.actors.get(actorId);
+        let actor: Actor = <Actor>game.actors?.get(actorId);
 
         if (!actor) {
             console.log("ERROR, ACTOR %s DOES NOT EXIST!", actorId);

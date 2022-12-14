@@ -59,7 +59,7 @@ export default class Theatre {
 	static SOCKET = "module.theatre";
 	static NARRATOR = "Narrator";
 	static ICONLIB = "modules/theatre/app/graphics/emotes";
-	static instance: Theatre|undefined = undefined;
+	static instance: Theatre;
 
 	workers: _TheatreWorkers;
 	textFont: string;
@@ -1289,7 +1289,7 @@ export default class Theatre {
 		userId: string,
 		theatreId: string) {
 
-		let user = game.users?.get(userId);
+		let user = <User>game.users?.get(userId);
 		if (user.isGM) {
       return true;
     }
@@ -1342,7 +1342,7 @@ export default class Theatre {
      //@ts-ignore
 		for (let perm in actor.ownership) {
 			if (perm != "default") {
-				user = game.users?.get(perm);
+				user = <User>game.users?.get(perm);
 				if (!user.isGM) {
 					return true;
         }
@@ -2698,7 +2698,7 @@ export default class Theatre {
 		if (!remote && (!this.isPlayerOwned(insert1.imgId) || !this.isPlayerOwned(insert2.imgId))) {
 			ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.CannotSwapControlled"));
 			return;
-		} else if (!remote && (!this.isActorOwner(game.user?.id, insert1.imgId) && !this.isActorOwner(game.user?.id, insert2.imgId))) {
+		} else if (!remote && (!this.isActorOwner(<string>game.user?.id, insert1.imgId) && !this.isActorOwner(<string>game.user?.id, insert2.imgId))) {
 			ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.CannotSwapOwner"));
 			return;
 		}
@@ -2832,7 +2832,7 @@ export default class Theatre {
 		remote: boolean = false) {
 
 		// permission check
-		if (!remote && !this.isActorOwner(game.user?.id, insert2.imgId)) {
+		if (!remote && !this.isActorOwner(<string>game.user?.id, insert2.imgId)) {
 			ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.CannotMoveOwner"));
 			return;
 		} else if (!remote && (!this.isPlayerOwned(insert1.imgId) || !this.isPlayerOwned(insert2.imgId))) {
@@ -3021,7 +3021,7 @@ export default class Theatre {
 		if (!firstInsert || !lastInsert || !firstTextBox || !lastTextBox) return;
 
 		// permission check
-		if (!remote && !this.isActorOwner(game.user?.id, insert.imgId)) {
+		if (!remote && !this.isActorOwner(<string>game.user?.id, insert.imgId)) {
 			ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.DoNotControl"));
 			return;
 		} else if (!remote && (isLeft ? !this.isPlayerOwned(firstInsert.imgId) : !this.isPlayerOwned(lastInsert.imgId))) {
@@ -3103,7 +3103,7 @@ export default class Theatre {
 		insert: StageInsert,
 		remote: boolean = false) {
 		// permission check
-		if (!remote && (!this.isActorOwner(game.user?.id, insert.imgId))) {
+		if (!remote && (!this.isActorOwner(<string>game.user?.id, insert.imgId))) {
 			ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.DoNotControl"));
 			return;
 		}
@@ -3191,7 +3191,7 @@ export default class Theatre {
 		insert: StageInsert,
 		remote: boolean = false) {
 		// permission check
-		if (!remote && !this.isActorOwner(game.user?.id, insert.imgId)) {
+		if (!remote && !this.isActorOwner(<string>game.user?.id, insert.imgId)) {
 			ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.DoNotControl"));
 			return;
 		}
@@ -3417,7 +3417,7 @@ export default class Theatre {
 			}
 		}
 
-		const emotes = this.userEmotes.get(game.user?.id);
+		const emotes = this.userEmotes.get(<string>game.user?.id);
 
 		return {
 			emote: emotes ? emotes.emote : null,
@@ -3440,11 +3440,11 @@ export default class Theatre {
 	activateInsertById(
 		id: string,
 		ev: MouseEvent) {
-		let actorId = id.replace("theatre-", "");
+		let actorId = <string>id.replace("theatre-", "");
 		let navItem = this.getNavItemById(id);
 		if (!navItem) {
-			let actor = game.actors.get(actorId);
-			this.navBar.addToNavBar(actor.data);
+			let actor = <Actor>game.actors?.get(actorId);
+			this.navBar.addToNavBar(actor);
 			navItem = this.getNavItemById(id);
 		}
 		if (!navItem) return;
@@ -3535,7 +3535,7 @@ export default class Theatre {
 				cimg.removeAttribute("src");
 				cimg.style.opacity = "0";
 				// clear typing theatreId data
-				this.removeUserTyping(game.user?.id);
+				this.removeUserTyping(<string>game.user?.id);
         //@ts-ignore
 				this.usersTyping.get(<string>game.user?.id)?.theatreId = null;
 			}
@@ -3610,7 +3610,7 @@ export default class Theatre {
 		}
 		// send typing event
 		this._sendTypingEvent();
-		this.setUserTyping(game.user?.id, this.speakingAs);
+		this.setUserTyping(<string>game.user?.id, this.speakingAs);
 		// re-render the emote menu (expensive)
 		this.emoteMenuRenderer.initialize();
 	}
@@ -3631,7 +3631,7 @@ export default class Theatre {
 		if (!textBox || !insert) {
       return;
     }
-		if (!remote && !this.isActorOwner(game.user?.id, theatreId)) {
+		if (!remote && !this.isActorOwner(<string>game.user?.id, theatreId)) {
 			ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.DoNotControl"));
 			return;
 		}
@@ -3968,9 +3968,10 @@ export default class Theatre {
 		ev: MouseEvent,
 		actorSheet: ActorSheet) {
 		ev.preventDefault();
-
-		if (!actorSheet.actor.data.flags.theatre) {
-			actorSheet.actor.data.flags.theatre = { baseinsert: "", name: "" };
+    //@ts.ignore
+		if (!actorSheet.actor.flags?.theatre) {
+      //@ts.ignore
+			actorSheet.actor.flags.theatre = { baseinsert: "", name: "" };
 		}
 
 		new TheatreActorConfig(actorSheet.actor, {

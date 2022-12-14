@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
 import TheatreSettings from "../extensions/TheatreSettings";
-import Theatre from "../Theatre";
+import type Theatre from "../Theatre";
 import TheatreStyle from "../types/TheatreStyle";
 import KHelpers from "./KHelpers";
-import SceneEventProcessor from "./SceneEventProcessor";
+import type SceneEventProcessor from "./SceneEventProcessor";
 import TextBoxMouseEventHandler from "./TextBoxMouseEventHandler";
 
 export default class TextBoxFactory {

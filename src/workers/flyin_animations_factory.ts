@@ -2,7 +2,7 @@ import TheatreSettings from "../extensions/TheatreSettings";
 import Theatre from "../Theatre";
 import TheatreStyle from "../types/TheatreStyle";
 import KHelpers from "./KHelpers";
-import { TextStandingAnimationFunction } from "./standing_animations_factory";
+import type { TextStandingAnimationFunction } from "./standing_animations_factory";
 
 export type Context = any;
 
@@ -195,26 +195,32 @@ export default class TextFlyinAnimationsFactory {
         speed: number,
         standingAnim: TextStandingAnimationFunction) {
 
-        let textBox: HTMLElement = null;
+        let textBox: HTMLElement|null = null;
 
         if (charSpans[0]) {
             switch (TheatreSettings.getTheatreStyle()) {
-                case TheatreStyle.LIGHTBOX:
+                case TheatreStyle.LIGHTBOX: {
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-light", 5);
-                    if (!textBox)
+                    if (!textBox) {
                         textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
+                    }
                     break;
-                case TheatreStyle.CLEARBOX:
+                }
+                case TheatreStyle.CLEARBOX: {
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-clear", 5);
-                    if (!textBox)
+                    if (!textBox) {
                         textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
+                    }
                     break;
-                case TheatreStyle.MANGABUBBLE:
+                }
+                case TheatreStyle.MANGABUBBLE: {
                     break;
+                }
                 case TheatreStyle.TEXTBOX:
-                default:
+                default: {
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
                     break;
+                }
             }
             if (textBox) {
                 textBox.style.setProperty("overflow-y", "visible");
@@ -275,25 +281,31 @@ export default class TextFlyinAnimationsFactory {
         speed: number,
         standingAnim: TextStandingAnimationFunction) {
 
-        let textBox: HTMLElement = null;
+        let textBox: HTMLElement|null = null;
         if (charSpans[0]) {
             switch (TheatreSettings.getTheatreStyle()) {
-                case TheatreStyle.LIGHTBOX:
+                case TheatreStyle.LIGHTBOX: {
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-light", 5);
-                    if (!textBox)
+                    if (!textBox) {
                         textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
+                    }
                     break;
-                case TheatreStyle.CLEARBOX:
+                }
+                case TheatreStyle.CLEARBOX: {
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-clear", 5);
-                    if (!textBox)
+                    if (!textBox) {
                         textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
+                    }
                     break;
-                case TheatreStyle.MANGABUBBLE:
+                }
+                case TheatreStyle.MANGABUBBLE: {
                     break;
+                }
                 case TheatreStyle.TEXTBOX:
-                default:
+                default: {
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
                     break;
+                }
             }
             if (textBox) {
                 textBox.style.setProperty("overflow-y", "visible");
@@ -332,25 +344,31 @@ export default class TextFlyinAnimationsFactory {
         speed: number,
         standingAnim: TextStandingAnimationFunction) {
 
-        let textBox: HTMLElement = null;
+        let textBox: HTMLElement|null = null;
         if (charSpans[0]) {
             switch (TheatreSettings.getTheatreStyle()) {
-                case TheatreStyle.LIGHTBOX:
+                case TheatreStyle.LIGHTBOX: {
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-light", 5);
-                    if (!textBox)
+                    if (!textBox) {
                         textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
+                    }
                     break;
-                case TheatreStyle.CLEARBOX:
+                }
+                case TheatreStyle.CLEARBOX: {
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box-clear", 5);
-                    if (!textBox)
+                    if (!textBox) {
                         textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
+                    }
                     break;
-                case TheatreStyle.MANGABUBBLE:
+                }
+                case TheatreStyle.MANGABUBBLE: {
                     break;
+                }
                 case TheatreStyle.TEXTBOX:
-                default:
+                default: {
                     textBox = KHelpers.seekParentClass(charSpans[0], "theatre-text-box", 5);
                     break;
+                }
             }
             if (textBox) {
                 textBox.style.setProperty("overflow-y", "visible");
