@@ -1,101 +1,88 @@
 import type Theatre from "../../../Theatre";
 import TextFlyinAnimationsFactory from "../../../workers/flyin_animations_factory";
 import KHelpers from "../../../workers/KHelpers";
-import type { TextStandingAnimationDefinition, TextStandingAnimationDefinitionDictionary, TextStandingAnimationFunction } from "../../../workers/standing_animations_factory";
+import type {
+	TextStandingAnimationDefinition,
+	TextStandingAnimationDefinitionDictionary,
+	TextStandingAnimationFunction,
+} from "../../../workers/standing_animations_factory";
 import TextBoxToCharSplitter from "../../../workers/TextBoxToCharSplitter";
 
 export default class TextStandingMenuItemMouseEventHandler {
+	theatre: Theatre;
+	animationDefinitions: TextStandingAnimationDefinitionDictionary;
 
-    theatre: Theatre;
-    animationDefinitions: TextStandingAnimationDefinitionDictionary;
+	constructor(theatre: Theatre, animationDefinitions: TextStandingAnimationDefinitionDictionary) {
+		this.theatre = theatre;
+		this.animationDefinitions = animationDefinitions;
+	}
 
+	handleMouseOver(ev: MouseEvent): void {
+		const currentTarget = <HTMLElement>ev.currentTarget;
 
-    constructor(
-        theatre: Theatre,
-        animationDefinitions: TextStandingAnimationDefinitionDictionary) {
+		let text = <string>currentTarget.getAttribute("otext");
+		let anim = <string>currentTarget.getAttribute("name");
 
-        this.theatre = theatre;
-        this.animationDefinitions = animationDefinitions;
-    }
+		currentTarget.textContent = "";
+		let charSpans = TextBoxToCharSplitter.splitTextBoxToChars(text, currentTarget);
+		TextFlyinAnimationsFactory.do_typewriter(
+			charSpans,
+			0.5,
+			0.05,
+			this.animationDefinitions[anim]
+				? <TextStandingAnimationFunction>this.animationDefinitions[anim]?.func
+				: null
+		);
+	}
 
-    handleMouseOver(ev: MouseEvent): void {
+	handleMouseOut(ev: MouseEvent, sender: HTMLElement): void {
+		const currentTarget = <HTMLElement>ev.currentTarget;
 
-        const currentTarget = <HTMLElement>ev.currentTarget;
+		for (let c of currentTarget.children) {
+			for (let sc of c.children) {
+				gsap.killTweensOf(sc);
+			}
+			gsap.killTweensOf(c);
+		}
+		for (let c of currentTarget.children) {
+			c.parentNode?.removeChild(c);
+		}
+		gsap.killTweensOf(sender);
+		sender.style.setProperty("overflow-y", "scroll");
+		sender.style.setProperty("overflow-x", "hidden");
 
-        let text = <string>currentTarget.getAttribute("otext");
-        let anim = <string>currentTarget.getAttribute("name");
+		currentTarget.textContent = currentTarget.getAttribute("otext");
+	}
 
-        currentTarget.textContent = "";
-        let charSpans = TextBoxToCharSplitter.splitTextBoxToChars(text, currentTarget);
-        TextFlyinAnimationsFactory.do_typewriter(
-            charSpans,
-            0.5,
-            0.05,
-            (this.animationDefinitions[anim] ? <TextStandingAnimationFunction>this.animationDefinitions[anim]?.func : null));
-    }
+	handleMouseUp(ev: MouseEvent): void {
+		const currentTarget = <HTMLElement>ev.currentTarget;
 
-    handleMouseOut(
-        ev: MouseEvent,
-        sender: HTMLElement): void {
+		if (ev.button == 0) {
+			if (KHelpers.hasClass(currentTarget, "textstanding-active")) {
+				KHelpers.removeClass(<HTMLElement>ev.currentTarget, "textstanding-active");
 
-        const currentTarget = <HTMLElement>ev.currentTarget;
+				this.theatre.setUserEmote(<string>game.user?.id, this.theatre.speakingAs, "textstanding", null);
+			} else {
+				let lastActives = <HTMLCollectionOf<Element>>(
+					this.theatre.theatreControls.theatreEmoteMenu?.getElementsByClassName("textstanding-active")
+				);
 
-        for (let c of currentTarget.children) {
-            for (let sc of c.children) {
-                gsap.killTweensOf(sc);
-            }
-            gsap.killTweensOf(c);
-        }
-        for (let c of currentTarget.children) {
-            c.parentNode?.removeChild(c);
-        }
-        gsap.killTweensOf(sender);
-        sender.style.setProperty("overflow-y", "scroll");
-        sender.style.setProperty("overflow-x", "hidden");
+				for (const lastActive of lastActives) {
+					KHelpers.removeClass(<HTMLElement>lastActive, "textstanding-active");
+				}
 
-        currentTarget.textContent = currentTarget.getAttribute("otext");
-    }
+				KHelpers.addClass(<HTMLElement>ev.currentTarget, "textstanding-active");
 
-    handleMouseUp(ev: MouseEvent): void {
+				this.theatre.setUserEmote(
+					<string>game.user?.id,
+					this.theatre.speakingAs,
+					"textstanding",
+					currentTarget.getAttribute("name")
+				);
+			}
 
-        const currentTarget = <HTMLElement>ev.currentTarget;
-
-        if (ev.button == 0) {
-            if (KHelpers.hasClass(currentTarget, "textstanding-active")) {
-
-                KHelpers.removeClass(
-                    <HTMLElement>ev.currentTarget,
-                    "textstanding-active");
-
-                this.theatre.setUserEmote(
-                    <string>game.user?.id,
-                    this.theatre.speakingAs,
-                    'textstanding',
-                    null);
-
-            } else {
-                let lastActives = <HTMLCollectionOf<Element>>this.theatre.theatreControls.theatreEmoteMenu?.getElementsByClassName("textstanding-active");
-
-                for (const lastActive of lastActives) {
-                    KHelpers.removeClass(
-                        <HTMLElement>lastActive,
-                        "textstanding-active");
-                }
-
-                KHelpers.addClass(
-                    <HTMLElement>ev.currentTarget,
-                    "textstanding-active");
-
-                this.theatre.setUserEmote(
-                    <string>game.user?.id,
-                    this.theatre.speakingAs,
-                    'textstanding',
-                    currentTarget.getAttribute("name"));
-
-            }
-
-            let chatMessage = document.getElementById("chat-message");
-            chatMessage?.focus();
-        }
-    }
+			let chatMessage = document.getElementById("chat-message");
+			chatMessage?.focus();
+		}
+	}
 }

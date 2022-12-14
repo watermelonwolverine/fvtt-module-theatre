@@ -3,58 +3,45 @@ import KHelpers from "../../../workers/KHelpers";
 import type ToolTipCanvas from "../../ToolTipCanvas";
 
 export default class EmoteMenuItemMouseEventHandler {
+	theatre: Theatre;
+	toolTipCanvas: ToolTipCanvas;
 
+	constructor(theatre: Theatre, toolTipCanvas: ToolTipCanvas) {
+		this.theatre = theatre;
+		this.toolTipCanvas = toolTipCanvas;
+	}
 
-    theatre: Theatre;
-    toolTipCanvas: ToolTipCanvas;
+	handleMouseUp(ev: MouseEvent) {
+		const currentTarget = <HTMLElement>ev.currentTarget;
 
-    constructor(theatre: Theatre,
-        toolTipCanvas: ToolTipCanvas) {
-        this.theatre = theatre;
-        this.toolTipCanvas = toolTipCanvas;
-    }
+		if (ev.button == 0) {
+			let emName = currentTarget.getAttribute("name");
+			if (KHelpers.hasClass(currentTarget, "emote-active")) {
+				KHelpers.removeClass(currentTarget, "emote-active");
 
-    handleMouseUp(ev: MouseEvent) {
+				this.theatre.setUserEmote(<string>game.user?.id, this.theatre.speakingAs, "emote", null);
+			} else {
+				let lastActives = <any>(
+					this.theatre.theatreControls.theatreEmoteMenu?.getElementsByClassName("emote-active")
+				);
 
-        const currentTarget = <HTMLElement>ev.currentTarget;
+				for (let la of lastActives) {
+					KHelpers.removeClass(<HTMLElement>la, "emote-active");
+				}
 
-        if (ev.button == 0) {
-            let emName = currentTarget.getAttribute("name");
-            if (KHelpers.hasClass(currentTarget, "emote-active")) {
-                KHelpers.removeClass(currentTarget, "emote-active");
+				KHelpers.addClass(currentTarget, "emote-active");
 
-                this.theatre.setUserEmote(
-                    <string>game.user?.id,
-                    this.theatre.speakingAs,
-                    'emote',
-                    null);
+				this.theatre.setUserEmote(<string>game.user?.id, this.theatre.speakingAs, "emote", emName);
+			}
+			// push focus to chat-message
+			let chatMessage = document.getElementById("chat-message");
+			chatMessage?.focus();
+		}
+	}
 
-            } else {
+	handleMouseEnter(ev: MouseEvent): void {
+		const currentTarget = <HTMLElement>ev.currentTarget;
 
-                let lastActives = <any>this.theatre.theatreControls.theatreEmoteMenu?.getElementsByClassName("emote-active");
-
-                for (let la of lastActives) {
-                    KHelpers.removeClass(<HTMLElement>la, "emote-active");
-                }
-
-                KHelpers.addClass(currentTarget, "emote-active");
-
-                this.theatre.setUserEmote(
-                    <string>game.user?.id,
-                    this.theatre.speakingAs,
-                    'emote',
-                    emName);
-            }
-            // push focus to chat-message
-            let chatMessage = document.getElementById("chat-message");
-            chatMessage?.focus();
-        }
-    }
-
-    handleMouseEnter(ev: MouseEvent): void {
-
-        const currentTarget = <HTMLElement>ev.currentTarget;
-
-        this.toolTipCanvas.configureTheatreToolTip(this.theatre.speakingAs, <string>currentTarget.getAttribute("name"));
-    }
+		this.toolTipCanvas.configureTheatreToolTip(this.theatre.speakingAs, <string>currentTarget.getAttribute("name"));
+	}
 }

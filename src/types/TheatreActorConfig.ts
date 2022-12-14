@@ -26,23 +26,22 @@ import KHelpers from "../workers/KHelpers";
 import { SceneEventTypes } from "./SceneEventTypes";
 
 export default class TheatreActorConfig extends FormApplication {
+	object: any;
 
-  object:any;
-
-	constructor(object:any = {}, options:any = {}) {
-
+	constructor(object: any = {}, options: any = {}) {
 		if (object._theatre_mod_configTab) {
 			options.tabs = [
-				{ navSelector: ".tabs", contentSelector: ".theatre-config-contents", initial: object._theatre_mod_configTab }
+				{
+					navSelector: ".tabs",
+					contentSelector: ".theatre-config-contents",
+					initial: object._theatre_mod_configTab,
+				},
 			];
 			if (object._theatre_mod_configTab === "emotes") {
 				options.height = 775;
 			}
 		}
 		super(object, options);
-
-
-
 	}
 
 	/**
@@ -54,9 +53,7 @@ export default class TheatreActorConfig extends FormApplication {
 		options.template = "modules/theatre/app/templates/theatre_actor_config.html";
 		options.width = 500;
 		options.height = 270;
-		options.tabs = [
-			{ navSelector: ".tabs", contentSelector: ".theatre-config-contents", initial: "main" }
-		];
+		options.tabs = [{ navSelector: ".tabs", contentSelector: ".theatre-config-contents", initial: "main" }];
 		return options;
 	}
 
@@ -69,19 +66,19 @@ export default class TheatreActorConfig extends FormApplication {
 
 	/**
 	 * Construct and return the data object used to render the HTML template for this form application.
-	   *
+	 *
 	 * @return (Object) : The Object to be used in handlebars compile
 	 */
 	getData() {
 		const entityName = this.object.name;
 		return {
-      title: entityName,
+			title: entityName,
 			entityName: entityName,
 			isGM: game.user?.isGM,
 			object: duplicate(this.object.data),
 			emote: ActorExtensions.getEmotesForActor(this.object.data._id),
 			options: this.options,
-		}
+		};
 	}
 
 	/**
@@ -90,35 +87,37 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @param html (JQuery) The rendered template ready to have listeners attached
 	 */
-	activateListeners(html:JQuery<HTMLElement>) {
+	activateListeners(html: JQuery<HTMLElement>) {
 		super.activateListeners(html);
 
 		let btnAdd = html[0]?.getElementsByClassName("theatre-config-btn-add-emote")[0];
 		if (btnAdd) {
 			btnAdd.addEventListener("click", this._onAddEmoteLine.bind(this));
-    }
-		let btnsEmoteConfig = <HTMLCollectionOf<Element>>html[0]?.getElementsByClassName("theatre-config-btn-edit-emote");
+		}
+		let btnsEmoteConfig = <HTMLCollectionOf<Element>>(
+			html[0]?.getElementsByClassName("theatre-config-btn-edit-emote")
+		);
 		for (let btn of btnsEmoteConfig) {
 			btn.addEventListener("click", this._onEditEmoteLine.bind(this));
-    }
+		}
 		// Support custom icon updates
 		let iconsCustom = <HTMLCollectionOf<Element>>html[0]?.getElementsByClassName("customicon");
 		for (let icon of iconsCustom) {
 			icon.addEventListener("click", this._onCustomIconImage.bind(this));
-    }
+		}
 		// Support custom label updates
 		let labelsCustom = <HTMLCollectionOf<Element>>html[0]?.getElementsByClassName("customlabel");
 		for (let label of labelsCustom) {
 			this._setupCustomLabelEvents(<HTMLElement>label);
-    }
+		}
 	}
 
 	/** @override */
-	_onChangeTab(event:any, tabs:any, active:string) {
+	_onChangeTab(event: any, tabs: any, active: string) {
 		this.object._theatre_mod_configTab = active;
 		// Auto change height
 		const tab = this.element.find(`.tab[data-tab="${active}"]`)[0];
-		this.setPosition({ height: (tab && tab.offsetHeight + 125) || "auto" })
+		this.setPosition({ height: (tab && tab.offsetHeight + 125) || "auto" });
 	}
 
 	/**
@@ -130,8 +129,7 @@ export default class TheatreActorConfig extends FormApplication {
 	 *                   as well as a set of data which only contains the updated
 	 *                   emotes (excluding other theatre updates)
 	 */
-	_verifyCustomEmotes(formData:any) {
-
+	_verifyCustomEmotes(formData: any) {
 		// find the formdata elements that contain "custom#" in their chain
 		// once we find these objects, verify that there's a boolean attribute
 		// specifying that it is a customEmote
@@ -141,9 +139,9 @@ export default class TheatreActorConfig extends FormApplication {
 		// then we add it to the form submission
 		for (let k in formData)
 			if (formData[k] && /emotes\.custom\d+/.test(k)) {
-        //@ts-ignore
+				//@ts-ignore
 				let mch = k.match(/flags\.theatre\.emotes\.custom\d+/)[0];
-        //@ts-ignore
+				//@ts-ignore
 				let name = mch.match(/custom\d+/)[0];
 				let labelPath = mch + ".label";
 				let cflagPath = mch + ".custom";
@@ -151,33 +149,29 @@ export default class TheatreActorConfig extends FormApplication {
 				// if label is both the formData as well as the object, reject the submission
 				let emoteProp = getProperty(this.object.data, mch);
 				let labelProp = null;
-				if (emoteProp)
-					labelProp = getProperty(this.object.data, labelPath);
+				if (emoteProp) labelProp = getProperty(this.object.data, labelPath);
 
-				if ((!labelProp || labelProp == "")
-					&& (!formData[labelPath] || formData[labelPath] == "")) {
+				if ((!labelProp || labelProp == "") && (!formData[labelPath] || formData[labelPath] == "")) {
 					console.log("ERROR: No label for custom emote defined!");
 					ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.BadCustomEmote"));
 					return false;
 				}
 
-				if (!emoteProp || !getProperty(this.object.data, cflagPath))
-					formData[cflagPath] = true;
-				if (!emoteProp || !getProperty(this.object.data, namePath))
-					formData[namePath] = name;
+				if (!emoteProp || !getProperty(this.object.data, cflagPath)) formData[cflagPath] = true;
+				if (!emoteProp || !getProperty(this.object.data, namePath)) formData[namePath] = name;
 			}
 
 		// collect emote form updates + revised form updates
 		let configElement = <HTMLElement>this.element[0];
 		let toDelete = configElement.querySelectorAll('.theatre-config-form-group[todelete="true"]');
-		let emoteFormData:any = {};
-		let revisedFormData:any = {};
+		let emoteFormData: any = {};
+		let revisedFormData: any = {};
 		for (let k in formData) {
 			let rem = false;
 			let isCustom = /custom\d+/.test(k);
 			let isEmote = /flags\.theatre\.emotes\./.test(k);
 			if (formData[k] && isCustom) {
-        //@ts-ignore
+				//@ts-ignore
 				let mch = k.match(/custom\d+/)[0];
 				for (let d of toDelete)
 					if (d.getAttribute("name") == mch) {
@@ -185,10 +179,8 @@ export default class TheatreActorConfig extends FormApplication {
 						break; // don't add it to our new object
 					}
 			}
-			if (!rem && isEmote)
-				emoteFormData[k] = formData[k];
-			else if (!rem && !isEmote)
-				revisedFormData[k] = formData[k];
+			if (!rem && isEmote) emoteFormData[k] = formData[k];
+			else if (!rem && !isEmote) revisedFormData[k] = formData[k];
 		}
 		// null out the entries if deleted in emote form, revised simply does not have any updates
 		// to deleted entries
@@ -208,10 +200,10 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @return Object : An object represeting the formData, but updated with new entries to be updated.
 	 */
-	_processUpdateLabels(formData:any) {
+	_processUpdateLabels(formData: any) {
 		let html = <HTMLElement>this.element[0];
 
-		let dataLabels = html.querySelectorAll('label[data-edit]');
+		let dataLabels = html.querySelectorAll("label[data-edit]");
 		for (let label of dataLabels) {
 			let target = <string>label.getAttribute("data-edit");
 			formData[target] = label.textContent;
@@ -222,13 +214,13 @@ export default class TheatreActorConfig extends FormApplication {
 	/**
 	 * Implement the _updateObject method as required by the parent class spec
 	 * This defines how to update the subject of the form when the form is submitted
-	   *
-	   * @param event (Object) : event that triggered this update ?
-	   * @param formData (Object) : An object representing the formData that will be used to update the Entity.
-	   *
+	 *
+	 * @param event (Object) : event that triggered this update ?
+	 * @param formData (Object) : An object representing the formData that will be used to update the Entity.
+	 *
 	 * @private
 	 */
-	async _updateObject(event:any, formData:any) {
+	async _updateObject(event: any, formData: any) {
 		formData["_id"] = this.object._id;
 
 		// if our baseinsert value was updated..
@@ -236,7 +228,8 @@ export default class TheatreActorConfig extends FormApplication {
 		let baseInsert = formData["flags.theatre.baseinsert"];
 		let optAlign = formData["flags.theatre.optalign"];
 		let name = formData["flags.theatre.name"];
-		let newBaseInsert = this.object.data.flags.theatre.baseinsert || (this.object.img ? this.object.img : "icons/mystery-man.png");
+		let newBaseInsert =
+			this.object.data.flags.theatre.baseinsert || (this.object.img ? this.object.img : "icons/mystery-man.png");
 		let newName = this.object.data.flags.theatre.name || this.object.data.name;
 		let newAlign = this.object.data.flags.theatre.optalign || "top";
 
@@ -247,7 +240,8 @@ export default class TheatreActorConfig extends FormApplication {
 
 		if (baseInsert != this.object.data.flags.theatre.baseinsert) {
 			insertDirty = true;
-			newBaseInsert = (baseInsert == "" ? (this.object.img ? this.object.img : "icons/mystery-man.png") : baseInsert);
+			newBaseInsert =
+				baseInsert == "" ? (this.object.img ? this.object.img : "icons/mystery-man.png") : baseInsert;
 			if (navItem) {
 				navItem.setAttribute("src", newBaseInsert);
 				cImg.setAttribute("src", newBaseInsert);
@@ -255,16 +249,18 @@ export default class TheatreActorConfig extends FormApplication {
 		}
 		if (optAlign != this.object.data.flags.theatre.optalign) {
 			insertDirty = true;
-			newAlign = (optAlign == "" ? "top" : optAlign)
-			if (navItem)
-				navItem.setAttribute("optalign", newAlign);
+			newAlign = optAlign == "" ? "top" : optAlign;
+			if (navItem) navItem.setAttribute("optalign", newAlign);
 		}
 		if (name != this.object.data.flags.theatre.name) {
 			insertDirty = true;
-			newName = (name == "" ? this.object.data.name : name);
+			newName = name == "" ? this.object.data.name : name;
 			if (navItem) {
 				navItem.setAttribute("name", newName);
-				navItem.setAttribute("title", newName + (newName == this.object.data.name ? "" : ` (${this.object.data.name})`));
+				navItem.setAttribute(
+					"title",
+					newName + (newName == this.object.data.name ? "" : ` (${this.object.data.name})`)
+				);
 			}
 		}
 		// Add label information to update if it has data-edit
@@ -278,11 +274,11 @@ export default class TheatreActorConfig extends FormApplication {
 		// check all image resources, if they differ the actor's, we need to replace the texture, and then tell all other clients to do so as well!
 		//let inserts = formData.filter((e,k) => {return k.endsWith("insert") || k.endsWith("baseinsert")});
 		let insert = <StageInsert>Theatre.instance.stage.getInsertById(theatreId);
-		let container = (insert ? insert.dockContainer : null);
+		let container = insert ? insert.dockContainer : null;
 		let app = Theatre.instance.pixiCTX;
 		let insertEmote = <string>Theatre.instance._getEmoteFromInsert(insert);
-		let newSrcImg:string|null = null;
-		let imgSrcs:{imgpath: string,resname: string}[] = [];
+		let newSrcImg: string | null = null;
+		let imgSrcs: { imgpath: string; resname: string }[] = [];
 
 		for (let k in formData)
 			if (k.endsWith("insert") || k.endsWith("baseinsert")) {
@@ -290,10 +286,10 @@ export default class TheatreActorConfig extends FormApplication {
 				// if the old value does not exist, we will continue
 				if (formData[k] != oldValue) {
 					let emoteRegex = k.match(/emotes\.[a-z0-9\-]+/);
-          let emote:string|null = null;
+					let emote: string | null = null;
 					if (emoteRegex) {
 						emote = emoteRegex[0].replace(/emotes\./, "");
-          }
+					}
 					let resName = <string>formData[k];
 					// A special case exists where the baseportrait is removed, and replaced with either
 					// null or an empty string, we can set this value, but we need to change the re-render
@@ -302,95 +298,102 @@ export default class TheatreActorConfig extends FormApplication {
 						// try to restore baseinsert
 						let formBaseInsert = formData["flags.theatre.baseinsert"];
 						if (k.endsWith("insert") && !k.endsWith("baseinsert")) {
-							if (formBaseInsert && formBaseInsert != "")
-								resName = formBaseInsert;
-							else if (this.object.data.flags.theatre.baseinsert && this.object.data.flags.theatre.baseinsert != "")
+							if (formBaseInsert && formBaseInsert != "") resName = formBaseInsert;
+							else if (
+								this.object.data.flags.theatre.baseinsert &&
+								this.object.data.flags.theatre.baseinsert != ""
+							)
 								resName = this.object.data.flags.theatre.baseinsert;
-							else
-								resName = (this.object.data.img ? this.object.data.img : "icons/mystery-man.png");
-						} else
-							resName = (this.object.data.img ? this.object.data.img : "icons/mystery-man.png");
+							else resName = this.object.data.img ? this.object.data.img : "icons/mystery-man.png";
+						} else resName = this.object.data.img ? this.object.data.img : "icons/mystery-man.png";
 					}
 
 					// ensure resource exists
-					if (!await srcExists(resName)) {
+					if (!(await srcExists(resName))) {
 						console.log("ERROR: Path %s does not exist!", resName);
-						ui.notifications.info(game.i18n.localize("Theatre.UI.Notification.BadFilepath") + `"${resName}"`);
+						ui.notifications.info(
+							game.i18n.localize("Theatre.UI.Notification.BadFilepath") + `"${resName}"`
+						);
 						return;
 					}
 
 					// to prevent firing off X number of packets on a save submit
-					imgSrcs.push(
-            {
-              imgpath: resName,
-              resname: resName
-            }
-          );
+					imgSrcs.push({
+						imgpath: resName,
+						resname: resName,
+					});
 					if (insertEmote == emote || !emote) {
 						newSrcImg = resName;
-          }
+					}
 				}
 			}
 
 		// check for null'd emotes, push the objects up a level if one exists
 		const newData = mergeObject(this.object.data, emoteFormData, { inplace: false });
 		let emMerge = newData.flags.theatre.emotes;
-		let nEmotes:any = {};
+		let nEmotes: any = {};
 		for (let emProp in emMerge) {
 			if (emMerge[emProp] == null) {
 				continue;
-      }
+			}
 			nEmotes[emProp] = emMerge[emProp];
 		}
 		// send the emote parent in bulk to get rid of unwanted children
 		revisedFormData["flags.theatre.emotes"] = nEmotes;
 
-
-		this.object.update(revisedFormData).then((response:any) => {
+		this.object.update(revisedFormData).then((response: any) => {
 			// perform texture updates if needed
 			if (imgSrcs.length > 0) {
 				// we know the active emote, thus all we need is the new source image
 
-				Theatre.instance._AddAllTextureResources(imgSrcs, theatreId, insertEmote, newSrcImg, (loader, resources) => {
-					// if our emote is active and we're replacing the emote texture, or base is active, and we're replacing the base texture
+				Theatre.instance._AddAllTextureResources(
+					imgSrcs,
+					theatreId,
+					insertEmote,
+					newSrcImg,
+					(loader, resources) => {
+						// if our emote is active and we're replacing the emote texture, or base is active, and we're replacing the base texture
 
+						if (app && container && newSrcImg) {
+							let resName = "icons/myster-man.png";
+							if (
+								insert.emotion.emote &&
+								this.object.flags.theatre.emotes[insert.emotion.emote].insert &&
+								this.object.flags.theatre.emotes[insert.emotion.emote].insert != ""
+							) {
+								resName = this.object.flags.theatre.emotes[insert.emotion.emote].insert;
+							} else if (
+								this.object.flags.theatre.baseinsert &&
+								this.object.flags.theatre.baseinsert != ""
+							) {
+								resName = this.object.flags.theatre.baseinsert;
+							} else if (this.object.img && this.object.img != "") {
+								resName = this.object.img;
+							}
 
-					if (app
-						&& container
-						&& newSrcImg) {
+							// bubble up dataum from the update
+							insert.optAlign = newAlign;
+							insert.name = newName;
+							insert.label.text = newName;
 
+							Theatre.instance._clearPortraitContainer(theatreId);
+							Theatre.instance.workers.portrait_container_setup_worker.setupPortraitContainer(
+								theatreId,
+								newAlign,
+								newSrcImg,
+								resources
+							);
+							// re-attach label + typingBubble
+							insert.dockContainer?.addChild(insert.label);
+							insert.dockContainer?.addChild(insert.typingBubble);
 
-						let resName = "icons/myster-man.png";
-						if (insert.emotion.emote
-							&& this.object.flags.theatre.emotes[insert.emotion.emote].insert
-							&& this.object.flags.theatre.emotes[insert.emotion.emote].insert != "") {
-							resName = this.object.flags.theatre.emotes[insert.emotion.emote].insert;
-            }
-						else if (this.object.flags.theatre.baseinsert
-							&& this.object.flags.theatre.baseinsert != "") {
-							resName = this.object.flags.theatre.baseinsert;
-            }
-						else if (this.object.img && this.object.img != "") {
-							resName = this.object.img;
-            }
+							Theatre.instance._repositionInsertElements(insert);
 
-						// bubble up dataum from the update
-						insert.optAlign = newAlign;
-						insert.name = newName;
-						insert.label.text = newName;
-
-						Theatre.instance._clearPortraitContainer(theatreId);
-						Theatre.instance.workers.portrait_container_setup_worker.setupPortraitContainer(theatreId, newAlign, newSrcImg, resources);
-						// re-attach label + typingBubble
-						insert.dockContainer?.addChild(insert.label);
-						insert.dockContainer?.addChild(insert.typingBubble);
-
-						Theatre.instance._repositionInsertElements(insert);
-
-						if (!Theatre.instance.rendering)
-							Theatre.instance._renderTheatre(performance.now());
-					}
-				}, false);
+							if (!Theatre.instance.rendering) Theatre.instance._renderTheatre(performance.now());
+						}
+					},
+					false
+				);
 
 				// replaceAllTextureResources will have performed the render, and sent the needed
 				// packets
@@ -400,20 +403,21 @@ export default class TheatreActorConfig extends FormApplication {
 
 			// if the insert is dirty, clear and setup
 			if (insertDirty && insert) {
-
 				let resName = "icons/myster-man.png";
-				if (insert.emotion.emote
-					&& this.object.data.flags.theatre.emotes[insert.emotion.emote].insert
-					&& this.object.data.flags.theatre.emotes[insert.emotion.emote].insert != "") {
+				if (
+					insert.emotion.emote &&
+					this.object.data.flags.theatre.emotes[insert.emotion.emote].insert &&
+					this.object.data.flags.theatre.emotes[insert.emotion.emote].insert != ""
+				) {
 					resName = this.object.data.flags.theatre.emotes[insert.emotion.emote].insert;
-        }
-				else if (this.object.data.flags.theatre.baseinsert
-					&& this.object.data.flags.theatre.baseinsert != "") {
+				} else if (
+					this.object.data.flags.theatre.baseinsert &&
+					this.object.data.flags.theatre.baseinsert != ""
+				) {
 					resName = this.object.data.flags.theatre.baseinsert;
-        }
-				else if (this.object.data.img && this.object.data.img != "") {
+				} else if (this.object.data.img && this.object.data.img != "") {
 					resName = this.object.data.img;
-        }
+				}
 
 				// bubble up dataum from the update
 				insert.optAlign = newAlign;
@@ -421,7 +425,12 @@ export default class TheatreActorConfig extends FormApplication {
 				insert.label.text = newName;
 
 				Theatre.instance._clearPortraitContainer(theatreId);
-				Theatre.instance.workers.portrait_container_setup_worker.setupPortraitContainer(theatreId, newAlign, resName, PIXI.Loader.shared.resources);
+				Theatre.instance.workers.portrait_container_setup_worker.setupPortraitContainer(
+					theatreId,
+					newAlign,
+					resName,
+					PIXI.Loader.shared.resources
+				);
 				// re-attach label + typingBubble
 				insert.dockContainer?.addChild(insert.label);
 				insert.dockContainer?.addChild(insert.typingBubble);
@@ -430,15 +439,17 @@ export default class TheatreActorConfig extends FormApplication {
 
 				if (!Theatre.instance.rendering) {
 					Theatre.instance._renderTheatre(performance.now());
-        }
+				}
 			}
 
 			if (theatreId == Theatre.instance.speakingAs) {
-			  Theatre.instance.emoteMenuRenderer.initialize();
-      }
+				Theatre.instance.emoteMenuRenderer.initialize();
+			}
 			if (insertDirty) {
-				Theatre.instance.sceneEventProcessor.sendSceneEvent(SceneEventTypes.renderinsert, { insertid: theatreId });
-      }
+				Theatre.instance.sceneEventProcessor.sendSceneEvent(SceneEventTypes.renderinsert, {
+					insertid: theatreId,
+				});
+			}
 		});
 	}
 
@@ -449,8 +460,7 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @private
 	 */
-	_onAddEmoteLine(ev:any) {
-
+	_onAddEmoteLine(ev: any) {
 		//ui.notifications.info(game.i18n.localize("Theatre.NotYet"));
 
 		// We need to get a custom emote name for storage purposes, this is a running index from
@@ -460,33 +470,38 @@ export default class TheatreActorConfig extends FormApplication {
 		let emoteContainer = ev.currentTarget.parentNode;
 		let formEmoteElems = emoteContainer.getElementsByClassName("theatre-config-form-group");
 
-		let customElems:{sortidx: number, elem: any;}[] = [];
+		let customElems: { sortidx: number; elem: any }[] = [];
 		for (let elem of formEmoteElems) {
 			let eName = elem.getAttribute("name");
 			if (eName && eName.startsWith("custom")) {
 				customElems.push({ sortidx: Number(eName.match(/\d+/)[0]), elem: elem });
-      }
+			}
 		}
 		// we grab max index, we don't care about possible missing indexes from removed custom emotes
 		// so we'll just leave them as gaps
-		customElems.sort((a, b) => { return a.sortidx - b.sortidx });
-		let customIdx = (customElems.length > 0 ? (<number>customElems[customElems.length - 1]?.sortidx + 1) : 1);
-
+		customElems.sort((a, b) => {
+			return a.sortidx - b.sortidx;
+		});
+		let customIdx = customElems.length > 0 ? <number>customElems[customElems.length - 1]?.sortidx + 1 : 1;
 
 		let customObjElems = [];
 		for (let k in this.object.data.flags.theatre.emotes) {
 			let eName = k;
 			if (eName && eName.startsWith("custom")) {
-				customObjElems.push({ sortidx: Number(((<string[]>eName.match(/\d+/))[0])), elem: this.object.data.flags.theatre.emotes[k] });
-      }
+				customObjElems.push({
+					sortidx: Number((<string[]>eName.match(/\d+/))[0]),
+					elem: this.object.data.flags.theatre.emotes[k],
+				});
+			}
 		}
 		// we grab max index, we don't care about possible missing indexes from removed custom emotes
 		// so we'll just leave them as gaps
-		customObjElems.sort((a, b) => { return a.sortidx - b.sortidx });
-		let customObjIdx = (customObjElems.length > 0 ? (<number>customObjElems[customObjElems.length - 1]?.sortidx + 1) : 1);
+		customObjElems.sort((a, b) => {
+			return a.sortidx - b.sortidx;
+		});
+		let customObjIdx =
+			customObjElems.length > 0 ? <number>customObjElems[customObjElems.length - 1]?.sortidx + 1 : 1;
 		let customName = `custom${Math.max(customIdx, customObjIdx)}`;
-
-
 
 		// inject a new DOM element to the emote list right before our button
 		let formGroup = document.createElement("div");
@@ -562,21 +577,21 @@ export default class TheatreActorConfig extends FormApplication {
 
 	/**
 	 * Handle changing customEmote image by
-	   *
-	   * @param ev (Event) triggered event
-	   *
+	 *
+	 * @param ev (Event) triggered event
+	 *
 	 * @private
 	 */
-	_onCustomIconImage(ev:any) {
+	_onCustomIconImage(ev: any) {
 		let target = ev.currentTarget;
 		new FilePicker({
 			type: "image",
 			current: target.getAttribute("src"),
-			callback: path => {
+			callback: (path) => {
 				target.src = path;
 			},
 			top: <number>this.position.top + 40,
-			left: <number>this.position.left + 10
+			left: <number>this.position.left + 10,
 		}).browse(target.getAttribute("src"));
 	}
 
@@ -587,12 +602,15 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @private
 	 */
-	_onCustomLabelClick(ev:any) {
+	_onCustomLabelClick(ev: any) {
 		// replace the label with an input box
 		ev.stopPropagation();
 		let inputLabel = document.createElement("input");
 		inputLabel.setAttribute("type", "text");
-		inputLabel.setAttribute("name", `flags.theatre.emotes.${ev.currentTarget.parentNode.getAttribute("name")}.label`);
+		inputLabel.setAttribute(
+			"name",
+			`flags.theatre.emotes.${ev.currentTarget.parentNode.getAttribute("name")}.label`
+		);
 		inputLabel.setAttribute("data-dtype", "String");
 		inputLabel.setAttribute("placeholder", game.i18n.localize("Theatre.UI.Config.CustomEmotePlaceholder"));
 		inputLabel.setAttribute("value", ev.currentTarget.textContent);
@@ -611,7 +629,7 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @private
 	 */
-	_onCustomLabelMouseEnter(ev:any) {
+	_onCustomLabelMouseEnter(ev: any) {
 		// show dock
 		let dock = ev.currentTarget.getElementsByClassName("theatre-config-emote-label-dock")[0];
 		dock.style.display = "flex";
@@ -624,7 +642,7 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @private
 	 */
-	_onCustomLabelMouseLeave(ev:any) {
+	_onCustomLabelMouseLeave(ev: any) {
 		// hide dock
 		let dock = ev.currentTarget.getElementsByClassName("theatre-config-emote-label-dock")[0];
 		dock.style.display = "none";
@@ -637,7 +655,7 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @private
 	 */
-	_onCustomLabelInputFocusOut(ev:any) {
+	_onCustomLabelInputFocusOut(ev: any) {
 		// re-build dock + label
 		let label = document.createElement("label");
 		let dock = document.createElement("div");
@@ -651,7 +669,10 @@ export default class TheatreActorConfig extends FormApplication {
 		label.textContent = ev.currentTarget.value;
 
 		label.setAttribute("title", game.i18n.localize("Theatre.UI.Title.ChooseEmoteName"));
-		label.setAttribute("data-edit", `flags.theatre.emotes.${ev.currentTarget.parentNode.getAttribute("name")}.label`);
+		label.setAttribute(
+			"data-edit",
+			`flags.theatre.emotes.${ev.currentTarget.parentNode.getAttribute("name")}.label`
+		);
 		dock.setAttribute("title", game.i18n.localize("Theatre.UI.Title.DeleteCustomEmote"));
 
 		dock.appendChild(deleteIcon);
@@ -669,7 +690,7 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @private
 	 */
-	_onCustomLabelDockClick(ev:any) {
+	_onCustomLabelDockClick(ev: any) {
 		// delete custom emote
 		// mark the form group as 'to be deleted' as a rider on our update call
 		let formGroup = KHelpers.seekParentClass(ev.currentTarget, "theatre-config-form-group", 5);
@@ -689,8 +710,7 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @private
 	 */
-	_onUndoDockDelete(ev:any) {
-
+	_onUndoDockDelete(ev: any) {
 		ev.stopPropagation();
 		ev.currentTarget.removeAttribute("todelete");
 		ev.currentTarget.style.left = "0";
@@ -705,7 +725,7 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @private
 	 */
-	_setupCustomLabelEvents(label:HTMLElement) {
+	_setupCustomLabelEvents(label: HTMLElement) {
 		label.addEventListener("click", this._onCustomLabelClick.bind(this));
 		label.addEventListener("mouseenter", this._onCustomLabelMouseEnter.bind(this));
 		label.addEventListener("mouseleave", this._onCustomLabelMouseLeave.bind(this));
@@ -720,10 +740,7 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @private
 	 */
-	_onEditEmoteLine(ev:any) {
+	_onEditEmoteLine(ev: any) {
 		ui.notifications.info(game.i18n.localize("Theatre.NotYet"));
 	}
-
-
 }
-

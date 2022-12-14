@@ -7,53 +7,44 @@ import type SceneEventProcessor from "./SceneEventProcessor";
 import TextBoxMouseEventHandler from "./TextBoxMouseEventHandler";
 
 export default class TextBoxFactory {
+	mouseEventHandler: TextBoxMouseEventHandler;
+	theatre: Theatre;
 
-    mouseEventHandler: TextBoxMouseEventHandler;
-    theatre: Theatre;
+	constructor(theatre: Theatre, sceneEventProcessor: SceneEventProcessor) {
+		this.theatre = theatre;
 
-    constructor(
-        theatre: Theatre,
-        sceneEventProcessor: SceneEventProcessor) {
+		this.mouseEventHandler = new TextBoxMouseEventHandler(theatre, sceneEventProcessor);
+	}
 
-        this.theatre = theatre;
+	createTextbox(portName: string, imgId: string) {
+		const textBox = document.createElement("div");
+		// textBox class + style depends on our display mode
+		switch (TheatreSettings.getTheatreStyle()) {
+			case TheatreStyle.LIGHTBOX:
+				KHelpers.addClass(textBox, "theatre-text-box-light");
+				break;
+			case TheatreStyle.CLEARBOX:
+				KHelpers.addClass(textBox, "theatre-text-box-clear");
+				break;
+			case TheatreStyle.MANGABUBBLE:
+				break;
+			case TheatreStyle.TEXTBOX:
+			default:
+				KHelpers.addClass(textBox, "theatre-text-box");
+				break;
+		}
+		KHelpers.addClass(textBox, "no-scrollbar");
 
-        this.mouseEventHandler = new TextBoxMouseEventHandler(
-            theatre,
-            sceneEventProcessor);
-    }
+		portName = portName.toLowerCase();
 
-    createTextbox(
-        portName: string,
-        imgId: string) {
+		textBox.setAttribute("name", portName);
+		textBox.setAttribute("imgid", imgId);
+		textBox.style.opacity = "0";
 
-        const textBox = document.createElement("div");
-        // textBox class + style depends on our display mode
-        switch (TheatreSettings.getTheatreStyle()) {
-            case TheatreStyle.LIGHTBOX:
-                KHelpers.addClass(textBox, "theatre-text-box-light");
-                break;
-            case TheatreStyle.CLEARBOX:
-                KHelpers.addClass(textBox, "theatre-text-box-clear");
-                break;
-            case TheatreStyle.MANGABUBBLE:
-                break;
-            case TheatreStyle.TEXTBOX:
-            default:
-                KHelpers.addClass(textBox, "theatre-text-box");
-                break;
-        }
-        KHelpers.addClass(textBox, "no-scrollbar");
+		this.theatre.applyFontFamily(textBox, this.theatre.textFont);
 
-        portName = portName.toLowerCase();
+		this.mouseEventHandler.addListeners(textBox);
 
-        textBox.setAttribute('name', portName);
-        textBox.setAttribute("imgid", imgId);
-        textBox.style.opacity = "0";
-
-        this.theatre.applyFontFamily(textBox, this.theatre.textFont);
-
-        this.mouseEventHandler.addListeners(textBox);
-
-        return textBox;
-    }
+		return textBox;
+	}
 }

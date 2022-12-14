@@ -1,12 +1,11 @@
 import type { AnyTheatreStyle } from "../types/TheatreStyle";
 
 export default class TheatreSettings {
-
 	static NAMESPACE = "theatre";
 
 	// keys
 	static REMOVE_LABEL_SHEET_HEADER = "removeLabelSheetHeader";
-	static SUPPRESS_OPACITY = "suppressOpacity"
+	static SUPPRESS_OPACITY = "suppressOpacity";
 	static SHIFT_PAUSE_ICON = "shiftPauseIcon";
 	static THEATRE_IMAGE_SIZE = "theatreImageSize";
 	static GM_ONLY = "gmOnly";
@@ -18,8 +17,6 @@ export default class TheatreSettings {
 	static TEXT_DECAY_MIN = "textDecayMin";
 	static TEXT_DECAY_RATE = "textDecayRate";
 	static MOTD_NEW_INFO = "string";
-
-
 
 	static getNameLocalizationKey(name: string): string {
 		return "Theatre.UI.Settings" + "." + name;
@@ -76,6 +73,4 @@ export default class TheatreSettings {
 	static getSuppressOpacity(): any {
 		return this.get<number>(this.SUPPRESS_OPACITY);
 	}
-
-
 }

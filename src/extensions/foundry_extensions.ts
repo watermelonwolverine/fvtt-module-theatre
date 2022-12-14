@@ -8,7 +8,6 @@ declare global {
 		canvas: never;
 		ui: never;
 		// combat-utility-belt extensions
-
 	}
 
 	interface Game {
@@ -17,7 +16,7 @@ declare global {
 
 	interface String {
 		/** Localizes the string via the global `game.i18n.localize()` function. */
-		localize(): string
+		localize(): string;
 	}
 	interface HTMLElement {
 		currentStyle: CSSStyleDeclaration;
