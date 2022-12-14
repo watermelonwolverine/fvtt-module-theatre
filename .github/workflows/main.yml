@@ -38,7 +38,7 @@ jobs:
         draft: false
         prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: 'module.json, package/module.zip'
+        artifacts: 'module.json, src/module.zip'
         tag: ${{ github.event.release.tag_name }}
         body: ${{ github.event.release.body }}
 
@@ -53,6 +53,6 @@ jobs:
         draft: false
         prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: 'module.json,package/module.zip'
+        artifacts: 'module.json,src/module.zip'
         tag: latest
         body: ${{ github.event.release.body }}
