@@ -1,6 +1,6 @@
-import Theatre from "../../../Theatre";
+import type Theatre from "../../../Theatre";
 import KHelpers from "../../../workers/KHelpers";
-import ToolTipCanvas from "../../ToolTipCanvas";
+import type ToolTipCanvas from "../../ToolTipCanvas";
 
 export default class EmoteMenuItemMouseEventHandler {
 
@@ -24,14 +24,14 @@ export default class EmoteMenuItemMouseEventHandler {
                 KHelpers.removeClass(currentTarget, "emote-active");
 
                 this.theatre.setUserEmote(
-                    game.user?.id,
+                    <string>game.user?.id,
                     this.theatre.speakingAs,
                     'emote',
                     null);
 
             } else {
 
-                let lastActives = this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName("emote-active");
+                let lastActives = <any>this.theatre.theatreControls.theatreEmoteMenu?.getElementsByClassName("emote-active");
 
                 for (let la of lastActives) {
                     KHelpers.removeClass(<HTMLElement>la, "emote-active");
@@ -40,14 +40,14 @@ export default class EmoteMenuItemMouseEventHandler {
                 KHelpers.addClass(currentTarget, "emote-active");
 
                 this.theatre.setUserEmote(
-                    game.user?.id,
+                    <string>game.user?.id,
                     this.theatre.speakingAs,
                     'emote',
                     emName);
             }
             // push focus to chat-message
             let chatMessage = document.getElementById("chat-message");
-            chatMessage.focus();
+            chatMessage?.focus();
         }
     }
 
@@ -55,6 +55,6 @@ export default class EmoteMenuItemMouseEventHandler {
 
         const currentTarget = <HTMLElement>ev.currentTarget;
 
-        this.toolTipCanvas.configureTheatreToolTip(this.theatre.speakingAs, currentTarget.getAttribute("name"));
+        this.toolTipCanvas.configureTheatreToolTip(this.theatre.speakingAs, <string>currentTarget.getAttribute("name"));
     }
 }

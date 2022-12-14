@@ -13,7 +13,7 @@ export default class StageInsert {
 
     name: string;
     emotion: EmotionDefinition
-    portrait: Portrait;
+    portrait: Portrait|null;
     label: PIXI.Text;
     typingBubble: PIXI.Sprite;
     exitOrientation: "left" | "right";
@@ -27,7 +27,7 @@ export default class StageInsert {
     meta: {}
     mirrored?= false;
     delayedOldEmote?: string;
-    decayTOId?: string|null;
+    decayTOId?: number;
     // given
     theatre: Theatre;
 

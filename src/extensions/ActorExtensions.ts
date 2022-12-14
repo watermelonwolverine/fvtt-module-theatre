@@ -1,7 +1,7 @@
 import Theatre from "src/Theatre";
 import DefaultEmotes from "../resources/default_emotes";
 import DefaultRiggingResources from "../resources/default_riggings";
-import { EmoteDictionary, RiggingResource } from "../resources/resources_types";
+import type { EmoteDictionary, RiggingResource } from "../resources/resources_types";
 
 export default class ActorExtensions {
 
@@ -20,10 +20,12 @@ export default class ActorExtensions {
         actorId: string,
         disableDefault?: boolean): EmoteDictionary {
 
-        const actor: Actor = game.actors.get(actorId);
-        const actorData: ActorData = actor ? actor.data : undefined;
-
+        const actor: Actor|undefined = game.actors?.get(actorId);
+        // const actorData: ActorData = actor ? actor.data : undefined;
+        const actorData: Actor|undefined = actor ? actor : undefined;
+        //@ts-ignore
         if (actorData && actorData.flags.theatre) {
+          //@ts-ignore
             const actorEmotes = actorData.flags.theatre.emotes;
             if (disableDefault) {
                 return actorEmotes;
@@ -37,7 +39,7 @@ export default class ActorExtensions {
 
     static getDisplayName(actorId: string) {
 
-        const actor: Actor = game.actors.get(actorId);
+        const actor: Actor|undefined = game.actors?.get(actorId);
 
         if (game.modules.get("combat-utility-belt")?.active) {
             if (game.settings.get("combat-utility-belt", "enableHideNPCNames")) {
@@ -47,7 +49,7 @@ export default class ActorExtensions {
             }
         }
 
-        return actor.name;
+        return actor?.name;
     }
 
     /**
@@ -61,14 +63,19 @@ export default class ActorExtensions {
      *							 representing the rigging resource map for the specified actorId.
      */
     static getRiggingResources(actorId: string): RiggingResource[] {
-        const actor: Actor = game.actors.get(actorId);
-        const actorData: ActorData = actor ? actor.data : undefined;
+        const actor: Actor|undefined = game.actors?.get(actorId);
+        const actorData: Actor|undefined  = actor ? actor : undefined;
 
 
         if (actorData
+            //@ts-ignore
             && actorData.flags.theatre
+            //@ts-ignore
             && actorData.flags.theatre.rigging
+            //@ts-ignore
             && actorData.flags.theatre.rigging.resources) {
+
+            //@ts-ignore
             const actorRiggings = actorData.flags.theatre.rigging.resources;
             return DefaultRiggingResources.get().concat(actorRiggings);
         } else

@@ -1,7 +1,7 @@
-import Theatre from "../../../Theatre";
+import type Theatre from "../../../Theatre";
 import TextFlyinAnimationsFactory from "../../../workers/flyin_animations_factory";
 import KHelpers from "../../../workers/KHelpers";
-import { TextStandingAnimationDefinitionDictionary } from "../../../workers/standing_animations_factory";
+import type { TextStandingAnimationDefinition, TextStandingAnimationDefinitionDictionary, TextStandingAnimationFunction } from "../../../workers/standing_animations_factory";
 import TextBoxToCharSplitter from "../../../workers/TextBoxToCharSplitter";
 
 export default class TextStandingMenuItemMouseEventHandler {
@@ -22,8 +22,8 @@ export default class TextStandingMenuItemMouseEventHandler {
 
         const currentTarget = <HTMLElement>ev.currentTarget;
 
-        let text = currentTarget.getAttribute("otext");
-        let anim = currentTarget.getAttribute("name");
+        let text = <string>currentTarget.getAttribute("otext");
+        let anim = <string>currentTarget.getAttribute("name");
 
         currentTarget.textContent = "";
         let charSpans = TextBoxToCharSplitter.splitTextBoxToChars(text, currentTarget);
@@ -31,7 +31,7 @@ export default class TextStandingMenuItemMouseEventHandler {
             charSpans,
             0.5,
             0.05,
-            (this.animationDefinitions[anim] ? this.animationDefinitions[anim].func : null));
+            (this.animationDefinitions[anim] ? <TextStandingAnimationFunction>this.animationDefinitions[anim]?.func : null));
     }
 
     handleMouseOut(
@@ -41,12 +41,14 @@ export default class TextStandingMenuItemMouseEventHandler {
         const currentTarget = <HTMLElement>ev.currentTarget;
 
         for (let c of currentTarget.children) {
-            for (let sc of c.children)
+            for (let sc of c.children) {
                 gsap.killTweensOf(sc);
+            }
             gsap.killTweensOf(c);
         }
-        for (let c of currentTarget.children)
-            c.parentNode.removeChild(c);
+        for (let c of currentTarget.children) {
+            c.parentNode?.removeChild(c);
+        }
         gsap.killTweensOf(sender);
         sender.style.setProperty("overflow-y", "scroll");
         sender.style.setProperty("overflow-x", "hidden");
@@ -66,13 +68,13 @@ export default class TextStandingMenuItemMouseEventHandler {
                     "textstanding-active");
 
                 this.theatre.setUserEmote(
-                    game.user?.id,
+                    <string>game.user?.id,
                     this.theatre.speakingAs,
                     'textstanding',
                     null);
 
             } else {
-                let lastActives = this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName("textstanding-active");
+                let lastActives = <HTMLCollectionOf<Element>>this.theatre.theatreControls.theatreEmoteMenu?.getElementsByClassName("textstanding-active");
 
                 for (const lastActive of lastActives) {
                     KHelpers.removeClass(
@@ -85,7 +87,7 @@ export default class TextStandingMenuItemMouseEventHandler {
                     "textstanding-active");
 
                 this.theatre.setUserEmote(
-                    game.user?.id,
+                    <string>game.user?.id,
                     this.theatre.speakingAs,
                     'textstanding',
                     currentTarget.getAttribute("name"));
@@ -93,7 +95,7 @@ export default class TextStandingMenuItemMouseEventHandler {
             }
 
             let chatMessage = document.getElementById("chat-message");
-            chatMessage.focus();
+            chatMessage?.focus();
         }
     }
 }

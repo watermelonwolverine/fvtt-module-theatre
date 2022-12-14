@@ -724,6 +724,9 @@ export default class Theatre {
 								if (Boolean(dat.position.mirror) != insert.mirrored) {
 									insert.mirrored = Boolean(dat.position.mirror);
 								}
+                if(!insert.portrait) {
+                  return;
+                }
 								// apply positioning data
 								insert.portrait.scaleX = <number>(insert.mirrored ? -1 : 1);
 								insert.portrait.x = <number>dat.position.x;
@@ -906,20 +909,24 @@ export default class Theatre {
 		userId: string,
 		theatreId: string,
 		subType: string,
-		value: string,
+		value: string|null,
 		remote: boolean = false) {
 
-		if (!this.userEmotes.get(userId))
+		if (!this.userEmotes.get(userId)) {
 			this.userEmotes.set(userId, new EmotionDefinition());
-
+    }
 		const userEmoting = <EmotionDefinition>this.userEmotes.get(userId);
 		const insert = <StageInsert>this.stage.getInsertById(theatreId);
 
 		switch (subType) {
 			case "textfont": {
 				if (insert) {
-					if (value) insert.emotion.textFont = value;
-					else insert.emotion.textFont = null;
+					if (value) {
+            insert.emotion.textFont = value;
+          }
+					else {
+            insert.emotion.textFont = null;
+          }
 				} else if (theatreId == Theatre.NARRATOR) {
 					if (value) this.theatreNarrator.setAttribute("textfont", value);
 					else this.theatreNarrator.removeAttribute("textfont");
@@ -930,14 +937,22 @@ export default class Theatre {
       }
 			case "textsize": {
 				if (insert) {
-					if (value) insert.emotion.textSize = parseInt(value);
-					else insert.emotion.textSize = null;
+					if (value) {
+            insert.emotion.textSize = parseInt(value);
+          }
+					else {
+            insert.emotion.textSize = null;
+          }
 				} else if (theatreId == Theatre.NARRATOR) {
-					if (value) this.theatreNarrator.setAttribute("textsize", value);
-					else this.theatreNarrator.removeAttribute("textsize");
-					userEmoting.textSize = parseInt(value);
+					if (value) {
+            this.theatreNarrator.setAttribute("textsize", value);
+          }
+					else {
+            this.theatreNarrator.removeAttribute("textsize");
+          }
+					userEmoting.textSize = parseInt(<string>value);
 				} else {
-					userEmoting.textSize = parseInt(value);
+					userEmoting.textSize = parseInt(<string>value);
 				}
 				break;
       }
@@ -990,7 +1005,7 @@ export default class Theatre {
 						}
 					} else {
 						insert.delayedOldEmote = <string>insert.emotion.emote;
-						this.setEmoteForInsertById(value, theatreId, remote);
+						this.setEmoteForInsertById(<string>value, theatreId, remote);
 					}
 					if (value) insert.emotion.emote = value;
 					else insert.emotion.emote = null;
@@ -1205,7 +1220,7 @@ export default class Theatre {
 				this._removeDockTween(insert.imgId, null, "typingWiggle");
 				this._removeDockTween(insert.imgId, null, "typingBounce");
 				// fade away
-				let oy = insert.portrait.height -
+				let oy = <number>insert.portrait?.height -
 					(insert.optAlign == "top" ? 0 : <number>this.stage.theatreBar?.offsetHeight);
 				// style specific settings
 				switch (TheatreSettings.getTheatreStyle()) {
@@ -1534,7 +1549,7 @@ export default class Theatre {
 				this._removeDockTween(imgId, null, tweenId);
 			insert.tweens = <any>null;
 			// destroy children
-			insert.portrait.destroy();
+			insert.portrait?.destroy();
 
 			for (let child of insert.dockContainer.children){
 				child.destroy();
@@ -1615,16 +1630,16 @@ export default class Theatre {
 			leftPos += textBox.offsetWidth - insert.portrait.width;
 		}
 		insert.typingBubble.y = insert.portrait.height -
-			(insert.optAlign == "top" ? 0 : <number>Theatre.instance?.theatreBar.offsetHeight) - insert.label.style.lineHeight + insert.typingBubble.height / 2;
+			(insert.optAlign == "top" ? 0 : <number>Theatre.instance.theatreBar.offsetHeight) - insert.label.style.lineHeight + insert.typingBubble.height / 2;
 		// if the label height > font-size, it word wrapped wrap, so we need to bump up the height
 		if (labelExceeds) {
 			let divisor = Math.round(insert.label.height / insert.label.style.lineHeight);
 			insert.label.y = insert.portrait.height -
-				(insert.optAlign == "top" ? 0 : <number>Theatre.instance?.theatreBar.offsetHeight) - (insert.label.style.lineHeight * divisor);
+				(insert.optAlign == "top" ? 0 : <number>Theatre.instance.theatreBar.offsetHeight) - (insert.label.style.lineHeight * divisor);
 		} else {
 			// normal
 			insert.label.y = insert.portrait.height -
-				(insert.optAlign == "top" ? 0 : <number>Theatre.instance?.theatreBar.offsetHeight) - insert.label.style.lineHeight;
+				(insert.optAlign == "top" ? 0 : <number>Theatre.instance.theatreBar.offsetHeight) - insert.label.style.lineHeight;
 		}
 		insert.typingBubble.rotation = 0.1745;
     //@ts-ignore
@@ -1645,8 +1660,8 @@ export default class Theatre {
 			case TheatreStyle.CLEARBOX: {
         //@ts-ignore
 				insert.dockContainer.y = this.stage.theatreDock?.offsetHeight - insert.portrait.height;
-				insert.label.y += (insert.optAlign == "top" ? 0 : <number>Theatre.instance?.theatreBar.offsetHeight);
-				insert.typingBubble.y += (insert.optAlign == "top" ? 0 : <number>Theatre.instance?.offsetHeight);
+				insert.label.y += (insert.optAlign == "top" ? 0 : <number>Theatre.instance.theatreBar.offsetHeight);
+				insert.typingBubble.y += (insert.optAlign == "top" ? 0 : <number>Theatre.instance.offsetHeight);
 				break;
       }
 			case TheatreStyle.MANGABUBBLE: {
@@ -3143,8 +3158,8 @@ export default class Theatre {
 			this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.positionupdate, {
 				insertid: insert.imgId,
 				position: {
-					x: insert.portrait.x,
-					y: insert.portrait.y,
+					x: insert.portrait?.x,
+					y: insert.portrait?.y,
 					mirror: insert.mirrored
 				}
 			});
@@ -3213,7 +3228,9 @@ export default class Theatre {
 			onCompleteParams: [this, insert.imgId, tweenId]
 		});
 		this._addDockTween(insert.imgId, tween, tweenId);
-
+    if(!insert.portrait) {
+      return;
+    }
 		// Push to socket our event
 		if (!remote) {
 			this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.positionupdate, {
@@ -3257,7 +3274,9 @@ export default class Theatre {
 			console.log('ERROR: resource name : "%s" with path "%s" does not exist!', tweenParams[0]?.resName, resTarget.path);
 			return;
 		}
-
+		if(!insert.portrait){
+      return;
+    }
 		const sprite = new PIXI.Sprite(resource.texture);
 		sprite.anchor.set(0.5);
 		insert.portrait.addEmote(sprite);
@@ -3548,9 +3567,9 @@ export default class Theatre {
 
 			// determine if to launch with actor saves or default settings
 			if (ev && ev.altKey) {
-				emotions = <EmotionDefinition>Theatre.instance?._getInitialEmotionSetFromInsertParams(params, true);
+				emotions = <EmotionDefinition>Theatre.instance._getInitialEmotionSetFromInsertParams(params, true);
       } else {
-				emotions = <EmotionDefinition>Theatre.instance?._getInitialEmotionSetFromInsertParams(params);
+				emotions = <EmotionDefinition>Theatre.instance._getInitialEmotionSetFromInsertParams(params);
       }
 			if (ev && !ev.shiftKey) {
 				if (game.user?.isGM) {
@@ -3643,7 +3662,7 @@ export default class Theatre {
 		// clear decay Timout if present
 		if (insert.decayTOId) {
 			window.clearTimeout(insert.decayTOId);
-			insert.decayTOId = null;
+			insert.decayTOId = undefined;
 		}
 		// kill tweens
 		for (let c of textBox.children) {
@@ -3925,13 +3944,13 @@ export default class Theatre {
 
 	updateSuppression(suppress: boolean) {
     //@ts-ignore
-		Theatre.instance?.isSuppressed = <boolean>suppress;
+		Theatre.instance.isSuppressed = <boolean>suppress;
 
 		let primeBar = <HTMLDivElement>this.stage.primeBar;
 		let secondBar = <HTMLDivElement>this.stage.secondBar;
 		let opacity: number|null = null
 
-		if (Theatre.instance?.isSuppressed) {
+		if (Theatre.instance.isSuppressed) {
 
 			opacity = TheatreSettings.getSuppressOpacity();
 
@@ -3948,12 +3967,12 @@ export default class Theatre {
     //@ts-ignore
 		this.stage?.theatreDock?.style.opacity = String(opacity);
     //@ts-ignore
-		Theatre.instance?.theatreBar.style.opacity = String(opacity);
+		Theatre.instance.theatreBar.style.opacity = String(opacity);
     //@ts-ignore
-		Theatre.instance?.theatreNarrator.style.opacity = String(opacity);
+		Theatre.instance.theatreNarrator.style.opacity = String(opacity);
 
 		// call hooks
-		Hooks.call("theatreSuppression", Theatre.instance?.isSuppressed);
+		Hooks.call("theatreSuppression", Theatre.instance.isSuppressed);
 	}
 
 	/**
@@ -3968,9 +3987,9 @@ export default class Theatre {
 		ev: MouseEvent,
 		actorSheet: ActorSheet) {
 		ev.preventDefault();
-    //@ts.ignore
+    //@ts-ignore
 		if (!actorSheet.actor.flags?.theatre) {
-      //@ts.ignore
+      //@ts-ignore
 			actorSheet.actor.flags.theatre = { baseinsert: "", name: "" };
 		}
 

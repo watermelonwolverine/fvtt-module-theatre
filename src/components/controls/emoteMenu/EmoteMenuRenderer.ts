@@ -1,13 +1,13 @@
 import ActorExtensions from "../../../extensions/ActorExtensions";
 import TheatreSettings from "../../../extensions/TheatreSettings";
-import { EmoteDictionary } from "../../../resources/resources_types";
+import type { EmoteDictionary } from "../../../resources/resources_types";
 import Theatre from "../../../Theatre";
 import TextFlyinAnimationsFactory, { TextFlyinAnimationDefinitions } from "../../../workers/flyin_animations_factory";
 import KHelpers from "../../../workers/KHelpers";
 import TextStandingAnimationsFactory, { TextStandingAnimationDefinitionDictionary } from "../../../workers/standing_animations_factory";
 import Tools from "../../../workers/Tools";
-import StageInsert from "../../stage/StageInsert";
-import ToolTipCanvas from "../../ToolTipCanvas";
+import type  StageInsert from "../../stage/StageInsert";
+import type  ToolTipCanvas from "../../ToolTipCanvas";
 import EmoteMenuItemMouseEventHandler from "./EmoteMenuItemMouseEventHandler";
 import TextFlyInMenuItemMouseEventHandler from "./TextFlyInMenuItemMouseEventHandler";
 import TextStandingMenuItemMouseEventHandler from "./TextStandingMenuItemMouseEventHandler";
@@ -47,14 +47,14 @@ export default class EmoteMenuInitilializer {
     initialize() {
         // each actor may have a different emote set
         // get actor emote set for currently speaking emote, else use the default set
-        let actorId = this.theatre.speakingAs ? Tools.toActorId(this.theatre.speakingAs) : null;
+        let actorId = <string>this.theatre.speakingAs ? Tools.toActorId(this.theatre.speakingAs) : null;
 
         let actor;
-        if (actorId)
-            actor = game.actors.get(actorId);
+        if (actorId) {
+            actor = <Actor>game.actors?.get(actorId);
+        }
 
-
-        const emotes = ActorExtensions.getEmotesForActor(actorId);
+        const emotes = ActorExtensions.getEmotesForActor(<string>actorId);
         // TODO find available fonts
         let fonts: string[] = [];
 
@@ -70,10 +70,11 @@ export default class EmoteMenuInitilializer {
     _add_listeners(template: string,
         emotes: EmoteDictionary) {
 
-        let insert = this.theatre.stage.getInsertById(this.theatre.speakingAs);
-
-        this.theatre.theatreControls.theatreEmoteMenu.style.top = `${this.theatre.theatreControls.root.offsetTop - 410}px`;
-        this.theatre.theatreControls.theatreEmoteMenu.innerHTML = template;
+        let insert = <StageInsert>this.theatre.stage.getInsertById(this.theatre.speakingAs);
+        //@ts-ignore
+        this.theatre.theatreControls.theatreEmoteMenu?.style.top = `${Number(this.theatre.theatreControls.root?.offsetTop) - 410}px`;
+        //@ts-ignore
+        this.theatre.theatreControls.theatreEmoteMenu?.innerHTML = template;
 
         this._initTextAttributeSelectors(insert);
 
@@ -85,35 +86,37 @@ export default class EmoteMenuInitilializer {
             emotes);
     }
     _initTextAttributeSelectors(insert: StageInsert) {
-        const colorSelect = <HTMLSelectElement>this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName('colorselect')[0];
-        const fontSelect = <HTMLSelectElement>this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName('fontselect')[0];
+        const colorSelect = <HTMLSelectElement>this.theatre.theatreControls.theatreEmoteMenu?.getElementsByClassName('colorselect')[0];
+        const fontSelect = <HTMLSelectElement>this.theatre.theatreControls.theatreEmoteMenu?.getElementsByClassName('fontselect')[0];
 
-        this.set_fontSelect_value(insert,
-            fontSelect);
+        this.set_fontSelect_value(insert,fontSelect);
+
         // assign color from insert
         if (insert && insert.emotion.textColor) {
             colorSelect.value = insert.emotion.textColor;
-        } else if (this.theatre.userEmotes.get(game.user?.id) && this.theatre.userEmotes.get(game.user?.id).textColor) {
-            colorSelect.value = this.theatre.userEmotes.get(game.user?.id).textColor;
-            if (insert) insert.emotion.textColor = colorSelect.value;
+        } else if (this.theatre.userEmotes.get(<string>game.user?.id) && this.theatre.userEmotes.get(<string>game.user?.id)?.textColor) {
+            colorSelect.value = <string>this.theatre.userEmotes.get(<string>game.user?.id)?.textColor;
+            if (insert) {
+              insert.emotion.textColor = colorSelect.value;
+            }
         }
         // assgin font size
         this.configure_size_select(insert);
 
         fontSelect.addEventListener("change", ev => {
-            this.theatre.setUserEmote(game.user?.id, this.theatre.speakingAs, 'textfont', (<HTMLSelectElement>(<HTMLElement>ev.currentTarget)).value);
+            this.theatre.setUserEmote(<string>game.user?.id, this.theatre.speakingAs, 'textfont', (<HTMLSelectElement>(<HTMLElement>ev.currentTarget)).value);
             this.initialize();
         });
 
         colorSelect.addEventListener("change", ev => {
-            this.theatre.setUserEmote(game.user?.id, this.theatre.speakingAs, 'textcolor', (<HTMLSelectElement>(<HTMLElement>ev.currentTarget)).value);
+            this.theatre.setUserEmote(<string>game.user?.id, this.theatre.speakingAs, 'textcolor', (<HTMLSelectElement>(<HTMLElement>ev.currentTarget)).value);
         });
 
 
         // Apply our language specific fonts to the template
         // OR apply the font specified by the insert
-        let headers = this.theatre.theatreControls.theatreEmoteMenu.getElementsByTagName('h2');
-        let textAnims = this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName('textanim');
+        let headers = <any>this.theatre.theatreControls.theatreEmoteMenu?.getElementsByTagName('h2');
+        let textAnims = <any>this.theatre.theatreControls.theatreEmoteMenu?.getElementsByClassName('textanim');
         for (let e of headers)
             this.theatre.applyFontFamily(e, TheatreSettings.getTitleFont());
         for (let element of textAnims) {
@@ -126,25 +129,29 @@ export default class EmoteMenuInitilializer {
 
     configure_size_select(insert: StageInsert) {
 
-        let sizeSelect = <HTMLSelectElement>this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName('sizeselect')[0];
+        let sizeSelect = <HTMLSelectElement>this.theatre.theatreControls.theatreEmoteMenu?.getElementsByClassName('sizeselect')[0];
 
         let sizeIcon = document.createElement("div");
         let sizeValue = 2;
-        if (insert)
-            sizeValue = insert.emotion.textSize;
-        else if (this.theatre.userEmotes.get(game.user?.id))
-            sizeValue = this.theatre.userEmotes.get(game.user?.id).textSize;
-
+        if (insert) {
+            sizeValue = Number(insert.emotion.textSize);
+        }
+        else if (this.theatre.userEmotes.get(<string>game.user?.id)) {
+            sizeValue = Number(this.theatre.userEmotes.get(<string>game.user?.id)?.textSize);
+        }
         switch (sizeValue) {
-            case 3:
+            case 3: {
                 KHelpers.addClass(sizeIcon, "theatre-icon-fontsize-large");
                 break;
-            case 1:
+            }
+            case 1: {
                 KHelpers.addClass(sizeIcon, "theatre-icon-fontsize-small");
                 break;
-            default:
+            }
+            default: {
                 KHelpers.addClass(sizeIcon, "theatre-icon-fontsize-medium");
                 break;
+            }
         }
         sizeSelect.appendChild(sizeIcon);
 
@@ -159,15 +166,15 @@ export default class EmoteMenuInitilializer {
         wheelEvent.stopPropagation();
     }
 
-    set_fontSelect_value(insert: StageInsert,
-        fontSelect: HTMLSelectElement) {
+    set_fontSelect_value(insert: StageInsert, fontSelect: HTMLSelectElement) {
         // assign font from insert
         if (insert && insert.emotion.textFont) {
             fontSelect.value = insert.emotion.textFont;
-        } else if (this.theatre.userEmotes.get(game.user?.id) && this.theatre.userEmotes.get(game.user?.id).textFont) {
-
-            fontSelect.value = this.theatre.userEmotes.get(game.user?.id).textFont;
-            if (insert) insert.emotion.textFont = fontSelect.value;
+        } else if (this.theatre.userEmotes.get(<string>game.user?.id) && this.theatre.userEmotes?.get(<string>game.user?.id)?.textFont) {
+            fontSelect.value = <string>this.theatre.userEmotes.get(<string>game.user?.id)?.textFont;
+            if (insert) {
+              insert.emotion.textFont = fontSelect.value;
+            }
         } else {
             fontSelect.value = this.theatre.textFont;
         }
@@ -178,31 +185,35 @@ export default class EmoteMenuInitilializer {
         let insert = this.theatre.stage.getInsertById(this.theatre.speakingAs);
         let icon = <HTMLElement>(<HTMLElement>ev.currentTarget).children[0];
         let value = 2;
-        if (insert)
-            value = insert.emotion.textSize;
-        else if (this.theatre.userEmotes.get(game.user?.id))
-            value = this.theatre.userEmotes.get(game.user?.id).textSize;
-
+        if (insert) {
+            value = Number(insert.emotion.textSize);
+        }
+        else if (this.theatre.userEmotes.get(<string>game.user?.id)) {
+            value = Number(this.theatre.userEmotes.get(<string>game.user?.id)?.textSize);
+        }
 
         switch (value) {
-            case 3:
+            case 3: {
                 KHelpers.removeClass(icon, "theatre-icon-fontsize-large");
                 KHelpers.addClass(icon, "theatre-icon-fontsize-medium");
                 value = 2;
                 break;
-            case 1:
+            }
+            case 1: {
                 KHelpers.removeClass(icon, "theatre-icon-fontsize-small");
                 KHelpers.addClass(icon, "theatre-icon-fontsize-large");
                 value = 3;
                 break;
-            default:
+            }
+            default: {
                 KHelpers.removeClass(icon, "theatre-icon-fontsize-medium");
                 KHelpers.addClass(icon, "theatre-icon-fontsize-small");
                 value = 1;
                 break;
+            }
         }
         this.theatre.setUserEmote(
-            game.user?.id,
+            <string>game.user?.id,
             this.theatre.speakingAs,
             'textsize',
             value.toString());
@@ -218,7 +229,7 @@ export default class EmoteMenuInitilializer {
 
     _initTextFlyinColumn(insert: StageInsert) {
 
-        const textflying_box = <HTMLElement>this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName("textflyin-box")[0];
+        const textflying_box = <HTMLElement>this.theatre.theatreControls.theatreEmoteMenu?.getElementsByClassName("textflyin-box")[0];
         const theatre_container_column = <HTMLElement>textflying_box.getElementsByClassName("theatre-container-column")[0];
         (<HTMLElement>theatre_container_column).addEventListener("wheel", ev => this.wheelFunc(ev));
 
@@ -248,7 +259,7 @@ export default class EmoteMenuInitilializer {
                     //TweenMax.to(flyinBox,.4,{scrollTo:{y:child.offsetTop, offsetY:flyinBox.offsetHeight/2}})
                     theatre_container_column.scrollTop = child.offsetTop - Math.max(theatre_container_column.offsetHeight / 2, 0);
                 }
-            } else if (!insert && this.theatre.userEmotes.get(game.user?.id) && (child.getAttribute("name") == this.theatre.userEmotes.get(game.user?.id).textFlyin)) {
+            } else if (!insert && this.theatre.userEmotes.get(<string>game.user?.id) && (child.getAttribute("name") == this.theatre.userEmotes.get(<string>game.user?.id)?.textFlyin)) {
                 KHelpers.addClass(child, "textflyin-active");
                 // scroll to
                 //TweenMax.to(flyinBox,.4,{scrollTo:{y:child.offsetTop, offsetY:flyinBox.offsetHeight/2}})
@@ -259,7 +270,7 @@ export default class EmoteMenuInitilializer {
 
     _initTextStandingColumn(insert: StageInsert) {
 
-        const textStanding_Box = <HTMLElement>this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName("textstanding-box")[0];
+        const textStanding_Box = <HTMLElement>this.theatre.theatreControls.theatreEmoteMenu?.getElementsByClassName("textstanding-box")[0];
         const standingBox = <HTMLElement>textStanding_Box.getElementsByClassName("theatre-container-column")[0];
 
         (<HTMLElement>standingBox).addEventListener("wheel", ev => this.wheelFunc(ev))
@@ -289,7 +300,7 @@ export default class EmoteMenuInitilializer {
                     //TweenMax.to(standingBox,.4,{scrollTo:{y:child.offsetTop, offsetY:standingBox.offsetHeight/2}})
                     standingBox.scrollTop = child.offsetTop - Math.max(standingBox.offsetHeight / 2, 0);
                 }
-            } else if (this.theatre.userEmotes.get(game.user?.id) && (child.getAttribute("name") == this.theatre.userEmotes.get(game.user?.id).textStanding)) {
+            } else if (this.theatre.userEmotes.get(<string>game.user?.id) && (child.getAttribute("name") == this.theatre.userEmotes.get(<string>game.user?.id)?.textStanding)) {
                 KHelpers.addClass(child, "textstanding-active");
                 // scroll to
                 //TweenMax.to(standingBox,.4,{scrollTo:{y:child.offsetTop, offsetY:standingBox.offsetHeight/2}})
@@ -303,19 +314,19 @@ export default class EmoteMenuInitilializer {
         emotes: EmoteDictionary) {
 
         // If speaking as theatre, minimize away the emote section
-        const fontSelect = <HTMLSelectElement>this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName('fontselect')[0];
-        const emoteBox = <HTMLElement>this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName("emote-box")[0];
+        const fontSelect = <HTMLSelectElement>this.theatre.theatreControls.theatreEmoteMenu?.getElementsByClassName('fontselect')[0];
+        const emoteBox = <HTMLElement>this.theatre.theatreControls.theatreEmoteMenu?.getElementsByClassName("emote-box")[0];
         const emContainer = <HTMLElement>emoteBox.getElementsByClassName("theatre-container-tiles")[0];
 
         if (this.theatre.speakingAs == Theatre.NARRATOR) {
             emoteBox.style.cssText += "flex: 0 0 40px";
-            let emLabel = emoteBox.getElementsByTagName("h2")[0];
+            let emLabel = <HTMLElement>emoteBox.getElementsByTagName("h2")[0];
             fontSelect.style.setProperty("max-width", "unset");
             emContainer.style.display = "none";
             emLabel.style.display = "none";
         } else {
             // configure handles to bind emote selection
-            let emoteBtns = this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName("emote");
+            let emoteBtns = <HTMLCollectionOf<Element>>this.theatre.theatreControls.theatreEmoteMenu?.getElementsByClassName("emote");
             for (const child_ of emoteBtns) {
 
                 const child = <HTMLElement>child_;
@@ -324,7 +335,7 @@ export default class EmoteMenuInitilializer {
 
 
                 // check if this child is our configured 'emote'
-                let childEmote = child.getAttribute("name");
+                let childEmote = <string>child.getAttribute("name");
                 if (insert) {
                     // if we have an insert we're speaking through, we should get that emote state instead
                     // if the insert has no emote state, neither should we despite user settings
@@ -334,17 +345,18 @@ export default class EmoteMenuInitilializer {
                         //emContainer.scrollTop = child.offsetTop-Math.max(emContainer.offsetHeight/2,0);
                     }
                     // we should 'highlight' emotes that at least have a base insert
-                    if (emotes[childEmote] && emotes[childEmote].insert)
+                    if (emotes[childEmote] && emotes[childEmote]?.insert) {
                         KHelpers.addClass(child, "emote-imgavail");
+                    }
 
                 }
-                if (!insert && this.theatre.userEmotes.get(game.user?.id) && (childEmote == this.theatre.userEmotes.get(game.user?.id).emote)) {
+                if (!insert && this.theatre.userEmotes.get(<string>game.user?.id) && (childEmote == this.theatre.userEmotes.get(<string>game.user?.id)?.emote)) {
                     KHelpers.addClass(child, "emote-active");
                     //emContainer.scrollTop = child.offsetTop-Math.max(emContainer.offsetHeight/2,0);
                 }
             }
             // bind mouseleave Listener
-            emoteBtns[0].parentNode.addEventListener("mouseleave", (ev) => {
+            emoteBtns[0]?.parentNode?.addEventListener("mouseleave", (ev) => {
                 this.toolTipCanvas.holder.style.opacity = "0";
             });
         }

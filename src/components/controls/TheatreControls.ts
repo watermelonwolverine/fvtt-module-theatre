@@ -1,7 +1,7 @@
 import NavBar from "./NavBar";
-import Stage from "../stage/Stage";
+import type Stage from "../stage/Stage";
 import TheatreSettings from "../../extensions/TheatreSettings";
-import Theatre from "../../Theatre";
+import type Theatre from "../../Theatre";
 import KHelpers from "../../workers/KHelpers";
 
 export default class TheatreControls {
@@ -128,9 +128,9 @@ export default class TheatreControls {
         btnResync.style["margin"] = "0 4px";
 
         if (game.user?.isGM || !TheatreSettings.get(TheatreSettings.GM_ONLY)) {
-            if (controlButtons) {
+            if (controlButtons && controlButtons.children.length > 0) {
                 controlButtons.style.setProperty("flex-basis", "100%");
-                KHelpers.insertBefore(btnResync, controlButtons.children[0]);
+                KHelpers.insertBefore(btnResync, <any>controlButtons.children[0]);
                 KHelpers.insertBefore(btnQuote, btnResync);
                 KHelpers.insertBefore(btnDelayEmote, btnQuote);
             } else {
@@ -167,14 +167,14 @@ export default class TheatreControls {
     }
 
     handleChatMessageFocusOut(ev: FocusEvent) {
-        KHelpers.removeClass(this.theatreChatCover, "theatre-control-chat-cover-ooc");
+        KHelpers.removeClass(<HTMLDivElement>this.theatreChatCover, "theatre-control-chat-cover-ooc");
     }
 
     handleChatMessageKeyUp(ev: KeyboardEvent) {
         if (!ev.repeat
             //&& this.theatre.speakingAs
             && ev.key == "Control")
-            KHelpers.removeClass(this.theatreChatCover, "theatre-control-chat-cover-ooc");
+            KHelpers.removeClass(<HTMLDivElement>this.theatreChatCover, "theatre-control-chat-cover-ooc");
     }
 
     handleChatMessageKeyDown(ev: KeyboardEvent) {
@@ -191,7 +191,7 @@ export default class TheatreControls {
         if (!ev.repeat
             //&& this.theatre.speakingAs
             && ev.key == "Control")
-            KHelpers.addClass(this.theatreChatCover, "theatre-control-chat-cover-ooc");
+            KHelpers.addClass(<HTMLDivElement>this.theatreChatCover, "theatre-control-chat-cover-ooc");
 
         if (now - this.theatre.lastTyping < 3000) return;
         if (ev.key == "Enter"
@@ -199,7 +199,7 @@ export default class TheatreControls {
             || ev.key == "Shift"
             || ev.key == "Control") return;
         this.theatre.lastTyping = now;
-        this.theatre.setUserTyping(game.user?.id, this.theatre.speakingAs)
+        this.theatre.setUserTyping(<string>game.user?.id, this.theatre.speakingAs)
         this.theatre._sendTypingEvent();
     }
 
@@ -253,7 +253,7 @@ export default class TheatreControls {
         }
 
         let chatMessage = document.getElementById("chat-message");
-        chatMessage.focus();
+        chatMessage?.focus();
     }
 
     handleBtnQuoteClick(ev: MouseEvent) {
@@ -271,7 +271,7 @@ export default class TheatreControls {
         }
 
         let chatMessage = document.getElementById("chat-message");
-        chatMessage.focus();
+        chatMessage?.focus();
     }
 
     handleBtnResyncClick(ev: MouseEvent) {
@@ -305,11 +305,13 @@ export default class TheatreControls {
         const currentTarget = <HTMLElement>ev.currentTarget;
 
         if (KHelpers.hasClass(currentTarget, "theatre-control-btn-down")) {
-            this.theatreEmoteMenu.style.display = "none";
+            //@ts-ignore
+            this.theatreEmoteMenu?.style.display = "none";
             KHelpers.removeClass(currentTarget, "theatre-control-btn-down");
         } else {
             this.theatre.emoteMenuRenderer.initialize();
-            this.theatreEmoteMenu.style.display = "flex";
+            //@ts-ignore
+            this.theatreEmoteMenu?.style.display = "flex";
             KHelpers.addClass(currentTarget, "theatre-control-btn-down");
         }
     }

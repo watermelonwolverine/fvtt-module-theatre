@@ -10,7 +10,7 @@ export type TextFlyinAnimationFunction = (
     charSpans: any,
     animTime: number,
     speed: number,
-    standingAnim: TextStandingAnimationFunction) => void
+    standingAnim: TextStandingAnimationFunction|null) => void
 
 export type TextFlyinAnimationDefinition = {
     func: TextFlyinAnimationFunction;
@@ -107,7 +107,7 @@ export default class TextFlyinAnimationsFactory {
         charSpans: any,
         animTime: number,
         speed: number,
-        standingAnim: TextStandingAnimationFunction): void {
+        standingAnim: TextStandingAnimationFunction|null): void {
 
         TweenMax.from(charSpans, {
             duration: 0.05,
@@ -128,7 +128,7 @@ export default class TextFlyinAnimationsFactory {
         charSpans: any,
         animTime: number,
         speed: number,
-        standingAnim: TextStandingAnimationFunction) {
+        standingAnim: TextStandingAnimationFunction|null) {
 
         TweenMax.from(charSpans, {
             duration: animTime,
@@ -147,7 +147,7 @@ export default class TextFlyinAnimationsFactory {
         charSpans: any,
         animTime: number,
         speed: number,
-        standingAnim: TextStandingAnimationFunction) {
+        standingAnim: TextStandingAnimationFunction|null) {
 
         TweenMax.from(charSpans,
             {
@@ -169,7 +169,7 @@ export default class TextFlyinAnimationsFactory {
         charSpans: any,
         animTime: number,
         speed: number,
-        standingAnim: TextStandingAnimationFunction) {
+        standingAnim: TextStandingAnimationFunction|null) {
 
         TweenMax.from(charSpans,
             {
@@ -193,7 +193,7 @@ export default class TextFlyinAnimationsFactory {
         charSpans: any,
         animTime: number,
         speed: number,
-        standingAnim: TextStandingAnimationFunction) {
+        standingAnim: TextStandingAnimationFunction|null) {
 
         let textBox: HTMLElement|null = null;
 
@@ -255,7 +255,7 @@ export default class TextFlyinAnimationsFactory {
         charSpans: any,
         animTime: number,
         speed: number,
-        standingAnim: TextStandingAnimationFunction) {
+        standingAnim: TextStandingAnimationFunction|null) {
 
         TweenMax.from(charSpans,
             {
@@ -279,7 +279,7 @@ export default class TextFlyinAnimationsFactory {
         charSpans: any,
         animTime: number,
         speed: number,
-        standingAnim: TextStandingAnimationFunction) {
+        standingAnim: TextStandingAnimationFunction|null) {
 
         let textBox: HTMLElement|null = null;
         if (charSpans[0]) {
@@ -342,7 +342,7 @@ export default class TextFlyinAnimationsFactory {
         charSpans: any,
         animTime: number,
         speed: number,
-        standingAnim: TextStandingAnimationFunction) {
+        standingAnim: TextStandingAnimationFunction|null) {
 
         let textBox: HTMLElement|null = null;
         if (charSpans[0]) {
@@ -404,7 +404,7 @@ export default class TextFlyinAnimationsFactory {
         charSpans: any,
         animTime: number,
         speed: number,
-        standingAnim: TextStandingAnimationFunction) {
+        standingAnim: TextStandingAnimationFunction|null) {
 
         let textBox = null;
         if (charSpans[0]) {
@@ -466,7 +466,7 @@ export default class TextFlyinAnimationsFactory {
         charSpans: any,
         animTime: number,
         speed: number,
-        standingAnim: TextStandingAnimationFunction) {
+        standingAnim: TextStandingAnimationFunction|null) {
 
         for (let idx = 0; idx < charSpans.length; ++idx) {
             TweenMax.from(charSpans[idx], animTime, {

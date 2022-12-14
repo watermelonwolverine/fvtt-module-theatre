@@ -1,4 +1,4 @@
-import Theatre from "../../../Theatre";
+import type Theatre from "../../../Theatre";
 import TextFlyinAnimationsFactory from "../../../workers/flyin_animations_factory";
 import KHelpers from "../../../workers/KHelpers";
 import TextBoxToCharSplitter from "../../../workers/TextBoxToCharSplitter";
@@ -15,19 +15,20 @@ export default class TextFlyInMenuItemMouseEventHandler {
         if ((<MouseEvent>ev).button == 0) {
             if (KHelpers.hasClass((<HTMLElement>ev.currentTarget), "textflyin-active")) {
                 KHelpers.removeClass((<HTMLElement>ev.currentTarget), "textflyin-active");
-                this.theatre.setUserEmote(game.user?.id, this.theatre.speakingAs, 'textflyin', null);
+                this.theatre.setUserEmote(<string>game.user?.id, this.theatre.speakingAs, 'textflyin', null);
             } else {
-                let lastActives = this.theatre.theatreControls.theatreEmoteMenu.getElementsByClassName("textflyin-active");
-                for (let lastActive of lastActives)
+                let lastActives = <any>this.theatre.theatreControls.theatreEmoteMenu?.getElementsByClassName("textflyin-active");
+                for (let lastActive of lastActives) {
                     KHelpers.removeClass(<HTMLElement>lastActive, "textflyin-active");
+                }
                 //if (insert || this.context.speakingAs == Theatre.NARRATOR) {
                 KHelpers.addClass((<HTMLElement>ev.currentTarget), "textflyin-active");
-                this.theatre.setUserEmote(game.user?.id, this.theatre.speakingAs, 'textflyin', (<HTMLElement>ev.currentTarget).getAttribute("name"));
+                this.theatre.setUserEmote(<string>game.user?.id, this.theatre.speakingAs, 'textflyin', <string>(<HTMLElement>ev.currentTarget).getAttribute("name"));
                 //}
             }
             // push focus to chat-message
             let chatMessage = document.getElementById("chat-message");
-            chatMessage.focus();
+            chatMessage?.focus();
         }
     }
 
@@ -36,12 +37,13 @@ export default class TextFlyInMenuItemMouseEventHandler {
         const currentTarget = (<HTMLElement>(<HTMLElement>ev.currentTarget));
 
         for (let child of currentTarget.children) {
-            for (let sub_child of child.children)
+            for (let sub_child of child.children) {
                 gsap.killTweensOf(sub_child);
+            }
             gsap.killTweensOf(child);
         }
         for (let child of currentTarget.children) {
-            child.parentNode.removeChild(child);
+            child.parentNode?.removeChild(child);
         }
 
         gsap.killTweensOf(sender);
@@ -52,8 +54,8 @@ export default class TextFlyInMenuItemMouseEventHandler {
     }
 
     handleMouseOver(ev: MouseEvent): void {
-        const text = (<HTMLElement>(<HTMLElement>ev.currentTarget)).getAttribute("otext");
-        const anim = (<HTMLElement>(<HTMLElement>ev.currentTarget)).getAttribute("name");
+        const text = <string>(<HTMLElement>(<HTMLElement>ev.currentTarget)).getAttribute("otext");
+        const anim = <string>(<HTMLElement>(<HTMLElement>ev.currentTarget)).getAttribute("name");
         //console.log("child text: ",text,(<HTMLElement>ev.currentTarget));
         (<HTMLElement>(<HTMLElement>ev.currentTarget)).textContent = "";
         const charSpans = TextBoxToCharSplitter.splitTextBoxToChars(text, (<HTMLElement>ev.currentTarget));

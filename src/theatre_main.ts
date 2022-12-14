@@ -20,13 +20,14 @@
  *
  */
 
+import type StageInsert from "./components/stage/StageInsert";
 import ActorExtensions from "./extensions/ActorExtensions";
 import TheatreSettings from "./extensions/TheatreSettings";
 import Theatre from "./Theatre";
 import { SceneEventTypes } from "./types/SceneEventTypes";
 import TextFlyinAnimationsFactory from "./workers/flyin_animations_factory";
 import KHelpers from "./workers/KHelpers";
-import TextStandingAnimationsFactory from "./workers/standing_animations_factory";
+import TextStandingAnimationsFactory, { TextStandingAnimationFunction } from "./workers/standing_animations_factory";
 import TextBoxToCharSplitter from "./workers/TextBoxToCharSplitter";
 
 /**
@@ -62,7 +63,7 @@ Hooks.on("getActorSheetHeaderButtons", (app:any, buttons:any) => {
 				label: "Theatre.UI.Config.Theatre",
 				class: "configure-theatre",
 				icon: "fas fa-user-edit",
-				onclick: ev => Theatre.onConfigureInsert(ev, app.object.sheet)
+				onclick: (ev:any) => Theatre.onConfigureInsert(ev, app.object.sheet)
 			})
 
 		}
@@ -75,7 +76,7 @@ Hooks.on("getActorSheetHeaderButtons", (app:any, buttons:any) => {
 			label: label,
 			class: "add-to-theatre-navbar",
 			icon: "fas fa-theater-masks",
-			onclick: ev => Theatre.instance.onAddToNavBar(ev, app.object.sheet)
+			onclick:  (ev:any) => Theatre.instance.onAddToNavBar(ev, app.object.sheet)
 
 		})
 	}
@@ -93,36 +94,40 @@ Hooks.on("collapseSidebar", function (a, collapsed) {
  * Pre-process chat message to set 'speaking as' to correspond
  * to our 'speaking as'
  */
-Hooks.on("preCreateChatMessage", function (chatMessage) {
+Hooks.on("preCreateChatMessage", function (chatMessage:any) {
 	let chatData = {
-		speaker: {}
+		speaker: <any>{},
+    type: <any>{},
+    content: <any>{}
 	};
 	// If theatre isn't even ready, then just no
-	if (!Theatre.instance) return;
-
+	if (!Theatre.instance) {
+    return;
+  }
 	// make the message OOC if needed
-	if (!chatMessage.data.roll && $(Theatre.instance.theatreControls.theatreChatCover).hasClass("theatre-control-chat-cover-ooc")) {
-		const user = game.users.get(chatMessage.data.user);
-		chatData.speaker.alias = user.data.name;
+  //@ts-ignore
+	if (!chatMessage.roll && $(Theatre.instance.theatreControls.theatreChatCover).hasClass("theatre-control-chat-cover-ooc")) {
+		const user = <User>game.users?.get(chatMessage.user);
+		chatData.speaker.alias = user.name;
 		chatData.speaker.actor = null;
 		chatData.speaker.scene = null;
 		chatData.type = CONST.CHAT_MESSAGE_TYPES.OOC;
 
-		chatMessage.data.update(chatData);
+		chatMessage.update(chatData);
 		return;
 	}
 
 	if (
-		!chatMessage.data.roll &&
+		!chatMessage.roll &&
 		Theatre.instance.speakingAs &&
-		Theatre.instance.usersTyping.get(chatMessage.data.user)
+		Theatre.instance.usersTyping.get(chatMessage.user)
 	) {
-		let theatreId = Theatre.instance.usersTyping.get(chatMessage.data.user).theatreId;
+		let theatreId = <string>(Theatre.instance.usersTyping.get(chatMessage.user)?.theatreId);
 		let insert = Theatre.instance.stage.getInsertById(theatreId);
 		let actorId = theatreId.replace("theatre-", "");
 
-		if (insert && chatMessage.data.speaker) {
-			let label = Theatre.instance._getLabelFromInsert(insert);
+		if (insert && chatMessage.speaker) {
+			let label = <PIXI.Text>Theatre.instance._getLabelFromInsert(insert);
 			let name = label.text;
 
 			chatData.speaker.alias = name;
@@ -138,16 +143,16 @@ Hooks.on("preCreateChatMessage", function (chatMessage) {
 
 				Theatre.instance.delayedSentState = 2;
 				Theatre.instance.setUserEmote(
-					game.user?._id,
+					<string>game.user?.id,
 					theatreId,
 					"emote",
-					insert.emote,
+					<any>insert.emotion.emote,
 					false
 				);
 				Theatre.instance.delayedSentState = 0;
 			}
 		} else if (insert) {
-			let label = Theatre.instance._getLabelFromInsert(insert);
+			let label = <PIXI.Text>Theatre.instance._getLabelFromInsert(insert);
 			let name = label.text;
 
 			chatData.speaker = {};
@@ -163,10 +168,10 @@ Hooks.on("preCreateChatMessage", function (chatMessage) {
 			) {
 				Theatre.instance.delayedSentState = 2;
 				Theatre.instance.setUserEmote(
-					game.user?._id,
+					<string>game.user?.id,
 					theatreId,
 					"emote",
-					insert.emote,
+					<any>insert.emotion.emote,
 					false
 				);
 				Theatre.instance.delayedSentState = 0;
@@ -183,8 +188,8 @@ Hooks.on("preCreateChatMessage", function (chatMessage) {
 	// append chat emote braces TODO make a setting
 	if (
 		Theatre.instance.isQuoteAuto &&
-		!chatMessage.data.roll &&
-		chatMessage.data.speaker &&
+		!chatMessage.roll &&
+		chatMessage.speaker &&
 		(chatData.speaker.actor ||
 			chatData.speaker.token ||
 			chatData.speaker.alias) &&
@@ -192,7 +197,7 @@ Hooks.on("preCreateChatMessage", function (chatMessage) {
 	) {
 		chatData.content =
 			game.i18n.localize("Theatre.Text.OpenBracket") +
-			chatMessage.data.content +
+			chatMessage.content +
 			game.i18n.localize("Theatre.Text.CloseBracket");
 	}
 
@@ -202,14 +207,14 @@ Hooks.on("preCreateChatMessage", function (chatMessage) {
 /**
  * Chat message Binding
  */
-Hooks.on("createChatMessage", function (chatEntity, _, userId) {
-	let theatreId = null;
+Hooks.on("createChatMessage", function (chatEntity:any, _:any, userId:string) {
+	let theatreId:string|null = null;
 
 	// If theatre isn't even ready, then just no
 	if (!Theatre.instance) return;
 
 	if (Theatre.instance.usersTyping.get(userId)) {
-		theatreId = Theatre.instance.usersTyping.get(userId).theatreId;
+		theatreId = <string>Theatre.instance.usersTyping.get(userId)?.theatreId;
 		Theatre.instance.removeUserTyping(userId);
 	}
 
@@ -227,8 +232,8 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 	)
 		return;
 
-	let textBox = Theatre.instance.getTextBoxById(theatreId);
-	let insert = Theatre.instance.stage.getInsertById(theatreId);
+	let textBox = Theatre.instance.getTextBoxById(<string>theatreId);
+	let insert = <StageInsert>Theatre.instance.stage.getInsertById(<string>theatreId);
 	let charSpans = [];
 	let textContent = chatData.content;
 
@@ -241,42 +246,59 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 	if (textBox) {
 		// kill all tweens
 		for (let c of textBox.children) {
-			for (let sc of c.children) TweenMax.killTweensOf(sc);
-			TweenMax.killTweensOf(c);
+			for (let sc of c.children) {
+        //TweenMax.killTweensOf(sc);
+        gsap.killTweensOf(sc);
+      }
+			//TweenMax.killTweensOf(c);
+      gsap.killTweensOf(c);
 		}
-		for (let c of textBox.children) c.parentNode.removeChild(c);
-		TweenMax.killTweensOf(textBox);
+		for (let c of textBox.children) {
+      c.parentNode?.removeChild(c);
+    }
+		//TweenMax.killTweensOf(textBox);
+    gsap.killTweensOf(textBox);
+    //@ts-ignore
 		textBox.style["overflow-y"] = "scroll";
+    //@ts-ignore
 		textBox.style["overflow-x"] = "hidden";
 
 		textBox.textContent = "";
 
 		if (insert) {
 			// Highlight the most recent speaker's textBox
-			let lastSpeaking = Theatre.instance.stage.theatreBar.getElementsByClassName(
+			let lastSpeaking = <HTMLCollectionOf<Element>>Theatre.instance.stage.theatreBar?.getElementsByClassName(
 				"theatre-text-box-lastspeaking"
 			);
 			if (lastSpeaking[0]) {
+        //@ts-ignore
 				lastSpeaking[0].style.background = "";
+        //@ts-ignore
 				lastSpeaking[0].style["box-shadow"] = "";
+        //@ts-ignore
 				KHelpers.removeClass(lastSpeaking[0], "theatre-text-box-lastspeaking");
 			}
 			KHelpers.addClass(textBox, "theatre-text-box-lastspeaking");
 			Theatre.instance.applyPlayerColorToTextBox(
 				textBox,
 				userId,
-				insert.textColor
+				<string>insert.emotion.textColor
 			);
 			// Pump up the speaker's render order
-			for (let dockInsert of Theatre.instance.stage.stageInserts)
+			for (let dockInsert of Theatre.instance.stage.stageInserts) {
 				dockInsert.renderOrder = dockInsert.order;
+      }
 			insert.renderOrder = 999999;
 			Theatre.instance.stage.stageInserts.sort((a, b) => {
 				return a.renderOrder - b.renderOrder;
 			});
 			// Pop our insert a little
 			let tweenId = "portraitPop";
-			let tween = TweenMax.to(insert.portrait.root, 0.25, {
+      if(!insert.portrait) {
+        return;
+      }
+			//let tween = TweenMax.to(insert.portrait.root, 0.25, {
+      let tween = gsap.to(insert.portrait.root, 0.25, {
 				pixi: { scaleX: insert.mirrored ? -1.05 : 1.05, scaleY: 1.05 },
 				ease: Power3.easeOut,
 				repeat: 1,
@@ -296,10 +318,11 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 			Theatre.instance._addDockTween(insert.imgId, tween, tweenId);
 			// Color flash
 			tweenId = "portraitFlash";
-			tween = TweenMax.to(insert.portrait, 0.25, {
+			//tween = TweenMax.to(insert.portrait, 0.25, {
+      tween = gsap.to(insert.portrait, 0.25, {
 				//pixi:{tint: 0xAAEDFF},
 				pixi: {
-					tint: Theatre.instance.getPlayerFlashColor(userId, insert.textColor)
+					tint: Theatre.instance.getPlayerFlashColor(userId, <string>insert.emotion.textColor)
 				},
 				ease: Power3.easeOut,
 				repeat: 1,
@@ -316,18 +339,18 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 		}
 
 		let insertFlyinMode = "typewriter";
-		let insertStandingMode = null;
+		let insertStandingMode:string|null = null;
 		let insertFontType = null;
 		let insertFontSize = null;
 		let insertFontColor = null;
 		if (insert) {
-			insertFlyinMode = insert.textFlyin;
-			insertStandingMode = insert.textStanding;
-			insertFontType = insert.textFont;
-			insertFontSize = Number(insert.textSize);
-			insertFontColor = insert.textColor;
+			insertFlyinMode = <string>insert.emotion.textFlyin;
+			insertStandingMode = insert.emotion.textStanding;
+			insertFontType = insert.emotion.textFont;
+			insertFontSize = Number(insert.emotion.textSize);
+			insertFontColor = insert.emotion.textColor;
 		} else if (theatreId == Theatre.NARRATOR) {
-			insertFlyinMode = Theatre.instance.theatreNarrator.getAttribute(
+			insertFlyinMode = <string>Theatre.instance.theatreNarrator.getAttribute(
 				"textflyin"
 			);
 			insertStandingMode = Theatre.instance.theatreNarrator.getAttribute(
@@ -362,6 +385,7 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 		);
 		//textBox.style["font-family"] = insertFontType || Theatre.instance.textFont;
 		textBox.style.color = insertFontColor || "white";
+    //@ts-ignore
 		textBox.style["font-size"] = `${fontSize}px`;
 		textBox.scrollTop = 0;
 
@@ -371,18 +395,20 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 			charSpans,
 			0.5,
 			0.05,
-			TextStandingAnimationsFactory.getForName(insertStandingMode)
+			<TextStandingAnimationFunction>TextStandingAnimationsFactory.getForName(<string>insertStandingMode)
 		);
 
 		// auto decay?
 		if (insert && insert.decayTOId) window.clearTimeout(insert.decayTOId);
 		if (insert && TheatreSettings.getAutoDecay()) {
 			insert.decayTOId = window.setTimeout(
-				imgId => {
+				(imgId:string) => {
 					let insert = Theatre.instance.stage.getInsertById(imgId);
-					if (insert) Theatre.instance.decayTextBoxById(imgId, true);
+					if (insert) {
+            Theatre.instance.decayTextBoxById(imgId, true);
+          }
 				},
-				Math.max(
+				<number>Math.max(
 					TheatreSettings.getTextDecayRate() * charSpans.length,
 					TheatreSettings.getTextDecayMin()
 				),
@@ -392,7 +418,7 @@ Hooks.on("createChatMessage", function (chatEntity, _, userId) {
 	}
 });
 
-Hooks.on("renderChatLog", function(app, html, data) {
+Hooks.on("renderChatLog", function(app:any, html:any, data:any) {
   if (data.cssId === "chat-popout") return;
 	Theatre.instance.initialize();
 	// window may not be ready?
@@ -410,28 +436,30 @@ Hooks.on("renderChatLog", function(app, html, data) {
 /**
  * Add to stage button on ActorDirectory Sidebar
  */
-Hooks.on("getActorDirectoryEntryContext", async (html, options) => {
+Hooks.on("getActorDirectoryEntryContext", async (html:any, options:any) => {
 	if (!game.user?.isGM && TheatreSettings.get(TheatreSettings.GM_ONLY)) return;
 
-	const getActorData = target => {
-		const actor = game.actors.get(target.data("documentId"));
-		return actor.data;
+	const getActorData = (target:any) => {
+		const actor = game.actors?.get(target.data("documentId"));
+		return actor;
 	}
 
 	options.splice(3, 0, {
 		name: "Add to Stage",
-		condition: target => !Theatre.instance.stage.isActorStaged(getActorData(target)),
+		condition: (target:any) => !Theatre.instance.stage.isActorStaged(<Actor>getActorData(target)),
 		icon: '<i class="fas fa-theater-masks"></i>',
-		callback: target => Theatre.instance.navBar.addToNavBar(getActorData(target))
+		callback: (target:any) => Theatre.instance.navBar.addToNavBar(<Actor>getActorData(target))
 	}, {
 		name: "Remove from Stage",
-		condition: target => Theatre.instance.stage.isActorStaged(getActorData(target)),
+		condition: (target:any) => Theatre.instance.stage.isActorStaged(<Actor>getActorData(target)),
 		icon: '<i class="fas fa-theater-masks"></i>',
-		callback: target => Theatre.instance.removeFromNavBar(getActorData(target))
+		callback: (target:any) => Theatre.instance.removeFromNavBar(<Actor>getActorData(target))
 	});
 });
 
 Hooks.once("setup", () => {
+  // TODO TO REPLACE WITH API STANDARD
+  //@ts-ignore
 	globalThis.theatre = new Theatre();
 });
 
@@ -444,11 +472,11 @@ Hooks.once("init", () => {
 		editable: [{
 			key: "Escape"
 		}],
-		onDown: () => {
+		onDown: (event:any) => {
 			if (document.activeElement === document.getElementById("chat-message")) {
 				event.preventDefault();
 				event.stopPropagation();
-				document.getElementById("chat-message").blur();
+				document.getElementById("chat-message")?.blur();
 			}
 		},
 		restricted: false
@@ -463,9 +491,15 @@ Hooks.once("init", () => {
 		}],
 		onDown: () => {
       //@ts-ignore
-			const ownedActors = game.actor?.filter(a => a.ownership === 3);
-			const ownedTokens = ownedActors.map(a => a.getActiveTokens());
-			for (const tokenArray of ownedTokens) tokenArray.forEach(t => Theatre.instance?.navBar.addToNavBar(t.actor.data));
+			const ownedActors = game.actor?.filter((a:any) => a.ownership === 3);
+			const ownedTokens = ownedActors.map((a:any) => a.getActiveTokens());
+			for (const tokenArray of ownedTokens) {
+        // NEVER USE forEach
+        //tokenArray.forEach(t => Theatre.instance.navBar.addToNavBar(t.actor));
+        for (const t of tokenArray) {
+          Theatre.instance.navBar.addToNavBar(t.actor);
+        }
+      }
 		},
 		restricted: false
 	});
@@ -481,9 +515,9 @@ Hooks.once("init", () => {
 			for (const tkn of <Token[]>canvas.tokens?.controlled) {
         if(tkn.actor?.data) {
           //@ts-ignore
-          Theatre.instance?.navBar.addToNavBar(<Actor>tkn.actor?.data);
+          Theatre.instance.navBar.addToNavBar(<Actor>tkn.actor?.data);
         } else {
-          Theatre.instance?.navBar.addToNavBar(<Actor>tkn.actor);
+          Theatre.instance.navBar.addToNavBar(<Actor>tkn.actor);
         }
 
       }
@@ -500,10 +534,10 @@ Hooks.once("init", () => {
 		}],
 		onDown: () => {
 			const narratorButton = $(document).find(`div.theatre-icon-narrator`).closest(`div.theatre-control-btn`);
-			if (KHelpers.hasClass(narratorButton[0], "theatre-control-nav-bar-item-speakingas")) Theatre.instance.toggleNarratorBar(false);
+			if (KHelpers.hasClass(<any>narratorButton[0], "theatre-control-nav-bar-item-speakingas")) Theatre.instance.toggleNarratorBar(false);
 			else Theatre.instance.toggleNarratorBar(true);
 
-			document.getElementById("chat-message").blur();
+			document.getElementById("chat-message")?.blur();
 		},
 		restricted: false
 	});
@@ -530,9 +564,13 @@ Hooks.once("init", () => {
 		}],
 		onDown: () => {
 			const imgId = Theatre.instance.speakingAs;
-			if (!imgId) return;
-
-			const insert = Theatre.instance.stage.stageInserts.find(p => p.imgId === imgId);
+			if (!imgId) {
+        return;
+      }
+			const insert = <StageInsert>Theatre.instance.stage.stageInserts.find(p => p.imgId === imgId);
+      if(!insert.portrait) {
+        return;
+      }
 			const oleft = insert.portrait.root.x, otop = insert.portrait.root.y;
 			const tweenId = "portraitMove";
 			const tween = TweenMax.to(insert.portrait.root, 0.5, {
@@ -565,9 +603,13 @@ Hooks.once("init", () => {
 		}],
 		onDown: () => {
 			const imgId = Theatre.instance.speakingAs;
-			if (!imgId) return;
-
-			const insert = Theatre.instance.stage.stageInserts.find(p => p.imgId === imgId);
+			if (!imgId) {
+        return;
+      }
+			const insert = <StageInsert>Theatre.instance.stage.stageInserts.find(p => p.imgId === imgId);
+      if(!insert.portrait) {
+        return;
+      }
 			const oleft = insert.portrait.root.x, otop = insert.portrait.root.y;
 			const tweenId = "portraitMove";
 			const tween = TweenMax.to(insert.portrait.root, 0.5, {
@@ -600,9 +642,13 @@ Hooks.once("init", () => {
 		}],
 		onDown: () => {
 			const imgId = Theatre.instance.speakingAs;
-			if (!imgId) return;
-
-			const insert = Theatre.instance.stage.stageInserts.find(p => p.imgId === imgId);
+			if (!imgId) {
+        return;
+      }
+			const insert = <StageInsert>Theatre.instance.stage.stageInserts.find(p => p.imgId === imgId);
+      if(!insert.portrait) {
+        return;
+      }
 			const oleft = insert.portrait.root.x, otop = insert.portrait.root.y;
 			const tweenId = "portraitMove";
 			const tween = TweenMax.to(insert.portrait.root, 0.5, {
@@ -635,9 +681,13 @@ Hooks.once("init", () => {
 		}],
 		onDown: () => {
 			const imgId = Theatre.instance.speakingAs;
-			if (!imgId) return;
-
-			const insert = Theatre.instance.stage.stageInserts.find(p => p.imgId === imgId);
+			if (!imgId) {
+        return;
+      }
+			const insert = <StageInsert>Theatre.instance.stage.stageInserts.find(p => p.imgId === imgId);
+      if(!insert.portrait) {
+        return;
+      }
 			const oleft = insert.portrait.root.x, otop = insert.portrait.root.y;
 			const tweenId = "portraitMove";
 			const tween = TweenMax.to(insert.portrait.root, 0.5, {
@@ -670,12 +720,13 @@ Hooks.once("init", () => {
 				key: `Digit${i === 10 ? 0 : i}`,
 				modifiers: ["Control"]
 			}],
-			onDown: () => {
+			onDown: (ev:any) => {
 				const ids = Object.keys(Theatre.instance.stage);
 				const id = ids[i - 1];
-				if (id) Theatre.instance.activateInsertById(id);
-
-				document.getElementById("chat-message").blur();
+				if (id) {
+          Theatre.instance.activateInsertById(id,ev);
+        }
+				document.getElementById("chat-message")?.blur();
 			},
 			restricted: false
 		});
@@ -701,15 +752,21 @@ Hooks.once("init", () => {
 /**
  * Hide player list (and macro hotbar) when stage is active (and not suppressed)
  */
-Hooks.on("theatreDockActive", insertCount => {
-	if (!insertCount) return;
-
+Hooks.on("theatreDockActive", (insertCount:any) => {
+	if (!insertCount) {
+    return;
+  }
 	if (TheatreSettings.get(TheatreSettings.SHIFT_PAUSE_ICON))
 		// The "MyTab" module inserts another element with id "pause". Use querySelectorAll to make sure we catch both
-		document.querySelectorAll("#pause").forEach(ele => KHelpers.addClass(ele, "theatre-centered"));
+		//document.querySelectorAll("#pause").forEach(ele => KHelpers.addClass(ele, "theatre-centered"));
+    for(const ele of document.querySelectorAll("#pause")){
+      //@ts-ignore
+      KHelpers.addClass(ele, "theatre-centered");
+    }
 
-	if (!TheatreSettings.get("autoHideBottom")) return;
-
+	if (!TheatreSettings.get("autoHideBottom")) {
+    return;
+  }
 	if (!Theatre.instance.isSuppressed) {
 		$('#players').addClass("theatre-invisible");
 		$('#hotbar').addClass("theatre-invisible");
@@ -720,11 +777,17 @@ Hooks.on("theatreDockActive", insertCount => {
  * If Argon is active, wrap CombatHudCanvasElement#toggleMacroPlayers to prevent playesr list and macro hotbar from being shown
  */
 Hooks.once("ready", () => {
-	if (!TheatreSettings.get("autoHideBottom")) return;
-	if (!game.modules.get("enhancedcombathud")?.active) return;
-
+	if (!TheatreSettings.get("autoHideBottom")) {
+    return;
+  }
+	if (!game.modules.get("enhancedcombathud")?.active) {
+    return;
+  }
+  //@ts-ignore
 	libWrapper.register(TheatreSettings.NAMESPACE, "CombatHudCanvasElement.prototype.toggleMacroPlayers", (wrapped, togg) => {
-		if (togg && Theatre.instance?.dockActive) return;
+		if (togg && Theatre.instance.dockActive) {
+      return;
+    }
 		return wrapped(togg);
 	}, "MIXED");
 });
@@ -732,10 +795,16 @@ Hooks.once("ready", () => {
 /**
  * Hide/show macro hotbar when stage is suppressed
  */
-Hooks.on("theatreSuppression", suppressed => {
-	if (!TheatreSettings.get("autoHideBottom")) return;
-	if (!TheatreSettings.get("suppressMacroHotbar")) return;
-	if (!Theatre.instance.dockActive) return;
+Hooks.on("theatreSuppression", (suppressed:boolean) => {
+	if (!TheatreSettings.get("autoHideBottom")) {
+    return;
+  }
+	if (!TheatreSettings.get("suppressMacroHotbar")) {
+    return;
+  }
+	if (!Theatre.instance.dockActive) {
+    return;
+  }
 
 	if (suppressed) {
 		$("#players").removeClass("theatre-invisible");
@@ -748,37 +817,46 @@ Hooks.on("theatreSuppression", suppressed => {
 });
 
 Hooks.on("renderPause", () => {
-	if (!Theatre.instance?.dockActive) return;
-	if (!TheatreSettings.get(TheatreSettings.SHIFT_PAUSE_ICON)) return;
+	if (!Theatre.instance.dockActive) {
+    return;
+  }
+	if (!TheatreSettings.get(TheatreSettings.SHIFT_PAUSE_ICON)) {
+    return;
+  }
 	// The "MyTab" module inserts another element with id "pause". Use querySelectorAll to make sure we catch both
-	document.querySelectorAll("#pause").forEach(ele => KHelpers.addClass(ele, "theatre-centered"));
+	//document.querySelectorAll("#pause").forEach(ele => KHelpers.addClass(ele, "theatre-centered"));
+  for(const ele of document.querySelectorAll("#pause")) {
+    //@ts-ignore
+    KHelpers.addClass(ele, "theatre-centered");
+  }
 });
 
 
 /**
  * If an actor changes, update the stage accordingly
  */
-Hooks.on("updateActor", (actor, data) => {
+Hooks.on("updateActor", (actor:Actor, data:any) => {
 	const insert = Theatre.instance.stage.getInsertById(`theatre-${actor.id}`);
-	if (!insert) return;
-
-	insert.label.text = ActorExtensions.getDisplayName(actor.id);
+	if (!insert) {
+    return;
+  }
+	insert.label.text = ActorExtensions.getDisplayName(<string>actor.id);
 	Theatre.instance._renderTheatre(performance.now());
 });
 
 Hooks.on("getSceneControlButtons", controls => {
 	// Use "theatre", since Theatre.SETTINGS may not be available yet
 	if (!game.user?.isGM && game.settings.get("theatre", "gmOnly")) {
-		const suppressTheatreTool = {
+		const suppressTheatreTool = <any>{
 			name: "suppressTheatre",
 			title: "Theatre.UI.Title.SuppressTheatre",
 			icon: "fas fa-theater-masks",
 			toggle: true,
 			active: false,
-			onClick: toggle => Theatre.instance.updateSuppression(toggle), // TODO Suppress theatre
+			onClick: (toggle:boolean) => Theatre.instance.updateSuppression(toggle), // TODO Suppress theatre
 			visible: true,
 		};
-		const tokenControls = controls.find(group => group.name === "token").tools;
+		const tokenControls = <SceneControl[]>controls.find(group => group.name === "token")?.tools;
 		tokenControls.push(suppressTheatreTool);
 	}
 })

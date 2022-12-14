@@ -1,4 +1,4 @@
-import { EmoteDictionary } from "./resources_types";
+import type { EmoteDictionary } from "./resources_types";
 
 export default class DefaultEmotes {
 

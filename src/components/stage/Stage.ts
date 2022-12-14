@@ -104,16 +104,18 @@ export default class Stage {
             case TheatreStyle.CLEARBOX: {
               //@ts-ignore
               this.theatreDock?.style.height = "100%";
+              break;
             }
             case TheatreStyle.MANGABUBBLE: {
               throw "NotImplemented";
             }
             case TheatreStyle.TEXTBOX: {
-
+              break;
             }
             default: {
               //@ts-ignore
               this.theatreDock?.style.height = "99.5vh";
+              break;
             }
         }
 
@@ -167,7 +169,7 @@ export default class Stage {
 
         if (toRemoveInsert.decayTOId) {
             window.clearTimeout(toRemoveInsert.decayTOId);
-            toRemoveInsert.decayTOId = null;
+            toRemoveInsert.decayTOId = undefined;
         }
 
         // WMW: TODO: Disabled for now, not sure if ever worked as intented
@@ -365,7 +367,7 @@ export default class Stage {
         for (const insert of this.stageInserts) {
             insert.portrait?.updateGeometry();
         }
-        Theatre.instance?._renderTheatre(performance.now());
+        Theatre.instance._renderTheatre(performance.now());
     }
 
 

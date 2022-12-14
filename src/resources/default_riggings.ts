@@ -1,4 +1,4 @@
-import { RiggingResource } from "./resources_types";
+import type { RiggingResource } from "./resources_types";
 
 
 export default class DefaultRiggingResources {
@@ -7,7 +7,7 @@ export default class DefaultRiggingResources {
      * Default rigging resources
      *
      * @return {RiggingResource[]} : An array of {name: (String), path: (String)} tuples
-     *							 representing the default rigging resource map. 
+     *							 representing the default rigging resource map.
      */
     static get(): RiggingResource[] {
         return [

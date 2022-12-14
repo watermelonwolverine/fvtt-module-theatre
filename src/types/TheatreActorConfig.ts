@@ -93,24 +93,24 @@ export default class TheatreActorConfig extends FormApplication {
 	activateListeners(html:JQuery<HTMLElement>) {
 		super.activateListeners(html);
 
-
 		let btnAdd = html[0]?.getElementsByClassName("theatre-config-btn-add-emote")[0];
-		if (btnAdd)
+		if (btnAdd) {
 			btnAdd.addEventListener("click", this._onAddEmoteLine.bind(this));
-
+    }
 		let btnsEmoteConfig = <HTMLCollectionOf<Element>>html[0]?.getElementsByClassName("theatre-config-btn-edit-emote");
-		for (let btn of btnsEmoteConfig)
+		for (let btn of btnsEmoteConfig) {
 			btn.addEventListener("click", this._onEditEmoteLine.bind(this));
-
+    }
 		// Support custom icon updates
 		let iconsCustom = <HTMLCollectionOf<Element>>html[0]?.getElementsByClassName("customicon");
-		for (let icon of iconsCustom)
+		for (let icon of iconsCustom) {
 			icon.addEventListener("click", this._onCustomIconImage.bind(this));
-
+    }
 		// Support custom label updates
 		let labelsCustom = <HTMLCollectionOf<Element>>html[0]?.getElementsByClassName("customlabel");
-		for (let label of labelsCustom)
-			this._setupCustomLabelEvents(label);
+		for (let label of labelsCustom) {
+			this._setupCustomLabelEvents(<HTMLElement>label);
+    }
 	}
 
 	/** @override */
@@ -382,8 +382,8 @@ export default class TheatreActorConfig extends FormApplication {
 						Theatre.instance._clearPortraitContainer(theatreId);
 						Theatre.instance.workers.portrait_container_setup_worker.setupPortraitContainer(theatreId, newAlign, newSrcImg, resources);
 						// re-attach label + typingBubble
-						insert.dockContainer.addChild(insert.label);
-						insert.dockContainer.addChild(insert.typingBubble);
+						insert.dockContainer?.addChild(insert.label);
+						insert.dockContainer?.addChild(insert.typingBubble);
 
 						Theatre.instance._repositionInsertElements(insert);
 
@@ -402,15 +402,18 @@ export default class TheatreActorConfig extends FormApplication {
 			if (insertDirty && insert) {
 
 				let resName = "icons/myster-man.png";
-				if (insert.emote
-					&& this.object.data.flags.theatre.emotes[insert.emote].insert
-					&& this.object.data.flags.theatre.emotes[insert.emote].insert != "")
-					resName = this.object.data.flags.theatre.emotes[insert.emote].insert;
+				if (insert.emotion.emote
+					&& this.object.data.flags.theatre.emotes[insert.emotion.emote].insert
+					&& this.object.data.flags.theatre.emotes[insert.emotion.emote].insert != "") {
+					resName = this.object.data.flags.theatre.emotes[insert.emotion.emote].insert;
+        }
 				else if (this.object.data.flags.theatre.baseinsert
-					&& this.object.data.flags.theatre.baseinsert != "")
+					&& this.object.data.flags.theatre.baseinsert != "") {
 					resName = this.object.data.flags.theatre.baseinsert;
-				else if (this.object.data.img && this.object.data.img != "")
+        }
+				else if (this.object.data.img && this.object.data.img != "") {
 					resName = this.object.data.img;
+        }
 
 				// bubble up dataum from the update
 				insert.optAlign = newAlign;
@@ -420,20 +423,22 @@ export default class TheatreActorConfig extends FormApplication {
 				Theatre.instance._clearPortraitContainer(theatreId);
 				Theatre.instance.workers.portrait_container_setup_worker.setupPortraitContainer(theatreId, newAlign, resName, PIXI.Loader.shared.resources);
 				// re-attach label + typingBubble
-				insert.dockContainer.addChild(insert.label);
-				insert.dockContainer.addChild(insert.typingBubble);
+				insert.dockContainer?.addChild(insert.label);
+				insert.dockContainer?.addChild(insert.typingBubble);
 
 				Theatre.instance._repositionInsertElements(insert);
 
-				if (!Theatre.instance.rendering)
+				if (!Theatre.instance.rendering) {
 					Theatre.instance._renderTheatre(performance.now());
+        }
 			}
 
-			if (theatreId == Theatre.instance.speakingAs);
-			Theatre.instance.emoteMenuRenderer.initialize();
-			if (insertDirty)
+			if (theatreId == Theatre.instance.speakingAs) {
+			  Theatre.instance.emoteMenuRenderer.initialize();
+      }
+			if (insertDirty) {
 				Theatre.instance.sceneEventProcessor.sendSceneEvent(SceneEventTypes.renderinsert, { insertid: theatreId });
-
+      }
 		});
 	}
 
@@ -444,7 +449,7 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @private
 	 */
-	_onAddEmoteLine(ev) {
+	_onAddEmoteLine(ev:any) {
 
 		//ui.notifications.info(game.i18n.localize("Theatre.NotYet"));
 
@@ -455,28 +460,30 @@ export default class TheatreActorConfig extends FormApplication {
 		let emoteContainer = ev.currentTarget.parentNode;
 		let formEmoteElems = emoteContainer.getElementsByClassName("theatre-config-form-group");
 
-		let customElems = [];
+		let customElems:{sortidx: number, elem: any;}[] = [];
 		for (let elem of formEmoteElems) {
 			let eName = elem.getAttribute("name");
-			if (eName && eName.startsWith("custom"))
+			if (eName && eName.startsWith("custom")) {
 				customElems.push({ sortidx: Number(eName.match(/\d+/)[0]), elem: elem });
+      }
 		}
 		// we grab max index, we don't care about possible missing indexes from removed custom emotes
 		// so we'll just leave them as gaps
 		customElems.sort((a, b) => { return a.sortidx - b.sortidx });
-		let customIdx = (customElems.length > 0 ? (customElems[customElems.length - 1].sortidx + 1) : 1);
+		let customIdx = (customElems.length > 0 ? (<number>customElems[customElems.length - 1]?.sortidx + 1) : 1);
 
 
 		let customObjElems = [];
 		for (let k in this.object.data.flags.theatre.emotes) {
 			let eName = k;
-			if (eName && eName.startsWith("custom"))
-				customObjElems.push({ sortidx: Number(eName.match(/\d+/)[0]), elem: this.object.data.flags.theatre.emotes[k] });
+			if (eName && eName.startsWith("custom")) {
+				customObjElems.push({ sortidx: Number(((<string[]>eName.match(/\d+/))[0])), elem: this.object.data.flags.theatre.emotes[k] });
+      }
 		}
 		// we grab max index, we don't care about possible missing indexes from removed custom emotes
 		// so we'll just leave them as gaps
 		customObjElems.sort((a, b) => { return a.sortidx - b.sortidx });
-		let customObjIdx = (customObjElems.length > 0 ? (customObjElems[customObjElems.length - 1].sortidx + 1) : 1);
+		let customObjIdx = (customObjElems.length > 0 ? (<number>customObjElems[customObjElems.length - 1]?.sortidx + 1) : 1);
 		let customName = `custom${Math.max(customIdx, customObjIdx)}`;
 
 
@@ -560,7 +567,7 @@ export default class TheatreActorConfig extends FormApplication {
 	   *
 	 * @private
 	 */
-	_onCustomIconImage(ev) {
+	_onCustomIconImage(ev:any) {
 		let target = ev.currentTarget;
 		new FilePicker({
 			type: "image",
@@ -568,8 +575,8 @@ export default class TheatreActorConfig extends FormApplication {
 			callback: path => {
 				target.src = path;
 			},
-			top: this.position.top + 40,
-			left: this.position.left + 10
+			top: <number>this.position.top + 40,
+			left: <number>this.position.left + 10
 		}).browse(target.getAttribute("src"));
 	}
 
@@ -580,7 +587,7 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @private
 	 */
-	_onCustomLabelClick(ev) {
+	_onCustomLabelClick(ev:any) {
 		// replace the label with an input box
 		ev.stopPropagation();
 		let inputLabel = document.createElement("input");
@@ -604,7 +611,7 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @private
 	 */
-	_onCustomLabelMouseEnter(ev) {
+	_onCustomLabelMouseEnter(ev:any) {
 		// show dock
 		let dock = ev.currentTarget.getElementsByClassName("theatre-config-emote-label-dock")[0];
 		dock.style.display = "flex";
@@ -617,7 +624,7 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @private
 	 */
-	_onCustomLabelMouseLeave(ev) {
+	_onCustomLabelMouseLeave(ev:any) {
 		// hide dock
 		let dock = ev.currentTarget.getElementsByClassName("theatre-config-emote-label-dock")[0];
 		dock.style.display = "none";
@@ -630,7 +637,7 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @private
 	 */
-	_onCustomLabelInputFocusOut(ev) {
+	_onCustomLabelInputFocusOut(ev:any) {
 		// re-build dock + label
 		let label = document.createElement("label");
 		let dock = document.createElement("div");
@@ -662,12 +669,12 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @private
 	 */
-	_onCustomLabelDockClick(ev) {
+	_onCustomLabelDockClick(ev:any) {
 		// delete custom emote
 		// mark the form group as 'to be deleted' as a rider on our update call
 		let formGroup = KHelpers.seekParentClass(ev.currentTarget, "theatre-config-form-group", 5);
 		if (!formGroup) return;
-		formGroup.setAttribute("todelete", true);
+		formGroup.setAttribute("todelete", "true");
 		formGroup.style.left = "20px";
 		formGroup.style.transform = "scale(0.75)";
 		formGroup.style.opacity = "0.25";
@@ -682,7 +689,7 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @private
 	 */
-	_onUndoDockDelete(ev) {
+	_onUndoDockDelete(ev:any) {
 
 		ev.stopPropagation();
 		ev.currentTarget.removeAttribute("todelete");
@@ -698,11 +705,11 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @private
 	 */
-	_setupCustomLabelEvents(label) {
+	_setupCustomLabelEvents(label:HTMLElement) {
 		label.addEventListener("click", this._onCustomLabelClick.bind(this));
 		label.addEventListener("mouseenter", this._onCustomLabelMouseEnter.bind(this));
 		label.addEventListener("mouseleave", this._onCustomLabelMouseLeave.bind(this));
-		let dock = label.getElementsByClassName("theatre-config-emote-label-dock")[0];
+		let dock = <HTMLElement>label.getElementsByClassName("theatre-config-emote-label-dock")[0];
 		dock.addEventListener("click", this._onCustomLabelDockClick.bind(this));
 	}
 
@@ -713,7 +720,7 @@ export default class TheatreActorConfig extends FormApplication {
 	 *
 	 * @private
 	 */
-	_onEditEmoteLine(ev) {
+	_onEditEmoteLine(ev:any) {
 		ui.notifications.info(game.i18n.localize("Theatre.NotYet"));
 	}
 

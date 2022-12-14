@@ -35,7 +35,7 @@ export default class NavItemMouseEventHandler {
     handleNavItemDragDrop(ev: DragEvent) {
         ev.preventDefault();
         KHelpers.insertBefore(
-            Theatre.instance?.dragNavItem,
+            Theatre.instance.dragNavItem,
             <HTMLElement>ev.currentTarget);
     }
 

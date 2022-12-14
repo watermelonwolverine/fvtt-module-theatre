@@ -1,4 +1,4 @@
-import Theatre from "../../Theatre";
+import type Theatre from "../../Theatre";
 
 export default class ControlButtons {
 

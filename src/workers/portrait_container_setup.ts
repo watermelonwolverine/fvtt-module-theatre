@@ -53,6 +53,10 @@ export default class TheatrePortraitContainerSetupWorker {
         }
 
         let dockContainer = insert.dockContainer;
+        if(!insert.portrait) {
+          return;
+        }
+
         insert.portrait.updateTexture(<PIXI.Texture>resources[resName]?.texture);
         insert.portrait.init();
 
@@ -71,22 +75,27 @@ export default class TheatrePortraitContainerSetupWorker {
 
         // TheatreStyle specific adjustments
         switch (TheatreSettings.getTheatreStyle()) {
-            case TheatreStyle.LIGHTBOX:
+            case TheatreStyle.LIGHTBOX: {
                 // to allow top-aligned portraits to work without a seam
                 dockContainer.y += (insert.optAlign == "top" ? 8 : 0);
                 insert.label.y -= (insert.optAlign == "top" ? 8 : 0);
                 break;
-            case TheatreStyle.CLEARBOX:
+            }
+            case TheatreStyle.CLEARBOX: {
                 dockContainer.y = Number(stage.theatreDock?.offsetHeight) - portHeight;
                 insert.label.y += (insert.optAlign == "top" ? 0 : Number(stage.theatreBar?.offsetHeight));
                 insert.typingBubble.y += (insert.optAlign == "top" ? 0 : Number(stage.theatreBar?.offsetHeight));
                 break;
-            case TheatreStyle.MANGABUBBLE:
+            }
+            case TheatreStyle.MANGABUBBLE: {
                 break;
-            case TheatreStyle.TEXTBOX:
+            }
+            case TheatreStyle.TEXTBOX: {
                 break;
-            default:
+            }
+            default: {
                 break;
+            }
         }
 
         // run rigging animations if we have have any
@@ -121,8 +130,9 @@ export default class TheatrePortraitContainerSetupWorker {
             dockContainer.alpha = 1;
         }
 
-        if (!this.theatre.rendering)
+        if (!this.theatre.rendering) {
             this.theatre._renderTheatre(performance.now());
+        }
     }
 
 }

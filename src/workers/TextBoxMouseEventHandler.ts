@@ -2,6 +2,7 @@ import Theatre from "../Theatre";
 import type StageInsert from "../components/stage/StageInsert";
 import type SceneEventProcessor from "./SceneEventProcessor";
 import { SceneEventTypes } from "../types/SceneEventTypes";
+import type Portrait from "src/components/stage/Portrait";
 
 type DragPoint = {
     dragStartX: number,
@@ -167,7 +168,7 @@ export default class TextBoxMouseEventHandler {
             },
             onCompleteParams: [Theatre.instance, insert.imgId, tweenId]
         });
-        Theatre.instance?._addDockTween(insert.imgId, tween, tweenId);
+        Theatre.instance._addDockTween(insert.imgId, tween, tweenId);
 
         this.sceneEventProcessor.sendSceneEvent(
             SceneEventTypes.positionupdate,
@@ -191,7 +192,7 @@ export default class TextBoxMouseEventHandler {
         insert: StageInsert): number {
         let x = ev.clientX || ev.pageX;
 
-        const portrait = insert.portrait;
+        const portrait = <Portrait>insert.portrait;
 
         const deltaX = x - Number(this.dragPoint?.dragStartX);
 

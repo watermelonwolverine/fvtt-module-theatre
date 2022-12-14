@@ -1,7 +1,8 @@
+import type Params from "src/types/Params";
 import Theatre from "../Theatre";
 import KHelpers from "../workers/KHelpers";
 import Tools from "../workers/Tools";
-import Stage from "./stage/Stage";
+import type Stage from "./stage/Stage";
 
 export default class ToolTipCanvas {
 
@@ -17,8 +18,8 @@ export default class ToolTipCanvas {
     /**
          * Initialize the tooltip canvas which renders previews for the emote menu
          *
-         * @return (HTMLElement) : The canvas HTMLElement of the PIXI canvas created, or 
-         *						  null if unsuccessful. 
+         * @return (HTMLElement) : The canvas HTMLElement of the PIXI canvas created, or
+         *						  null if unsuccessful.
          */
     initTheatreToolTipCanvas(): void {
 
@@ -27,7 +28,7 @@ export default class ToolTipCanvas {
 
         if (!canvas) {
             console.log("FAILED TO INITILIZE TOOLTIP CANVAS!");
-            return null;
+            return;
         }
 
         this.holder = document.createElement("div");
@@ -49,16 +50,17 @@ export default class ToolTipCanvas {
      *
      * @params theatreId (String) : The theatreId of the insert to display in
      *							  the theatre tool tip.
-     * @params emote (String) : The emote of the theatreId to get for dispay 
-     *						  in the theatre tool tip. 
+     * @params emote (String) : The emote of the theatreId to get for dispay
+     *						  in the theatre tool tip.
      */
     configureTheatreToolTip(
         theatreId: string,
         emote: string) {
-        if (!theatreId || theatreId == Theatre.NARRATOR) return;
-
+        if (!theatreId || theatreId == Theatre.NARRATOR) {
+          return;
+        }
         let actorId = theatreId.replace("theatre-", "");
-        let params = Tools.getInsertParamsFromActorId(actorId);
+        let params = <Params>Tools.getInsertParamsFromActorId(actorId);
         let resources = PIXI.Loader.shared.resources;
 
         if (!params) {
@@ -66,9 +68,9 @@ export default class ToolTipCanvas {
             return;
         }
 
-        let resName = (emote && params.emotes[emote] && params.emotes[emote].insert ? params.emotes[emote].insert : params.src);
+        let resName = <string>(emote && params.emotes[emote] && params.emotes[emote]?.insert ? params.emotes[emote]?.insert : params.src);
 
-        if (!resources[resName] || !resources[resName].texture) {
+        if (!resources[resName] || !resources[resName]?.texture) {
             console.log("ERROR could not load texture (for tooltip) %s", resName, resources);
             return;
         }
@@ -77,14 +79,14 @@ export default class ToolTipCanvas {
 
         // clear canvas
         for (let idx = app.stage.children.length - 1; idx >= 0; --idx) {
-            let child = app.stage.children[idx];
+            let child = <PIXI.DisplayObject>app.stage.children[idx];
             child.destroy();
         }
 
 
-        let sprite = new PIXI.Sprite(resources[resName].texture);
-        let portWidth = resources[resName].texture.width;
-        let portHeight = resources[resName].texture.height;
+        let sprite = new PIXI.Sprite(resources[resName]?.texture);
+        let portWidth = Number(resources[resName]?.texture.width);
+        let portHeight = Number(resources[resName]?.texture.height);
         let maxSide = Math.max(portWidth, portHeight);
         let scaledWidth, scaledHeight, ratio;
         if (maxSide == portWidth) {
@@ -114,13 +116,13 @@ export default class ToolTipCanvas {
         }
 
         // adjust dockContainer + portraitContainer dimensions to fit the image
-        //app.stage.y = portHeight*ratio/2; 
+        //app.stage.y = portHeight*ratio/2;
 
         // set sprite initial coordinates + state
         sprite.x = 0;
         sprite.y = 0;
 
-        //console.log("Tooltip Portrait loaded with w:%s h:%s scale:%s",portWidth,portHeight,ratio,sprite); 
+        //console.log("Tooltip Portrait loaded with w:%s h:%s scale:%s",portWidth,portHeight,ratio,sprite);
 
         // render and show the tooltip
         app.render();
@@ -140,6 +142,6 @@ export default class ToolTipCanvas {
         this.holder.style.left =
             `${Math.min(
                 (ev.clientX || ev.pageX) - this.holder.offsetWidth / 2,
-                this.stage.theatreDock.offsetWidth - this.holder.offsetWidth)}px`;
+                Number(this.stage.theatreDock?.offsetWidth) - this.holder.offsetWidth)}px`;
     }
 }

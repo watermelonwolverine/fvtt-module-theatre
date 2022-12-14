@@ -54,7 +54,7 @@ export default class TheatreSettingsInitializer {
             default: TheatreStyle.TEXTBOX,
             type: String,
             choices: choices,
-            onChange: theatreStyle => Theatre.instance?.configTheatreStyle(theatreStyle as AnyTheatreStyle)
+            onChange: theatreStyle => Theatre.instance.configTheatreStyle(theatreStyle as AnyTheatreStyle)
         });
 
         this.register(TheatreSettings.THEATRE_IMAGE_SIZE, {
@@ -62,7 +62,7 @@ export default class TheatreSettingsInitializer {
             config: true,
             default: TheatreSettings.THEATRE_IMAGE_SIZE_DEFAULT.toString(),
             type: String,
-            onChange: () => Theatre.instance?.stage.updatePortraits()
+            onChange: () => Theatre.instance.stage.updatePortraits()
         });
 
         this.register<string>(TheatreSettings.NARRATOR_HEIGHT, {
@@ -77,7 +77,7 @@ export default class TheatreSettingsInitializer {
                 "50%": "50%",
                 "70%": "75%"
             },
-            onChange: () => Theatre.instance?.maybeUpdateNarratorHeight()
+            onChange: () => Theatre.instance.maybeUpdateNarratorHeight()
         });
 
         this.register<number>("nameFontSize", {

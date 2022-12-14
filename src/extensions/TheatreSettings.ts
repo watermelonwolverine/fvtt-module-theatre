@@ -1,4 +1,4 @@
-import { AnyTheatreStyle } from "../types/TheatreStyle";
+import type { AnyTheatreStyle } from "../types/TheatreStyle";
 
 export default class TheatreSettings {
 
