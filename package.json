@@ -1,8 +1,8 @@
 {
 	"name": "theatre",
 	"title": "Theatre Insert",
-	"version": "3.0.0",
 	"description": "Theater Inserts with a visual novel style made for heavy roleplay scenes",
+  "version": "3.0.0",
 	"main": "src/theatre_main.js",
 	"scripts": {
     "build": "npx gulp",
