@@ -108,7 +108,7 @@ Hooks.on("preCreateChatMessage", function (chatMessage: any) {
 		//@ts-ignore
 		$(Theatre.instance.theatreControls.theatreChatCover).hasClass("theatre-control-chat-cover-ooc")
 	) {
-		const user = <User>game.users?.get(chatMessage.user);
+		const user = <User>game.users?.get(chatMessage.user.id);
 		chatData.speaker.alias = user.name;
 		chatData.speaker.actor = null;
 		chatData.speaker.scene = null;
@@ -118,8 +118,8 @@ Hooks.on("preCreateChatMessage", function (chatMessage: any) {
 		return;
 	}
 
-	if (!chatMessage.roll && Theatre.instance.speakingAs && Theatre.instance.usersTyping.get(chatMessage.user)) {
-		let theatreId = <string>Theatre.instance.usersTyping.get(chatMessage.user)?.theatreId;
+	if (!chatMessage.roll && Theatre.instance.speakingAs && Theatre.instance.usersTyping.get(chatMessage.user.id)) {
+		let theatreId = <string>Theatre.instance.usersTyping.get(chatMessage.user.id)?.theatreId;
 		let insert = Theatre.instance.stage.getInsertById(theatreId);
 		let actorId = theatreId.replace("theatre-", "");
 
@@ -147,7 +147,11 @@ Hooks.on("preCreateChatMessage", function (chatMessage: any) {
 		} else if (insert) {
 			let label = <PIXI.Text>Theatre.instance._getLabelFromInsert(insert);
 			let name = label.text;
-
+      let theatreColor = Theatre.instance.getPlayerFlashColor(
+        chatMessage.data.user.id,
+        //@ts-ignore
+        insert.textColor ? insert.textColor : <string>insert.emotion.textColor
+      );
 			chatData.speaker = {};
 			chatData.speaker.alias = name;
 			chatData.speaker.actor = null;
