@@ -9,7 +9,7 @@ export default class StageInsert {
 	imgId: string;
 	// contains label and portraitContainer
 	// sits right on top the textBox
-	dockContainer: PIXI.Container | null;
+	dockContainer?: PIXI.Container;
 
 	name: string;
 	emotion: EmotionDefinition;

@@ -1,4 +1,3 @@
-import { EmoteDefinition } from "./resources/resources_types";
 /**
  * Theatre.js
  *
@@ -1068,7 +1067,7 @@ export default class Theatre {
 				this._addDockTween(insert.imgId, tween, tweenId);
 
 				//insert.typingBubble.alpha = 0;
-				userTyping.theatreId = null;
+				userTyping.theatreId = undefined;
 			}
 		}
 
@@ -1233,8 +1232,7 @@ export default class Theatre {
 		}
 
 		window.clearTimeout(<number>this.usersTyping.get(userId)?.timeoutId);
-		//@ts-ignore
-		this.usersTyping.get(userId)?.timeoutId = null;
+		(<TheaterUser>this.usersTyping.get(userId)).timeoutId = undefined;
 	}
 
 	/**
@@ -1256,7 +1254,7 @@ export default class Theatre {
 		}
 
 		//@ts-ignore
-		if (actor.data.flags.theatre && actor.data.flags.theatre.disabledefault) {
+		if (actor.flags.theatre && actor.flags.theatre.disabledefault) {
 			return true;
 		}
 		return false;
@@ -1516,7 +1514,7 @@ export default class Theatre {
 			insert.label = <any>null;
 			// destroy self
 			insert.dockContainer.destroy();
-			insert.dockContainer = null;
+			insert.dockContainer = undefined;
 			let idx = this.stage.stageInserts.findIndex((e) => e.imgId == imgId);
 			this.stage.stageInserts.splice(idx, 1);
 			// The "MyTab" module inserts another element with id "pause". Use querySelectorAll to make sure we catch both
@@ -1627,10 +1625,8 @@ export default class Theatre {
 				insert.label.style.lineHeight;
 		}
 		insert.typingBubble.rotation = 0.1745;
-		//@ts-ignore
-		insert.dockContainer?.x = leftPos;
-		//@ts-ignore
-		insert.dockContainer?.y =
+		(<PIXI.Container>insert.dockContainer).x = leftPos;
+		(<PIXI.Container>insert.dockContainer).y =
 			<number>this.stage.theatreDock?.offsetHeight -
 			(insert.optAlign == "top" ? <number>this.stage.theatreBar?.offsetHeight : 0) -
 			insert.portrait.height;
@@ -1639,14 +1635,12 @@ export default class Theatre {
 		switch (TheatreSettings.getTheatreStyle()) {
 			case TheatreStyle.LIGHTBOX: {
 				// to allow top-aligned portraits to work without a seam
-				//@ts-ignore
-				insert.dockContainer.y += insert.optAlign == "top" ? 8 : 0;
+				(<PIXI.Container>insert.dockContainer).y += insert.optAlign == "top" ? 8 : 0;
 				insert.label.y -= insert.optAlign == "top" ? 8 : 0;
 				break;
 			}
 			case TheatreStyle.CLEARBOX: {
-				//@ts-ignore
-				insert.dockContainer.y = this.stage.theatreDock?.offsetHeight - insert.portrait.height;
+				(<PIXI.Container>insert.dockContainer).y = (<HTMLCanvasElement>this.stage.theatreDock).offsetHeight - insert.portrait.height;
 				insert.label.y += insert.optAlign == "top" ? 0 : <number>Theatre.instance.theatreBar.offsetHeight;
 				insert.typingBubble.y += insert.optAlign == "top" ? 0 : <number>Theatre.instance.offsetHeight;
 				break;
@@ -1818,8 +1812,8 @@ export default class Theatre {
 			return;
 		}
 		// preserve position without portrait offset
-		let ox = insert.portrait.portraitContainer?.x - insert.portrait.width / 2;
-		let oy = insert.portrait.portraitContainer?.y - insert.portrait.height / 2;
+		let ox = (<PIXI.Container>insert.portrait.portraitContainer).x - insert.portrait.width / 2;
+		let oy = (<PIXI.Container>insert.portrait.portraitContainer).y - insert.portrait.height / 2;
 		let ocx = insert.dockContainer.x;
 		let ocy = insert.dockContainer.y;
 		let oLabelAnim = insert.tweens["nameSpeakingPulse"];
@@ -1859,7 +1853,10 @@ export default class Theatre {
 		}
 
 		// destroy children
-		for (let child of insert.portrait.portraitContainer.children) child.destroy();
+		const displayObjects = <PIXI.DisplayObject[]>insert.portrait.portraitContainer?.children;
+		for (let child of displayObjects) {
+			child.destroy();
+		}
 		// attempt to preserve label + typingBubble
 		for (let idx = insert.dockContainer.children.length - 1; idx >= 0; --idx) {
 			let child = <PIXI.DisplayObject>insert.dockContainer.children[idx];
@@ -1873,7 +1870,7 @@ export default class Theatre {
 		// insert.portrait?.portraitContainer = <any>null;
 		// destroy self
 		insert.dockContainer.destroy();
-		insert.dockContainer = null;
+		insert.dockContainer = undefined;
 		// re-generate the container
 		let dockContainer = new PIXI.Container();
 		let portraitContainer = new PIXI.Container();
@@ -1946,8 +1943,7 @@ export default class Theatre {
 						loader.add(resName, imgTuple.imgpath);
 					}
 				}
-				//@ts-ignore
-				loader.load(cb);
+				loader.load(<any>cb);
 			} else {
 				window.setTimeout(() => {
 					this._getLoaderChainWait(imgSrcs, cb).call(this);
@@ -2087,9 +2083,8 @@ export default class Theatre {
 			primeBar.appendChild(textBox);
 			primeBar.style.left = "0%";
 			primeBar.style.opacity = "1";
-			primeBar.style.setProperty("pointer-events", "all");
-			//@ts-ignore
-			this.stage.theatreBar?.style.opacity = "1";
+			primeBar.style.setProperty("pointer-events", "all");	
+			(<HTMLDivElement>this.stage.theatreBar).style.opacity = "1";
 			Hooks.call("theatreDockActive", this.dockActive);
 		} else if (textBoxes.length == 1) {
 			// single dock
@@ -2169,8 +2164,7 @@ export default class Theatre {
 			primeBar.style.opacity = "0";
 			primeBar.style.setProperty("pointer-events", "none");
 			textBox.parentNode?.removeChild(textBox);
-			//@ts-ignore
-			this.stage.theatreBar?.style.opacity = "0";
+			(<HTMLDivElement>this.stage.theatreBar).style.opacity = "0";
 			Hooks.call("theatreDockActive", this.dockActive);
 		} else if (textBoxes.length == 2) {
 			// dual docks
@@ -3453,8 +3447,7 @@ export default class Theatre {
 				cimg.style.opacity = "0";
 				// clear typing theatreId data
 				this.removeUserTyping(<string>game.user?.id);
-				//@ts-ignore
-				this.usersTyping.get(<string>game.user?.id)?.theatreId = null;
+				(<TheaterUser>this.usersTyping.get(<string>game.user?.id)).theatreId = undefined;
 			}
 		} else {
 			let src = params.src;
@@ -3733,8 +3726,7 @@ export default class Theatre {
 				cimg.style.opacity = "0";
 				// clear typing theatreId data
 				this.removeUserTyping(game.user?.id);
-				//@ts-ignore
-				this.usersTyping.get(game.user?.id).theatreId = null;
+				(<TheaterUser>this.usersTyping.get(game.user?.id)).theatreId = undefined;
 				// Mark speaking as Narrator
 				this.speakingAs = Theatre.NARRATOR;
 				this.setUserTyping(game.user?.id, Theatre.NARRATOR);
@@ -3783,8 +3775,7 @@ export default class Theatre {
 				// clear narrator
 				this.speakingAs = null;
 				this.removeUserTyping(game.user?.id);
-				//@ts-ignore
-				this.usersTyping.get(game.user?.id)?.theatreId = null;
+				(<TheaterUser>this.usersTyping.get(game.user?.id)).theatreId = undefined;
 				// send event to turn off the narrator bar
 				if (!remote) {
 					this.sceneEventProcessor.sendSceneEvent(SceneEventTypes.narrator, { active: false });
@@ -3852,11 +3843,8 @@ export default class Theatre {
 			secondBar.style.setProperty("pointer-events", "all");
 		}
 
-		//@ts-ignore
-		this.stage?.theatreDock?.style.opacity = String(opacity);
-		//@ts-ignore
+		(<HTMLCanvasElement>this.stage?.theatreDock).style.opacity = String(opacity);
 		Theatre.instance.theatreBar.style.opacity = String(opacity);
-		//@ts-ignore
 		Theatre.instance.theatreNarrator.style.opacity = String(opacity);
 
 		// call hooks
@@ -3894,7 +3882,7 @@ export default class Theatre {
 	onAddToNavBar(ev: MouseEvent, actorSheet: ActorSheet) {
 		const removeLabelSheetHeader = TheatreSettings.getRemoteLabelSheetHeader();
 		//@ts-ignore
-		const actorData = <Actor>actorSheet.object.data;
+		const actorData = actorSheet.object.data ? <Actor>actorSheet.object.data : actorSheet.object;
 		const addLabel = removeLabelSheetHeader ? "" : game.i18n.localize("Theatre.UI.Config.AddToStage");
 		const removeLabel = removeLabelSheetHeader ? "" : game.i18n.localize("Theatre.UI.Config.RemoveFromStage");
 		let newText;

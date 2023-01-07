@@ -98,8 +98,7 @@ export default class Stage {
 		switch (theatreStyle) {
 			case TheatreStyle.LIGHTBOX:
 			case TheatreStyle.CLEARBOX: {
-				//@ts-ignore
-				this.theatreDock?.style.height = "100%";
+				(<HTMLCanvasElement>this.theatreDock).style.height = "100%";
 				break;
 			}
 			case TheatreStyle.MANGABUBBLE: {
@@ -109,8 +108,7 @@ export default class Stage {
 				break;
 			}
 			default: {
-				//@ts-ignore
-				this.theatreDock?.style.height = "99.5vh";
+				(<HTMLCanvasElement>this.theatreDock).style.height = "99.5vh";
 				break;
 			}
 		}
@@ -241,7 +239,7 @@ export default class Stage {
 
 		// animate away the dockContainer
 		let tweenId = "containerSlide";
-		let tween = TweenMax.to(toRemoveInsert.dockContainer, 1, {
+		let tween = TweenMax.to((<PIXI.Container>toRemoveInsert.dockContainer), 1, {
 			//delay: 0.5,
 			pixi: { x: exitX, alpha: 0 },
 			ease: Power4.easeOut,
@@ -321,10 +319,8 @@ export default class Stage {
 		this.theatreDock?.setAttribute("width", String(dockWidth));
 		this.theatreDock?.setAttribute("height", String(dockHeight));
 
-		//@ts-ignore
-		this.pixiApplication?.renderer?.view?.width = dockWidth;
-		//@ts-ignore
-		this.pixiApplication?.renderer?.view?.height = dockHeight;
+		(<HTMLCanvasElement>this.pixiApplication?.renderer?.view).width = dockWidth;
+		(<HTMLCanvasElement>this.pixiApplication?.renderer?.view).height = dockHeight;
 		this.pixiApplication?.renderer.resize(dockWidth, dockHeight);
 
 		this.maybeReapplyRelativePortraitSize();

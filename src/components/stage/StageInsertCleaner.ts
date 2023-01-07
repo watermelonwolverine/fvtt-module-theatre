@@ -75,7 +75,7 @@ export default class StageInsertClearer {
 		insert.portrait = null;
 		// destroy self
 		insert.dockContainer.destroy();
-		insert.dockContainer = null;
+		insert.dockContainer = undefined;
 		// re-generate the container
 		const newDockContainer = new PIXI.Container();
 		const newPortrait = new Portrait(this.theatre.stage);

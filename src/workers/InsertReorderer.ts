@@ -147,8 +147,7 @@ export default class InsertReorderer {
 					insert.label.style.lineHeight;
 			}
 			insert.typingBubble.rotation = 0.1745;
-			//@ts-ignore
-			insert.dockContainer?.y =
+			(<PIXI.Container>insert.dockContainer).y =
 				Number(this.stage.theatreDock?.offsetHeight) -
 				(insert.optAlign == "top" ? Number(this.stage.theatreBar?.offsetHeight) : 0) -
 				insert.portrait.height;
@@ -157,18 +156,14 @@ export default class InsertReorderer {
 			switch (TheatreSettings.getTheatreStyle()) {
 				case TheatreStyle.LIGHTBOX: {
 					// to allow top-aligned portraits to work without a seam
-					//@ts-ignore
-					insert.dockContainer.y += insert.optAlign == "top" ? 8 : 0;
+					(<PIXI.Container>insert.dockContainer).y += insert.optAlign == "top" ? 8 : 0;
 					insert.label.y -= insert.optAlign == "top" ? 8 : 0;
 					break;
 				}
 				case TheatreStyle.CLEARBOX: {
-					//@ts-ignore
-					insert.dockContainer.y = Number(this.stage.theatreDock?.offsetHeight) - insert.portrait.height;
-					//@ts-ignore
-					insert.label.y += insert.optAlign == "top" ? 0 : Number(this.stage.theatreBar.offsetHeight);
-					//@ts-ignore
-					insert.typingBubble.y += insert.optAlign == "top" ? 0 : Number(this.stage.theatreBar.offsetHeight);
+					(<PIXI.Container>insert.dockContainer).y = Number(this.stage.theatreDock?.offsetHeight) - insert.portrait.height;
+					insert.label.y += insert.optAlign == "top" ? 0 : Number((<HTMLDivElement>this.stage.theatreBar).offsetHeight);
+					insert.typingBubble.y += insert.optAlign == "top" ? 0 : Number((<HTMLDivElement>this.stage.theatreBar).offsetHeight);
 					break;
 				}
 				case TheatreStyle.MANGABUBBLE: {
@@ -214,7 +209,7 @@ export default class InsertReorderer {
 			const tweenId = "containerSlide";
 			const context = this.context;
 
-			let tween = TweenMax.to(insert.dockContainer, 1, {
+			let tween = TweenMax.to((<PIXI.Container>insert.dockContainer), 1, {
 				//delay: 0.5,
 				pixi: { x: leftPos, alpha: 1 },
 				ease: Power4.easeOut,

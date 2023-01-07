@@ -297,13 +297,11 @@ export default class TheatreControls {
 		const currentTarget = <HTMLElement>ev.currentTarget;
 
 		if (KHelpers.hasClass(currentTarget, "theatre-control-btn-down")) {
-			//@ts-ignore
-			this.theatreEmoteMenu?.style.display = "none";
+			(<HTMLDivElement>this.theatreEmoteMenu).style.display = "none";
 			KHelpers.removeClass(currentTarget, "theatre-control-btn-down");
 		} else {
 			this.theatre.emoteMenuRenderer.initialize();
-			//@ts-ignore
-			this.theatreEmoteMenu?.style.display = "flex";
+			(<HTMLDivElement>this.theatreEmoteMenu).style.display = "flex";
 			KHelpers.addClass(currentTarget, "theatre-control-btn-down");
 		}
 	}

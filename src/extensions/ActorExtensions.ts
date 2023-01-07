@@ -1,4 +1,3 @@
-import Theatre from "src/Theatre";
 import DefaultEmotes from "../resources/default_emotes";
 import DefaultRiggingResources from "../resources/default_riggings";
 import type { EmoteDictionary, RiggingResource } from "../resources/resources_types";

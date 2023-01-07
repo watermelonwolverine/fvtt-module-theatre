@@ -80,8 +80,8 @@ export default class TheatrePortraitContainerSetupWorker {
 			(insert.optAlign == "top" ? 0 : Number(stage.theatreBar?.offsetHeight)) -
 			insert.label.style.lineHeight -
 			20;
-		//@ts-ignore
-		insert.typingBubble.texture = resources["modules/theatre/app/graphics/typing.png"]?.texture;
+		
+		insert.typingBubble.texture = <PIXI.Texture>resources["modules/theatre/app/graphics/typing.png"]?.texture;
 
 		// TheatreStyle specific adjustments
 		switch (TheatreSettings.getTheatreStyle()) {

@@ -105,8 +105,7 @@ Hooks.on("preCreateChatMessage", function (chatMessage: any) {
 	// make the message OOC if needed
 	if (
 		!chatMessage.roll &&
-		//@ts-ignore
-		$(Theatre.instance.theatreControls.theatreChatCover).hasClass("theatre-control-chat-cover-ooc")
+		$(<HTMLDivElement>Theatre.instance.theatreControls.theatreChatCover).hasClass("theatre-control-chat-cover-ooc")
 	) {
 		const user = <User>game.users?.get(chatMessage.user.id);
 		chatData.speaker.alias = user.name;
@@ -250,10 +249,8 @@ Hooks.on("createChatMessage", function (chatEntity: any, _: any, userId: string)
 		}
 		//TweenMax.killTweensOf(textBox);
 		gsap.killTweensOf(textBox);
-		//@ts-ignore
-		textBox.style["overflow-y"] = "scroll";
-		//@ts-ignore
-		textBox.style["overflow-x"] = "hidden";
+		textBox.style.overflowY = "scroll";
+		textBox.style.overflowX = "hidden";
 
 		textBox.textContent = "";
 
@@ -263,12 +260,9 @@ Hooks.on("createChatMessage", function (chatEntity: any, _: any, userId: string)
 				Theatre.instance.stage.theatreBar?.getElementsByClassName("theatre-text-box-lastspeaking")
 			);
 			if (lastSpeaking[0]) {
-				//@ts-ignore
-				lastSpeaking[0].style.background = "";
-				//@ts-ignore
-				lastSpeaking[0].style["box-shadow"] = "";
-				//@ts-ignore
-				KHelpers.removeClass(lastSpeaking[0], "theatre-text-box-lastspeaking");
+				(<HTMLElement>lastSpeaking[0]).style.background = "";
+				(<HTMLElement>lastSpeaking[0]).style.setProperty("box-shadow", "");
+				KHelpers.removeClass(<HTMLElement>lastSpeaking[0], "theatre-text-box-lastspeaking");
 			}
 			KHelpers.addClass(textBox, "theatre-text-box-lastspeaking");
 			Theatre.instance.applyPlayerColorToTextBox(textBox, userId, <string>insert.emotion.textColor);
@@ -360,8 +354,7 @@ Hooks.on("createChatMessage", function (chatEntity: any, _: any, userId: string)
 		Theatre.instance.applyFontFamily(textBox, insertFontType || Theatre.instance.textFont);
 		//textBox.style["font-family"] = insertFontType || Theatre.instance.textFont;
 		textBox.style.color = insertFontColor || "white";
-		//@ts-ignore
-		textBox.style["font-size"] = `${fontSize}px`;
+		textBox.style.fontSize = `${fontSize}px`;
 		textBox.scrollTop = 0;
 
 		charSpans = TextBoxToCharSplitter.splitTextBoxToChars(textContent, textBox);
@@ -467,8 +460,7 @@ Hooks.once("init", () => {
 			},
 		],
 		onDown: () => {
-			//@ts-ignore
-			const ownedActors = game.actor?.filter((a: any) => a.ownership === 3);
+			const ownedActors = <Actor[]>game.actors?.filter((a: any) => a.ownership === 3);
 			const ownedTokens = ownedActors.map((a: any) => a.getActiveTokens());
 			for (const tokenArray of ownedTokens) {
 				// NEVER USE forEach
@@ -827,8 +819,7 @@ Hooks.on("renderPause", () => {
 	// The "MyTab" module inserts another element with id "pause". Use querySelectorAll to make sure we catch both
 	//document.querySelectorAll("#pause").forEach(ele => KHelpers.addClass(ele, "theatre-centered"));
 	for (const ele of document.querySelectorAll("#pause")) {
-		//@ts-ignore
-		KHelpers.addClass(ele, "theatre-centered");
+		KHelpers.addClass(<HTMLElement>ele, "theatre-centered");
 	}
 });
 

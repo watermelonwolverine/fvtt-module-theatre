@@ -83,10 +83,8 @@ export default class EmoteSetter {
 					resources
 				);
 				// re-attach label + typingBubble
-				//@ts-ignore
-				insert.dockContainer.addChild(insert.label);
-				//@ts-ignore
-				insert.dockContainer.addChild(insert.typingBubble);
+				(<PIXI.Container>insert.dockContainer).addChild(insert.label);
+				(<PIXI.Container>insert.dockContainer).addChild(insert.typingBubble);
 
 				this.theatre._repositionInsertElements(insert);
 
@@ -136,10 +134,8 @@ export default class EmoteSetter {
 					);
 
 					// re-attach label + typingBubble
-					//@ts-ignore
-					insert.dockContainer.addChild(insert.label);
-					//@ts-ignore
-					insert.dockContainer.addChild(insert.typingBubble);
+					(<PIXI.Container>insert.dockContainer).addChild(insert.label);
+					(<PIXI.Container>insert.dockContainer).addChild(insert.typingBubble);
 
 					this.theatre._repositionInsertElements(insert);
 
@@ -157,10 +153,8 @@ export default class EmoteSetter {
 				);
 
 				// re-attach label + typingBubble
-				//@ts-ignore
-				insert.dockContainer.addChild(insert.label);
-				//@ts-ignore
-				insert.dockContainer.addChild(insert.typingBubble);
+				(<PIXI.Container>insert.dockContainer).addChild(insert.label);
+				(<PIXI.Container>insert.dockContainer).addChild(insert.typingBubble);
 
 				this.theatre._repositionInsertElements(insert);
 

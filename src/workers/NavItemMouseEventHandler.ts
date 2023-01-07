@@ -14,8 +14,7 @@ export default class NavItemMouseEventHandler {
 		ev.dataTransfer?.clearData("text/plain");
 		ev.dataTransfer?.clearData("text/html");
 		ev.dataTransfer?.clearData("text/uri-list");
-		//@ts-ignore
-		ev.dataTransfer?.dropEffect = "move";
+		(<DataTransfer>ev.dataTransfer).dropEffect = "move";
 		ev.dataTransfer?.setDragImage(<HTMLElement>ev.currentTarget, 16, 16);
 		this.theatre.dragNavItem = ev.currentTarget;
 	}
@@ -27,8 +26,7 @@ export default class NavItemMouseEventHandler {
 
 	handleNavItemDragOver(ev: DragEvent) {
 		ev.preventDefault();
-		//@ts-ignore
-		ev.dataTransfer?.dropEffect = "move";
+		(<DataTransfer>ev.dataTransfer).dropEffect = "move";
 	}
 
 	handleNavItemDragDrop(ev: DragEvent) {

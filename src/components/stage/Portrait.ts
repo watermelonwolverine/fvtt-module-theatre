@@ -9,8 +9,8 @@ type Size = {
 export default class Portrait {
 	stage: Stage;
 	// wraps portrait for easier mirroring
-	portraitContainer: PIXI.Container;
-	portrait: PIXI.Sprite;
+	portraitContainer?: PIXI.Container;
+	portrait?: PIXI.Sprite;
 	// wraps container of portrait for easier positioning
 	// allows keeping scale out of calculations
 	root: PIXI.Container;
@@ -45,11 +45,19 @@ export default class Portrait {
 	}
 
 	get scaleX() {
-		return this.portraitContainer.scale.x;
+		return this.portraitContainer?.scale.x;
 	}
 
 	set scaleX(newScale) {
-		this.portraitContainer.scale.x = newScale;
+		(<PIXI.Container>this.portraitContainer).scale.x = <number>newScale;
+	}
+
+	get scaleY() {
+		return this.portraitContainer?.scale.y;
+	}
+
+	set scaleY(newScale) {
+		(<PIXI.Container>this.portraitContainer).scale.y = <number>newScale;
 	}
 
 	constructor(stage: Stage) {
@@ -61,24 +69,22 @@ export default class Portrait {
 	}
 
 	init() {
-		this.root.addChild(this.portraitContainer);
-		this.portraitContainer.addChild(this.portrait);
+		this.root.addChild(<PIXI.Container>this.portraitContainer);
+		this.portraitContainer?.addChild(<PIXI.Sprite>this.portrait);
 		this.updateGeometry();
 	}
 
 	updateTexture(texture: PIXI.Texture, updateGeometry = false) {
-		this.portrait.texture = texture;
+		(<PIXI.Sprite>this.portrait).texture = <PIXI.Texture>texture;
 
 		if (updateGeometry) this.updateGeometry();
 	}
 
 	destroy() {
-		this.portrait.destroy();
-		this.portraitContainer.destroy();
-		//@ts-ignore
-		this.portrait = null;
-		//@ts-ignore
-		this.portraitContainer = null;
+		(<PIXI.Sprite>this.portrait).destroy();
+		(<PIXI.Container>this.portraitContainer).destroy();
+		this.portrait = undefined;
+		this.portraitContainer = undefined;
 	}
 
 	updateGeometry() {
@@ -93,28 +99,28 @@ export default class Portrait {
 
 	/** Updates size of portrait. */
 	_updateDimension(targetSize: Size) {
-		this.portrait.height = targetSize.height;
-		this.portrait.width = targetSize.width;
+		(<PIXI.Sprite>this.portrait).height = targetSize.height;
+		(<PIXI.Sprite>this.portrait).width = targetSize.width;
 	}
 
 	/** Updates pivot of container to be in the middle. Has to be updated everytime because pivot changes */
 	_updatePivot(targetSize: Size) {
-		this.portraitContainer.pivot.x = targetSize.width / 2;
-		this.portraitContainer.pivot.y = targetSize.height / 2;
-		this.portraitContainer.x = targetSize.width / 2;
-		this.portraitContainer.y = targetSize.height / 2;
+		(<PIXI.Container>this.portraitContainer).pivot.x = targetSize.width / 2;
+		(<PIXI.Container>this.portraitContainer).pivot.y = targetSize.height / 2;
+		(<PIXI.Container>this.portraitContainer).x = targetSize.width / 2;
+		(<PIXI.Container>this.portraitContainer).y = <number>targetSize.height / 2;
 	}
 
 	/**
 	 * Calculates portrait target size according to the set target height.
 	 */
 	_calculatePortraitTargetSize(): Size {
-		const texture = this.portrait.texture;
+		const texture = (<PIXI.Sprite>this.portrait).texture;
 
 		if (!texture) console.error("OOF");
 
-		const portWidth = this.portrait.texture.width;
-		const portHeight = this.portrait.texture.height;
+		const portWidth = (<PIXI.Sprite>this.portrait).texture.width;
+		const portHeight = (<PIXI.Sprite>this.portrait).texture.height;
 
 		const heightStr = TheatreSettings.getTheatreImageSize();
 
@@ -145,6 +151,6 @@ export default class Portrait {
 	}
 
 	addEmote(emote: PIXI.Sprite) {
-		this.portraitContainer.addChild(emote);
+		(<PIXI.Container>this.portraitContainer).addChild(emote);
 	}
 }

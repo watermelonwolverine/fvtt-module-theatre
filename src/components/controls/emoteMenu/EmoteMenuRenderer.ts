@@ -69,12 +69,10 @@ export default class EmoteMenuInitilializer {
 
 	_add_listeners(template: string, emotes: EmoteDictionary) {
 		let insert = <StageInsert>this.theatre.stage.getInsertById(this.theatre.speakingAs);
-		//@ts-ignore
-		this.theatre.theatreControls.theatreEmoteMenu?.style.top = `${
+		(<HTMLDivElement>this.theatre.theatreControls.theatreEmoteMenu).style.top = `${
 			Number(this.theatre.theatreControls.root?.offsetTop) - 410
 		}px`;
-		//@ts-ignore
-		this.theatre.theatreControls.theatreEmoteMenu?.innerHTML = template;
+		(<HTMLDivElement>this.theatre.theatreControls.theatreEmoteMenu).innerHTML = template;
 
 		this._initTextAttributeSelectors(insert);
 
