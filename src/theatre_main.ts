@@ -147,11 +147,11 @@ Hooks.on("preCreateChatMessage", function (chatMessage: any) {
 		} else if (insert) {
 			let label = <PIXI.Text>Theatre.instance._getLabelFromInsert(insert);
 			let name = label.text;
-      let theatreColor = Theatre.instance.getPlayerFlashColor(
-        chatMessage.data.user.id,
-        //@ts-ignore
-        insert.textColor ? insert.textColor : <string>insert.emotion.textColor
-      );
+			let theatreColor = Theatre.instance.getPlayerFlashColor(
+				chatMessage.data.user.id,
+				//@ts-ignore
+				insert.textColor ? insert.textColor : <string>insert.emotion.textColor
+			);
 			chatData.speaker = {};
 			chatData.speaker.alias = name;
 			chatData.speaker.actor = null;
