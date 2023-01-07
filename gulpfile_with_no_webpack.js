@@ -161,6 +161,25 @@ const tsConfig = ts.createProject(`tsconfig.json`, {
 /*		BUILD		*/
 /********************/
 
+function buildJSON() {
+    return gulp.src(`src/**/*.json`).pipe(gulp.dest(`dist`));
+}
+function buildDB() {
+    return gulp.src(`src/**/*.db`).pipe(gulp.dest(`dist`));
+}
+function buildPNG() {
+    return gulp.src(`src/**/*.png`).pipe(gulp.dest(`dist`));
+}
+function buildTTF() {
+    return gulp.src(`src/**/*.ttf`).pipe(gulp.dest(`dist`));
+}
+function buildJPG() {
+    return gulp.src(`src/**/*.jpg`).pipe(gulp.dest(`dist`));
+}
+function buildMD() {
+    return gulp.src(`src/**/*.md`).pipe(gulp.dest(`dist`));
+}
+
 /**
  * Build TypeScript
  */
@@ -661,7 +680,7 @@ const test = () => {
 
 
 // const execBuild = gulp.parallel(buildTS, buildLess, copyFiles); // MOD 4535992
-const execBuild = gulp.parallel(buildTS, buildJS, buildMJS, buildCSS, buildLess, buildSASS, copyFiles);
+const execBuild = gulp.parallel(buildTS, buildJS, buildMJS, buildCSS, buildLess, buildSASS, buildJSON,buildDB,buildPNG,buildTTF,buildJPG,buildMD, copyFiles);
 
 exports.build = gulp.series(clean, execBuild);
 exports.bundle = gulp.series(clean, execBuild, bundleModule, cleanDist);
