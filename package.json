@@ -2,10 +2,12 @@
 	"name": "theatre",
 	"title": "Theatre Insert",
 	"description": "Theater Inserts with a visual novel style made for heavy roleplay scenes",
-  "version": "3.0.0",
+	"version": "3.0.0",
 	"main": "src/theatre_main.js",
 	"scripts": {
-    "build": "npx gulp",
+		"build": "gulp build --gulpfile ./gulpfile_with_no_webpack.js --dbg",
+
+		"build:npx": "npx gulp",
 		"watch": "npx gulp watch",
 		"clean": "npx gulp clean",
 		"devbuild": "npx gulp dev --sm",
@@ -15,11 +17,11 @@
 		"tag": "git tag -d ${npm_package_name}_${npm_package_version} 2>/dev/null ; git tag ${npm_package_name}_${npm_package_version} && git push -f origin ${npm_package_name}_${npm_package_version}",
 
 		"update": "npm install --save-dev @league-of-foundry-developers/foundry-vtt-types@9",
-    "prettier-format": "prettier --config .prettierrc.js --write \"./src/**/*.{ts,js,json,scss,css,html}\"",
+		"prettier-format": "prettier --config .prettierrc.js --write \"./src/**/*.{ts,js,json,scss,css,html}\"",
 
 		"publish:nowebpack": "gulp publish --gulpfile ./gulpfile_with_no_webpack.js --update",
 		"package:nowebpack": "gulp package --gulpfile ./gulpfile_with_no_webpack.js",
-    "build:nowebpack": "gulp build --gulpfile ./gulpfile_with_no_webpack.js --dbg",
+		"build:nowebpack": "gulp build --gulpfile ./gulpfile_with_no_webpack.js --dbg",
 		"build:nowebpack:link": "gulp build --gulpfile ./gulpfile_with_no_webpack.js --dbg && gulp link",
 		"build:nowebpack:test": "gulp build --gulpfile ./gulpfile_with_no_webpack.js --dbg && gulp link && npm test",
 		"build:nowebpack:prod": "gulp bundle --gulpfile ./gulpfile_with_no_webpack.js && npm test",

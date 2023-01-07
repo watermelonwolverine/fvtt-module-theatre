@@ -11,7 +11,7 @@
 			"discord": "cswendrowski#9701",
 			"patreon": "ironmoose"
 		},
-    {
+		{
 			"name": "Ken L",
 			"url": "",
 			"discord": "",
@@ -22,7 +22,7 @@
 			"reddit": "",
 			"email": ""
 		},
-    {
+		{
 			"name": "Noah Zorbaugh",
 			"url": "",
 			"discord": "",
@@ -33,7 +33,7 @@
 			"reddit": "",
 			"email": ""
 		},
-    {
+		{
 			"name": "U~man",
 			"url": "",
 			"discord": "",
@@ -44,7 +44,7 @@
 			"reddit": "",
 			"email": ""
 		},
-    {
+		{
 			"name": "KaKaRoTo",
 			"url": "",
 			"discord": "",
@@ -55,7 +55,7 @@
 			"reddit": "",
 			"email": ""
 		},
-    {
+		{
 			"name": "elizeuangelo",
 			"url": "",
 			"discord": "",
@@ -77,7 +77,7 @@
 			"reddit": "",
 			"email": ""
 		},
-    {
+		{
 			"name": "p4535992",
 			"url": "https://github.com/p4535992",
 			"discord": "",
@@ -117,83 +117,81 @@
 			"url": "https://github.com/watermelonwolverine/media/raw/master/foundryvtt-vino/journal-preview.png"
 		}
 	],
-  "languages": [
-    {
-        "lang": "en",
-        "name": "English",
-        "path": "app/lang/en.json"
-    },
-    {
-        "lang": "ja",
-        "name": "日本語 (Japanese)",
-        "path": "app/lang/ja.json"
-    },
-    {
-        "lang": "ko",
-        "name": "한국어 (Korean)",
-        "path": "app/lang/ko.json"
-    },
-    {
-        "lang": "pt-BR",
-        "name": "Português (Portuguese [Brasil])",
-        "path": "app/lang/pt-BR.json"
-    },
-    {
-        "lang": "fr",
-        "name": "Français (French)",
-        "path": "app/lang/fr.json"
-    },
-    {
-        "lang": "th",
-        "name": "ภาษาไทย (Thai)",
-        "path": "app/lang/th.json"
-    },
-    {
-        "lang": "zh-tw",
-        "name": "正體中文",
-        "path": "app/lang/zh-tw.json"
-    },
-    {
-        "lang": "es",
-        "name": "Español",
-        "path": "app/lang/es.json"
-    },
-    {
-        "lang": "de",
-        "name": "Deutsch (German)",
-        "path": "app/lang/de.json"
-    }
-  ],
-  "packs": [
-    {
-        "name": "theatre-inserts-macros",
-        "label": "Theatre Inserts Macros",
-        "path": "app/packs/theatre-inserts-macros.db",
-        "module": "theatre",
-        "type": "Macro"
-    }
-  ],
+	"languages": [
+		{
+			"lang": "en",
+			"name": "English",
+			"path": "app/lang/en.json"
+		},
+		{
+			"lang": "ja",
+			"name": "日本語 (Japanese)",
+			"path": "app/lang/ja.json"
+		},
+		{
+			"lang": "ko",
+			"name": "한국어 (Korean)",
+			"path": "app/lang/ko.json"
+		},
+		{
+			"lang": "pt-BR",
+			"name": "Português (Portuguese [Brasil])",
+			"path": "app/lang/pt-BR.json"
+		},
+		{
+			"lang": "fr",
+			"name": "Français (French)",
+			"path": "app/lang/fr.json"
+		},
+		{
+			"lang": "th",
+			"name": "ภาษาไทย (Thai)",
+			"path": "app/lang/th.json"
+		},
+		{
+			"lang": "zh-tw",
+			"name": "正體中文",
+			"path": "app/lang/zh-tw.json"
+		},
+		{
+			"lang": "es",
+			"name": "Español",
+			"path": "app/lang/es.json"
+		},
+		{
+			"lang": "de",
+			"name": "Deutsch (German)",
+			"path": "app/lang/de.json"
+		}
+	],
+	"packs": [
+		{
+			"name": "theatre-inserts-macros",
+			"label": "Theatre Inserts Macros",
+			"path": "app/packs/theatre-inserts-macros.db",
+			"module": "theatre",
+			"type": "Macro"
+		}
+	],
 	"scripts": [
-    "greensock/dist/gsap.min.js",
-    "greensock/dist/PixiPlugin.min.js",
-    "greensock/dist/ScrollToPlugin.min.js",
-    "greensock/dist/SplitText.min.js"
-  ],
-	"esmodules": ["app/theatre_main.js"],
-  "styles": [
-    "app/css/theatre.css"
-  ],
+		"greensock/dist/gsap.min.js",
+		"greensock/dist/PixiPlugin.min.js",
+		"greensock/dist/ScrollToPlugin.min.js",
+		"greensock/dist/SplitText.min.js"
+	],
+	"esmodules": ["theatre_main.js"],
+	"styles": ["app/css/theatre.css"],
 	"compatibility": {
 		"minimum": 10,
 		"verified": 10,
 		"maximum": 10
 	},
-	"url": "https://github.com/watermelonwolverine/fvtt-module-theatre",
-	"manifest": "https://github.com/watermelonwolverine/fvtt-module-theatre/releases/latest/download/module.json",
-	"download": "https://github.com/watermelonwolverine/fvtt-module-theatre/releases/latest/download/module.zip",
-	"readme": "https://github.com/watermelonwolverine/fvtt-module-theatre/blob/v3.0.0/README.md",
-	"changelog": "https://github.com/watermelonwolverine/fvtt-module-theatre/blob/v3.0.0/CHANGELOG.md",
-	"bugs": "https://github.com/watermelonwolverine/fvtt-module-theatre/issues",
+	"url": "https://github.com/p4535992/fvtt-module-theatre",
+	"manifest": "https://github.com/p4535992/fvtt-module-theatre/releases/latest/download/module.json",
+	"download": "https://github.com/p4535992/fvtt-module-theatre/releases/latest/download/module.zip",
+	"readme": "https://github.com/p4535992/fvtt-module-theatre/blob/v3.0.0/README.md",
+	"changelog": "https://github.com/p4535992/fvtt-module-theatre/blob/v3.0.0/CHANGELOG.md",
+	"bugs": "https://github.com/p4535992/fvtt-module-theatre/issues",
 	"allowBugReporter": true,
 	"manifestPlusVersion": "1.2.0",
 	"relationships": {
