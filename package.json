@@ -6,6 +6,7 @@
 	"main": "src/theatre_main.js",
 	"scripts": {
 		"build": "gulp build --gulpfile ./gulpfile_with_no_webpack.js --dbg",
+		"package": "gulp package --gulpfile ./gulpfile_with_no_webpack.js",
 
 		"build:npx": "npx gulp",
 		"watch": "npx gulp watch",

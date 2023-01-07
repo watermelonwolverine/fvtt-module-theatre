@@ -85,7 +85,7 @@ function buildManifest(output = null) {
 			if (files.length == 0)
 				throw Error('No files found in ' + SOURCE + GLOB + " or " + CSS + GLOB);
 			const css = files.filter(e => e.endsWith('css'));
-			fs.readFile('module.json', (err, data) => {
+			fs.readFile('./src/module.json', (err, data) => {
 				const module = data.toString() // Inject the data into the module.json
 					.replaceAll('{{name}}', PACKAGE.name)
 					.replaceAll('{{title}}', PACKAGE.title)
