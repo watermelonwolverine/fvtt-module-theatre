@@ -1,7 +1,5 @@
-.vscode/settings.json
-/node_modules/
-/dist/
-/devEnv.json
-/.vscode/settings.json
-/bundle/
-/tmp/
+node_modules
+.idea
+/package-lock.json
+/dist
+/package

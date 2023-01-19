@@ -20,7 +20,7 @@ const GRAPHICS = 'app/graphics/';
 const METAFILES = ['LICENSE.txt', 'README.md', 'CHANGELOG.md'];
 
 var PACKAGE = JSON.parse(fs.readFileSync('package.json'));
-var SETTINGS = JSON.parse(fs.readFileSync('./.vscode/settings.json'));
+var SETTINGS = JSON.parse(fs.readFileSync('./.vscode/settings.json'))
 
 function reloadPackage(cb) { PACKAGE = JSON.parse(fs.readFileSync('package.json')); cb(); }
 function DEV_DIST() { return SETTINGS["local-foundry-data-dir"] + '/Data/modules/' + PACKAGE.name + '/'; }
@@ -85,7 +85,7 @@ function buildManifest(output = null) {
 			if (files.length == 0)
 				throw Error('No files found in ' + SOURCE + GLOB + " or " + CSS + GLOB);
 			const css = files.filter(e => e.endsWith('css'));
-			fs.readFile('module.json', (err, data) => {
+			fs.readFile('./src/module.json', (err, data) => {
 				const module = data.toString() // Inject the data into the module.json
 					.replaceAll('{{name}}', PACKAGE.name)
 					.replaceAll('{{title}}', PACKAGE.title)

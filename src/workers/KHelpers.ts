@@ -1,4 +1,3 @@
-
 export default class KHelpers {
 	static hasClass(el: HTMLElement, className: string) {
 		return el.classList
@@ -13,11 +12,7 @@ export default class KHelpers {
 
 	static removeClass(el: HTMLElement, className: string) {
 		if (el.classList) el.classList.remove(className);
-		else
-			el.className = el.className.replace(
-				new RegExp("\\b" + className + "\\b", "g"),
-				""
-			);
+		else el.className = el.className.replace(new RegExp("\\b" + className + "\\b", "g"), "");
 	}
 
 	static offset(el: HTMLElement) {
@@ -31,10 +26,10 @@ export default class KHelpers {
 		return el.currentStyle || window.getComputedStyle(el);
 	}
 	static insertAfter(el: HTMLElement, referenceNode: Node) {
-		referenceNode.parentNode.insertBefore(el, referenceNode.nextSibling);
+		referenceNode.parentNode?.insertBefore(el, referenceNode.nextSibling);
 	}
 	static insertBefore(el: HTMLElement, referenceNode: Node) {
-		referenceNode.parentNode.insertBefore(el, referenceNode);
+		referenceNode.parentNode?.insertBefore(el, referenceNode);
 	}
 
 	/**
@@ -57,12 +52,10 @@ export default class KHelpers {
 			if (KHelpers.hasClass(el, cls)) {
 				targ = el;
 				break;
-			}
-			else {
+			} else {
 				el = el.parentNode as HTMLElement;
 			}
 		}
-		return targ;
+		return <HTMLElement>targ;
 	}
-
 }

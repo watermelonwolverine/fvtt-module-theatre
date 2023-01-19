@@ -1,3 +1,3 @@
 export default class Emote {
-    insert: string;
+	insert: string;
 }

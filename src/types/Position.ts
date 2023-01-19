@@ -1,6 +1,5 @@
-
 export class Position {
-    x: number;
-    y: number;
-    mirror: boolean;
+	x: number;
+	y: number;
+	mirror: boolean;
 }

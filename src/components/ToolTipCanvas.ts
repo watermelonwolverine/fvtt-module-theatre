@@ -1,145 +1,140 @@
+import type Params from "src/types/Params";
 import Theatre from "../Theatre";
 import KHelpers from "../workers/KHelpers";
 import Tools from "../workers/Tools";
-import Stage from "./stage/Stage";
+import type Stage from "./stage/Stage";
 
 export default class ToolTipCanvas {
+	application: PIXI.Application;
+	canvas: HTMLCanvasElement;
+	holder: HTMLDivElement;
+	stage: Stage;
 
-    application: PIXI.Application;
-    canvas: HTMLCanvasElement;
-    holder: HTMLDivElement;
-    stage: Stage;
+	constructor(stage: Stage) {
+		this.stage = stage;
+	}
 
-    constructor(stage: Stage) {
-        this.stage = stage;
-    }
+	/**
+	 * Initialize the tooltip canvas which renders previews for the emote menu
+	 *
+	 * @return (HTMLElement) : The canvas HTMLElement of the PIXI canvas created, or
+	 *						  null if unsuccessful.
+	 */
+	initTheatreToolTipCanvas(): void {
+		this.application = new PIXI.Application({ width: 140, height: 140, transparent: true, antialias: true });
+		this.canvas = this.application.view;
 
-    /**
-         * Initialize the tooltip canvas which renders previews for the emote menu
-         *
-         * @return (HTMLElement) : The canvas HTMLElement of the PIXI canvas created, or 
-         *						  null if unsuccessful. 
-         */
-    initTheatreToolTipCanvas(): void {
+		if (!canvas) {
+			console.log("FAILED TO INITILIZE TOOLTIP CANVAS!");
+			return;
+		}
 
-        this.application = new PIXI.Application({ width: 140, height: 140, transparent: true, antialias: true });
-        this.canvas = this.application.view;
+		this.holder = document.createElement("div");
+		this.holder.id = "theatre-tooltip";
+		KHelpers.addClass(this.holder, "theatre-tooltip");
+		KHelpers.addClass(this.holder, "app");
+		this.holder.style.opacity = "0";
 
-        if (!canvas) {
-            console.log("FAILED TO INITILIZE TOOLTIP CANVAS!");
-            return null;
-        }
+		this.holder.appendChild(this.canvas);
 
-        this.holder = document.createElement("div");
-        this.holder.id = "theatre-tooltip";
-        KHelpers.addClass(this.holder, "theatre-tooltip");
-        KHelpers.addClass(this.holder, "app");
-        this.holder.style.opacity = "0";
+		this.application.ticker.autoStart = false;
+		this.application.ticker.stop();
+	}
 
-        this.holder.appendChild(this.canvas);
+	/**
+	 * configure the theatre tool tip based on the provided
+	 * insert, if none is provided, the do nothing
+	 *
+	 * @params theatreId (String) : The theatreId of the insert to display in
+	 *							  the theatre tool tip.
+	 * @params emote (String) : The emote of the theatreId to get for dispay
+	 *						  in the theatre tool tip.
+	 */
+	configureTheatreToolTip(theatreId: string, emote: string) {
+		if (!theatreId || theatreId == Theatre.NARRATOR) {
+			return;
+		}
+		let actorId = theatreId.replace("theatre-", "");
+		let params = <Params>Tools.getInsertParamsFromActorId(actorId);
+		let resources = PIXI.Loader.shared.resources;
 
+		if (!params) {
+			console.log("ERROR actor no longer exists for %s", theatreId);
+			return;
+		}
 
-        this.application.ticker.autoStart = false;
-        this.application.ticker.stop();
-    }
+		let resName = <string>(
+			(emote && params.emotes[emote] && params.emotes[emote]?.insert ? params.emotes[emote]?.insert : params.src)
+		);
 
-    /**
-     * configure the theatre tool tip based on the provided
-     * insert, if none is provided, the do nothing
-     *
-     * @params theatreId (String) : The theatreId of the insert to display in
-     *							  the theatre tool tip.
-     * @params emote (String) : The emote of the theatreId to get for dispay 
-     *						  in the theatre tool tip. 
-     */
-    configureTheatreToolTip(
-        theatreId: string,
-        emote: string) {
-        if (!theatreId || theatreId == Theatre.NARRATOR) return;
+		if (!resources[resName] || !resources[resName]?.texture) {
+			console.log("ERROR could not load texture (for tooltip) %s", resName, resources);
+			return;
+		}
 
-        let actorId = theatreId.replace("theatre-", "");
-        let params = Tools.getInsertParamsFromActorId(actorId);
-        let resources = PIXI.Loader.shared.resources;
+		const app = this.application;
 
-        if (!params) {
-            console.log("ERROR actor no longer exists for %s", theatreId);
-            return;
-        }
+		// clear canvas
+		for (let idx = app.stage.children.length - 1; idx >= 0; --idx) {
+			let child = <PIXI.DisplayObject>app.stage.children[idx];
+			child.destroy();
+		}
 
-        let resName = (emote && params.emotes[emote] && params.emotes[emote].insert ? params.emotes[emote].insert : params.src);
+		let sprite = new PIXI.Sprite(resources[resName]?.texture);
+		let portWidth = Number(resources[resName]?.texture.width);
+		let portHeight = Number(resources[resName]?.texture.height);
+		let maxSide = Math.max(portWidth, portHeight);
+		let scaledWidth, scaledHeight, ratio;
+		if (maxSide == portWidth) {
+			// scale portWidth to 200px, assign height as a fraction
+			scaledWidth = 140;
+			scaledHeight = (portHeight * 140) / portWidth;
+			ratio = scaledHeight / portHeight;
+			app.stage.width = scaledWidth;
+			app.stage.height = scaledHeight;
 
-        if (!resources[resName] || !resources[resName].texture) {
-            console.log("ERROR could not load texture (for tooltip) %s", resName, resources);
-            return;
-        }
+			app.stage.addChild(sprite);
+			app.stage.scale.x = ratio * 2;
+			app.stage.scale.y = ratio * 2;
+			app.stage.y = 70 - (portHeight * ratio) / 2;
+		} else {
+			// scale portHeight to 200px, assign width as a fraction
+			scaledHeight = 140;
+			scaledWidth = (portWidth * 140) / portHeight;
+			ratio = scaledWidth / portWidth;
+			app.stage.width = scaledWidth;
+			app.stage.height = scaledHeight;
 
-        const app = this.application;
+			app.stage.addChild(sprite);
+			app.stage.scale.x = ratio * 2;
+			app.stage.scale.y = ratio * 2;
+			app.stage.x = 70 - (portWidth * ratio * 2) / 2;
+		}
 
-        // clear canvas
-        for (let idx = app.stage.children.length - 1; idx >= 0; --idx) {
-            let child = app.stage.children[idx];
-            child.destroy();
-        }
+		// adjust dockContainer + portraitContainer dimensions to fit the image
+		//app.stage.y = portHeight*ratio/2;
 
+		// set sprite initial coordinates + state
+		sprite.x = 0;
+		sprite.y = 0;
 
-        let sprite = new PIXI.Sprite(resources[resName].texture);
-        let portWidth = resources[resName].texture.width;
-        let portHeight = resources[resName].texture.height;
-        let maxSide = Math.max(portWidth, portHeight);
-        let scaledWidth, scaledHeight, ratio;
-        if (maxSide == portWidth) {
-            // scale portWidth to 200px, assign height as a fraction
-            scaledWidth = 140;
-            scaledHeight = portHeight * 140 / portWidth;
-            ratio = scaledHeight / portHeight;
-            app.stage.width = scaledWidth;
-            app.stage.height = scaledHeight;
+		//console.log("Tooltip Portrait loaded with w:%s h:%s scale:%s",portWidth,portHeight,ratio,sprite);
 
-            app.stage.addChild(sprite);
-            app.stage.scale.x = ratio * 2;
-            app.stage.scale.y = ratio * 2;
-            app.stage.y = 70 - (portHeight * ratio) / 2;
-        } else {
-            // scale portHeight to 200px, assign width as a fraction
-            scaledHeight = 140;
-            scaledWidth = portWidth * 140 / portHeight;
-            ratio = scaledWidth / portWidth;
-            app.stage.width = scaledWidth;
-            app.stage.height = scaledHeight;
+		// render and show the tooltip
+		app.render();
+		this.holder.style.opacity = "1";
+	}
 
-            app.stage.addChild(sprite);
-            app.stage.scale.x = ratio * 2;
-            app.stage.scale.y = ratio * 2;
-            app.stage.x = 70 - (portWidth * ratio * 2) / 2;
-        }
-
-        // adjust dockContainer + portraitContainer dimensions to fit the image
-        //app.stage.y = portHeight*ratio/2; 
-
-        // set sprite initial coordinates + state
-        sprite.x = 0;
-        sprite.y = 0;
-
-        //console.log("Tooltip Portrait loaded with w:%s h:%s scale:%s",portWidth,portHeight,ratio,sprite); 
-
-        // render and show the tooltip
-        app.render();
-        this.holder.style.opacity = "1";
-
-    }
-
-    /**
-     * Store mouse position for our tooltip which will roam
-     *
-     * @param ev (Event) : The Event that triggered the mouse move.
-     */
-    handleEmoteMenuMouseMove(ev: MouseEvent) {
-
-        this.holder.style.top =
-            `${(ev.clientY || ev.pageY) - this.holder.offsetHeight - 20}px`;
-        this.holder.style.left =
-            `${Math.min(
-                (ev.clientX || ev.pageX) - this.holder.offsetWidth / 2,
-                this.stage.theatreDock.offsetWidth - this.holder.offsetWidth)}px`;
-    }
+	/**
+	 * Store mouse position for our tooltip which will roam
+	 *
+	 * @param ev (Event) : The Event that triggered the mouse move.
+	 */
+	handleEmoteMenuMouseMove(ev: MouseEvent) {
+		this.holder.style.top = `${(ev.clientY || ev.pageY) - this.holder.offsetHeight - 20}px`;
+		this.holder.style.left = `${Math.min(
+			(ev.clientX || ev.pageX) - this.holder.offsetWidth / 2,
+			Number(this.stage.theatreDock?.offsetWidth) - this.holder.offsetWidth
+		)}px`;
+	}
 }

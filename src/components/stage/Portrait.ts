@@ -1,162 +1,156 @@
 import TheatreSettings from "../../extensions/TheatreSettings";
-import Stage from "./Stage";
+import type Stage from "./Stage";
 
 type Size = {
-    width: number,
-    height: number
-}
+	width: number;
+	height: number;
+};
 
 export default class Portrait {
+	stage: Stage;
+	// wraps portrait for easier mirroring
+	portraitContainer?: PIXI.Container;
+	portrait?: PIXI.Sprite;
+	// wraps container of portrait for easier positioning
+	// allows keeping scale out of calculations
+	root: PIXI.Container;
+	mirrored: boolean;
 
-    stage: Stage;
-    // wraps portrait for easier mirroring
-    portraitContainer: PIXI.Container;
-    portrait: PIXI.Sprite;
-    // wraps container of portrait for easier positioning 
-    // allows keeping scale out of calculations
-    root: PIXI.Container;
-    mirrored: boolean;
+	get width() {
+		return this.root.width;
+	}
 
-    get width() {
-        return this.root.width;
-    };
+	get height() {
+		return this.root.height;
+	}
 
-    get height() {
-        return this.root.height;
-    };
+	/** Get X-Position of bottom left corner */
+	get x() {
+		return this.root.x;
+	}
 
-    /** Get X-Position of bottom left corner */
-    get x() {
-        return this.root.x;
-    }
+	/** Set X-Position of bottom left corner */
+	set x(newX) {
+		this.root.x = newX;
+	}
 
-    /** Set X-Position of bottom left corner */
-    set x(newX) {
-        this.root.x = newX;
-    }
+	/** Get Y-Position of bottom left corner */
+	get y() {
+		return this.root.y;
+	}
 
-    /** Get Y-Position of bottom left corner */
-    get y() {
-        return this.root.y;
-    }
+	/** Set S-Position of bottom left corner */
+	set y(newY) {
+		this.root.y = newY;
+	}
 
-    /** Set S-Position of bottom left corner */
-    set y(newY) {
-        this.root.y = newY;
-    }
+	get scaleX() {
+		return this.portraitContainer?.scale.x;
+	}
 
-    get scaleX() {
-        return this.portraitContainer.scale.x;
-    }
+	set scaleX(newScale) {
+		(<PIXI.Container>this.portraitContainer).scale.x = <number>newScale;
+	}
 
-    set scaleX(newScale) {
-        this.portraitContainer.scale.x = newScale;
-    }
+	get scaleY() {
+		return this.portraitContainer?.scale.y;
+	}
 
-    constructor(stage: Stage) {
+	set scaleY(newScale) {
+		(<PIXI.Container>this.portraitContainer).scale.y = <number>newScale;
+	}
 
-        this.mirrored = false;
-        this.root = new PIXI.Container();
-        this.portraitContainer = new PIXI.Container();
-        this.portrait = new PIXI.Sprite();
-        this.stage = stage;
-    }
+	constructor(stage: Stage) {
+		this.mirrored = false;
+		this.root = new PIXI.Container();
+		this.portraitContainer = new PIXI.Container();
+		this.portrait = new PIXI.Sprite();
+		this.stage = stage;
+	}
 
-    init() {
-        this.root.addChild(this.portraitContainer);
-        this.portraitContainer.addChild(this.portrait);
-        this.updateGeometry();
-    }
+	init() {
+		this.root.addChild(<PIXI.Container>this.portraitContainer);
+		this.portraitContainer?.addChild(<PIXI.Sprite>this.portrait);
+		this.updateGeometry();
+	}
 
-    updateTexture(
-        texture: PIXI.Texture,
-        updateGeometry = false) {
-        this.portrait.texture = texture;
+	updateTexture(texture: PIXI.Texture, updateGeometry = false) {
+		(<PIXI.Sprite>this.portrait).texture = <PIXI.Texture>texture;
 
-        if (updateGeometry)
-            this.updateGeometry();
-    }
+		if (updateGeometry) this.updateGeometry();
+	}
 
-    destroy() {
-        this.portrait.destroy();
-        this.portraitContainer.destroy();
+	destroy() {
+		(<PIXI.Sprite>this.portrait).destroy();
+		(<PIXI.Container>this.portraitContainer).destroy();
+		this.portrait = undefined;
+		this.portraitContainer = undefined;
+	}
 
-        this.portrait = null;
-        this.portraitContainer = null;
-    }
+	updateGeometry() {
+		const targetSize = this._calculatePortraitTargetSize();
+		this._updateDimension(targetSize);
+		this._updatePivot(targetSize);
 
-    updateGeometry() {
+		if (this.mirrored) {
+			this.scaleX = -1;
+		}
+	}
 
-        const targetSize = this._calculatePortraitTargetSize();
-        this._updateDimension(targetSize);
-        this._updatePivot(targetSize);
+	/** Updates size of portrait. */
+	_updateDimension(targetSize: Size) {
+		(<PIXI.Sprite>this.portrait).height = targetSize.height;
+		(<PIXI.Sprite>this.portrait).width = targetSize.width;
+	}
 
-        if (this.mirrored) {
-            this.scaleX = -1;
-        }
-    }
+	/** Updates pivot of container to be in the middle. Has to be updated everytime because pivot changes */
+	_updatePivot(targetSize: Size) {
+		(<PIXI.Container>this.portraitContainer).pivot.x = targetSize.width / 2;
+		(<PIXI.Container>this.portraitContainer).pivot.y = targetSize.height / 2;
+		(<PIXI.Container>this.portraitContainer).x = targetSize.width / 2;
+		(<PIXI.Container>this.portraitContainer).y = <number>targetSize.height / 2;
+	}
 
-    /** Updates size of portrait. */
-    _updateDimension(targetSize: Size) {
-        this.portrait.height = targetSize.height;
-        this.portrait.width = targetSize.width;
-    }
+	/**
+	 * Calculates portrait target size according to the set target height.
+	 */
+	_calculatePortraitTargetSize(): Size {
+		const texture = (<PIXI.Sprite>this.portrait).texture;
 
-    /** Updates pivot of container to be in the middle. Has to be updated everytime because pivot changes */
-    _updatePivot(targetSize: Size) {
-        this.portraitContainer.pivot.x = targetSize.width / 2;
-        this.portraitContainer.pivot.y = targetSize.height / 2;
-        this.portraitContainer.x = targetSize.width / 2;
-        this.portraitContainer.y = targetSize.height / 2;
-    }
+		if (!texture) console.error("OOF");
 
-    /**
-     * Calculates portrait target size according to the set target height.  
-     */
-    _calculatePortraitTargetSize(): Size {
+		const portWidth = (<PIXI.Sprite>this.portrait).texture.width;
+		const portHeight = (<PIXI.Sprite>this.portrait).texture.height;
 
-        const texture = this.portrait.texture;
+		const heightStr = TheatreSettings.getTheatreImageSize();
 
-        if (!texture)
-            console.error("OOF");
+		let height: number;
 
-        const portWidth = this.portrait.texture.width;
-        const portHeight = this.portrait.texture.height;
+		if (isNaN(heightStr as unknown as number)) {
+			if (heightStr.endsWith("%")) {
+				// => target height is relative to canvas size
+				const relativeHeight = parseInt(heightStr.substring(0, heightStr.length - 1)) / 100;
 
-        const heightStr = TheatreSettings.getTheatreImageSize();
+				height = relativeHeight * this.stage.height;
+			} else {
+				// => target size does no have a legal string value
+				ui.notifications.error(
+					`Illegal value for: ${TheatreSettings.getNameLocalizationKey(TheatreSettings.THEATRE_IMAGE_SIZE)}`
+				);
+				height = TheatreSettings.THEATRE_IMAGE_SIZE_DEFAULT;
+			}
+		} else {
+			// => target height is absolute
+			height = parseInt(heightStr);
+		}
 
-        let height: number;
+		return {
+			width: (height * portWidth) / portHeight,
+			height: height,
+		};
+	}
 
-
-        if (isNaN(heightStr as unknown as number)) {
-            if (heightStr.endsWith("%")) {
-                // => target height is relative to canvas size
-                const relativeHeight = parseInt(
-                    heightStr.substring(0, heightStr.length - 1)
-                ) / 100;
-
-                height = relativeHeight * this.stage.height;
-            }
-            else {
-                // => target size does no have a legal string value
-                ui.notifications.error(`Illegal value for: ${TheatreSettings.getNameLocalizationKey(TheatreSettings.THEATRE_IMAGE_SIZE)}`);
-                height = TheatreSettings.THEATRE_IMAGE_SIZE_DEFAULT;
-            }
-        }
-        else {
-            // => target height is absolute
-            height = parseInt(heightStr);
-        }
-
-        return {
-            width: height * portWidth / portHeight,
-            height: height
-        };
-
-    }
-
-    addEmote(emote: PIXI.Sprite) {
-        this.portraitContainer.addChild(emote);
-    }
-
+	addEmote(emote: PIXI.Sprite) {
+		(<PIXI.Container>this.portraitContainer).addChild(emote);
+	}
 }

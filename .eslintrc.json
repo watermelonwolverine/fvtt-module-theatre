@@ -1,50 +1,50 @@
 {
-    "env": {
-        "browser": true,
-        "es2021": true
-    },
-    "extends": "eslint:recommended",
-    "parserOptions": {
-        "ecmaVersion": "latest",
-        "sourceType": "module"
-    },
-    "rules": {},
-    "ignorePatterns": [
-        "/gulpfile.js",
-        "/webpack.config.js",
-        "/dist/**/*.js"
-    ],
-    "globals": {
-        "game": true,
-        "$": true,
-        "getProperty": true,
-        "ui": true,
-        "PIXI": true,
-        "debounce": true,
-        "Handlebars": true,
-        "TweenMax": true,
-        "Power0": true,
-        "Power1": true,
-        "Power2": true,
-        "Power3": true,
-        "Power4": true,
-        "srcExists": true,
-        "Hooks": true,
-        "renderTemplate": true,
-        "KeyboardManager": true,
-        "Sine": true,
-        "Expo": true,
-        "Circ": true,
-        "Bounce": true,
-        "Elastic": true,
-        "FormApplication": true,
-        "mergeObject" : true,
-        "duplicate" : true,
-        "FilePicker": true,
-        "Back": true,
-        "gsap": true,
-        "libWrapper": true,
-        "CONST": true,
-        "canvas": true
-    }
+  "env": {
+      "browser": true,
+      "es2021": true
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+      "ecmaVersion": "latest",
+      "sourceType": "module"
+  },
+  "rules": {},
+  "ignorePatterns": [
+      "/gulpfile.js",
+      "/webpack.config.js",
+      "/dist/**/*.js"
+  ],
+  "globals": {
+      "game": true,
+      "$": true,
+      "getProperty": true,
+      "ui": true,
+      "PIXI": true,
+      "debounce": true,
+      "Handlebars": true,
+      "TweenMax": true,
+      "Power0": true,
+      "Power1": true,
+      "Power2": true,
+      "Power3": true,
+      "Power4": true,
+      "srcExists": true,
+      "Hooks": true,
+      "renderTemplate": true,
+      "KeyboardManager": true,
+      "Sine": true,
+      "Expo": true,
+      "Circ": true,
+      "Bounce": true,
+      "Elastic": true,
+      "FormApplication": true,
+      "mergeObject" : true,
+      "duplicate" : true,
+      "FilePicker": true,
+      "Back": true,
+      "gsap": true,
+      "libWrapper": true,
+      "CONST": true,
+      "canvas": true
+  }
 }
